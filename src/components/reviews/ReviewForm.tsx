@@ -1,7 +1,8 @@
+
 "use client";
 
-import { useFormState, useFormStatus } from 'react-dom';
-import { useEffect, useState } from 'react';
+import { useActionState, useEffect, useState } from 'react';
+import { useFormStatus } from 'react-dom';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -33,7 +34,7 @@ interface ReviewFormProps {
 }
 
 export function ReviewForm({ entityId, entityType, onReviewSubmitted }: ReviewFormProps) {
-  const [state, formAction] = useFormState(submitReviewAction, initialState);
+  const [state, formAction] = useActionState(submitReviewAction, initialState);
   const { toast } = useToast();
   const { user } = useAuth();
   const [rating, setRating] = useState(0);
