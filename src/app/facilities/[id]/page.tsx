@@ -1,3 +1,4 @@
+
 // This should be a server component to fetch initial data
 import { getFacilityById } from '@/lib/mockData'; // Will be replaced by actual data fetching
 import { PageWrapper } from '@/components/ui/PageWrapper';
@@ -6,7 +7,7 @@ import Image from 'next/image';
 import { RatingStars } from '@/components/shared/RatingStars';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Mail, Phone, MapPin, Building, ShieldCheck, ListChecks, ConciergeBell } from 'lucide-react';
+import { Mail, Phone, MapPin, Building, ListChecks, ConciergeBell } from 'lucide-react';
 import FacilityDetailsClient from '@/components/facilities/FacilityDetailsClient'; // Client component
 
 export async function generateStaticParams() {
@@ -114,18 +115,6 @@ export default async function FacilityProfilePage({ params }: { params: { id: st
                       <div className="flex flex-wrap gap-2">
                         {facility.servicesOffered.map(service => (
                           <span key={service} className="px-3 py-1 bg-secondary text-secondary-foreground text-sm rounded-full">{service}</span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  {facility.insurancesAccepted && facility.insurancesAccepted.length > 0 && (
-                    <div>
-                      <h3 className="font-semibold text-md text-foreground mb-2 flex items-center">
-                        <ShieldCheck className="h-5 w-5 mr-2 text-primary" /> Insurances Accepted
-                      </h3>
-                       <div className="flex flex-wrap gap-2">
-                        {facility.insurancesAccepted.map(ins => (
-                          <span key={ins} className="px-3 py-1 bg-secondary text-secondary-foreground text-sm rounded-full">{ins}</span>
                         ))}
                       </div>
                     </div>

@@ -1,3 +1,4 @@
+
 import type { Provider, Facility, Review, User } from './types';
 import { SPECIALTY_ICONS, FACILITY_TYPE_ICONS, DEFAULT_USER_AVATAR } from './constants';
 import { Stethoscope } from 'lucide-react';
@@ -61,7 +62,6 @@ export const mockProviders: Provider[] = [
       email: 'almaz.tesfaye@ethiohealth.com',
       address: 'Bole Medhanialem, Addis Ababa',
     },
-    insurancesAccepted: ['NIB Insurance', 'Awash Insurance'],
     languagesSpoken: ['Amharic', 'English'],
     overallRating: 4.8,
     reviews: mockReviews.slice(0, 2),
@@ -80,7 +80,6 @@ export const mockProviders: Provider[] = [
       email: 'bruk.girma@ethiohealth.com',
       address: 'Kazanchis, Addis Ababa',
     },
-    insurancesAccepted: ['United Insurance', 'Self Pay / No Insurance'],
     languagesSpoken: ['Amharic', 'Oromo', 'English'],
     overallRating: 4.5,
     reviews: [mockReviews[3], mockReviews[1]],
@@ -99,7 +98,6 @@ export const mockProviders: Provider[] = [
       email: 'helen.getachew@ethiohealth.com',
       address: 'CMC area, Addis Ababa',
     },
-    insurancesAccepted: ['NIB Insurance', 'Self Pay / No Insurance'],
     languagesSpoken: ['Amharic', 'English'],
     overallRating: 4.2,
     reviews: [mockReviews[2]],
@@ -122,7 +120,6 @@ export const mockFacilities: Facility[] = [
       address: 'Gulele Sub-city, Addis Ababa',
     },
     servicesOffered: ['Emergency Care', 'Surgery', 'Internal Medicine', 'Pediatrics', 'Obstetrics & Gynecology'],
-    insurancesAccepted: ['Ethiopian Insurance Corporation', 'Self Pay / No Insurance'],
     overallRating: 4.3,
     reviews: mockReviews.slice(1, 3),
     location: 'Addis Ababa',
@@ -141,7 +138,6 @@ export const mockFacilities: Facility[] = [
       address: 'Old Airport, Addis Ababa',
     },
     servicesOffered: ['General Consultation', 'Specialist Consultation', 'Minor Procedures', 'Vaccinations'],
-    insurancesAccepted: ['NIB Insurance', 'Awash Insurance', 'United Insurance'],
     overallRating: 4.7,
     reviews: mockReviews.slice(0, 2).reverse(),
     location: 'Addis Ababa',

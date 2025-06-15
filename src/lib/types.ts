@@ -1,3 +1,4 @@
+
 import type { LucideIcon } from 'lucide-react';
 
 export interface NavItem {
@@ -35,7 +36,6 @@ export interface Provider {
     email?: string;
     address?: string;
   };
-  insurancesAccepted: string[];
   languagesSpoken: string[];
   overallRating: number; // Calculated average
   reviews: Review[];
@@ -56,7 +56,6 @@ export interface Facility {
     address: string;
   };
   servicesOffered: string[];
-  insurancesAccepted: string[];
   overallRating: number; // Calculated average
   reviews: Review[];
   location: string;

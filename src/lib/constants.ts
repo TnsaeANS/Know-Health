@@ -1,5 +1,6 @@
+
 import type { NavItem, FilterOption } from './types';
-import { Home, Stethoscope, Hospital, Info, MessageSquare, BriefcaseMedical, Building, ShieldCheck, Languages, MapPin, Smile, Bone, Brain, Baby, Eye } from 'lucide-react';
+import { Home, Stethoscope, Hospital, Info, MessageSquare, BriefcaseMedical, Building, Languages, MapPin, Smile, Bone, Brain, Baby, Eye } from 'lucide-react';
 
 export const APP_NAME = "EthioHealth Connect";
 
@@ -51,14 +52,6 @@ export const FACILITY_TYPE_ICONS: { [key: string]: LucideIcon } = {
   laboratory: BriefcaseMedical, // Placeholder
   diagnostic_center: BriefcaseMedical, // Placeholder
 };
-
-export const INSURANCE_PROVIDERS: FilterOption[] = [
-  { value: 'nib_insurance', label: 'NIB Insurance' },
-  { value: 'united_insurance', label: 'United Insurance' },
-  { value: 'awash_insurance', label: 'Awash Insurance' },
-  { value: 'ethiopian_insurance_corp', label: 'Ethiopian Insurance Corporation' },
-  { value: 'self_pay', label: 'Self Pay / No Insurance' },
-];
 
 export const LANGUAGES_SPOKEN: FilterOption[] = [
   { value: 'amharic', label: 'Amharic' },

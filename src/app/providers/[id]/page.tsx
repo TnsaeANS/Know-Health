@@ -1,3 +1,4 @@
+
 // This should be a server component to fetch initial data
 import { getProviderById } from '@/lib/mockData'; // Will be replaced by actual data fetching
 import { PageWrapper } from '@/components/ui/PageWrapper';
@@ -6,7 +7,7 @@ import Image from 'next/image';
 import { RatingStars } from '@/components/shared/RatingStars';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Mail, Phone, MapPin, BriefcaseMedical, Languages, ShieldCheck, Stethoscope } from 'lucide-react';
+import { Mail, Phone, MapPin, BriefcaseMedical, Languages, Stethoscope } from 'lucide-react';
 import { ReviewList } from '@/components/reviews/ReviewList';
 import { ReviewForm } from '@/components/reviews/ReviewForm';
 import { ReviewSummary } from '@/components/reviews/ReviewSummary';
@@ -129,17 +130,6 @@ export default async function ProviderProfilePage({ params }: { params: { id: st
                       {provider.languagesSpoken.map(lang => (
                         <span key={lang} className="px-3 py-1 bg-secondary text-secondary-foreground text-sm rounded-full">{lang}</span>
                       ))}
-                    </div>
-                  </div>
-                   <div>
-                    <h3 className="font-semibold text-md text-foreground mb-2 flex items-center">
-                      <ShieldCheck className="h-5 w-5 mr-2 text-primary" /> Insurances Accepted
-                    </h3>
-                    <div className="flex flex-wrap gap-2">
-                      {provider.insurancesAccepted.map(ins => (
-                        <span key={ins} className="px-3 py-1 bg-secondary text-secondary-foreground text-sm rounded-full">{ins}</span>
-                      ))}
-                      {provider.insurancesAccepted.length === 0 && <p className="text-sm text-muted-foreground">Contact provider for insurance details.</p>}
                     </div>
                   </div>
                   {/* Placeholder for map */}

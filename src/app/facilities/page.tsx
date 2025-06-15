@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Search, ListFilter, X } from 'lucide-react';
-import { FACILITY_TYPES, INSURANCE_PROVIDERS, LOCATIONS } from '@/lib/constants';
+import { FACILITY_TYPES, LOCATIONS } from '@/lib/constants';
 
 const ALL_FILTER_VALUE = "_all_";
 
@@ -20,7 +20,6 @@ export default function FacilitiesPage() {
   const [filters, setFilters] = useState({
     type: '',
     location: '',
-    insurance: '',
   });
 
   const handleFilterChange = (filterName: keyof typeof filters, value: string) => {
@@ -29,7 +28,7 @@ export default function FacilitiesPage() {
 
   const clearFilters = () => {
     setSearchTerm('');
-    setFilters({ type: '', location: '', insurance: '' });
+    setFilters({ type: '', location: '' });
   };
   
   const activeFilterCount = Object.values(filters).filter(Boolean).length + (searchTerm ? 1 : 0);
@@ -39,9 +38,8 @@ export default function FacilitiesPage() {
       const nameMatch = facility.name.toLowerCase().includes(searchTerm.toLowerCase());
       const typeMatch = filters.type ? facility.type.toLowerCase() === filters.type.toLowerCase() : true;
       const locationMatch = filters.location ? facility.location.toLowerCase() === filters.location.toLowerCase() : true;
-      const insuranceMatch = filters.insurance ? facility.insurancesAccepted.some(ins => ins.toLowerCase() === filters.insurance.toLowerCase()) : true;
       
-      return nameMatch && typeMatch && locationMatch && insuranceMatch;
+      return nameMatch && typeMatch && locationMatch;
     });
   }, [searchTerm, filters]);
 
@@ -94,7 +92,7 @@ export default function FacilitiesPage() {
             </div>
           </div>
         </div>
-         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4">
+         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 gap-4">
           <FilterSelect
             placeholder="Facility Type"
             options={FACILITY_TYPES}
@@ -106,12 +104,6 @@ export default function FacilitiesPage() {
             options={LOCATIONS}
             value={filters.location}
             onValueChange={(value) => handleFilterChange('location', value === ALL_FILTER_VALUE ? '' : value)}
-          />
-          <FilterSelect
-            placeholder="Insurance"
-            options={INSURANCE_PROVIDERS}
-            value={filters.insurance}
-            onValueChange={(value) => handleFilterChange('insurance', value === ALL_FILTER_VALUE ? '' : value)}
           />
         </div>
          {activeFilterCount > 0 && (

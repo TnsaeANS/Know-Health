@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Search, ListFilter, X } from 'lucide-react';
-import { SPECIALTIES, INSURANCE_PROVIDERS, LOCATIONS, LANGUAGES_SPOKEN } from '@/lib/constants';
+import { SPECIALTIES, LOCATIONS, LANGUAGES_SPOKEN } from '@/lib/constants';
 
 const ALL_FILTER_VALUE = "_all_";
 
@@ -20,7 +20,6 @@ export default function ProvidersPage() {
   const [filters, setFilters] = useState({
     specialty: '',
     location: '',
-    insurance: '',
     language: '',
   });
 
@@ -30,7 +29,7 @@ export default function ProvidersPage() {
 
   const clearFilters = () => {
     setSearchTerm('');
-    setFilters({ specialty: '', location: '', insurance: '', language: '' });
+    setFilters({ specialty: '', location: '', language: '' });
   };
   
   const activeFilterCount = Object.values(filters).filter(Boolean).length + (searchTerm ? 1 : 0);
@@ -40,10 +39,9 @@ export default function ProvidersPage() {
       const nameMatch = provider.name.toLowerCase().includes(searchTerm.toLowerCase());
       const specialtyMatch = filters.specialty ? provider.specialty.toLowerCase() === filters.specialty.toLowerCase() : true;
       const locationMatch = filters.location ? provider.location.toLowerCase() === filters.location.toLowerCase() : true;
-      const insuranceMatch = filters.insurance ? provider.insurancesAccepted.some(ins => ins.toLowerCase() === filters.insurance.toLowerCase()) : true;
       const languageMatch = filters.language ? provider.languagesSpoken.some(lang => lang.toLowerCase() === filters.language.toLowerCase()) : true;
       
-      return nameMatch && specialtyMatch && locationMatch && insuranceMatch && languageMatch;
+      return nameMatch && specialtyMatch && locationMatch && languageMatch;
     });
   }, [searchTerm, filters]);
 
@@ -96,7 +94,7 @@ export default function ProvidersPage() {
             </div>
           </div>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           <FilterSelect
             placeholder="Specialty"
             options={SPECIALTIES}
@@ -108,12 +106,6 @@ export default function ProvidersPage() {
             options={LOCATIONS}
             value={filters.location}
             onValueChange={(value) => handleFilterChange('location', value === ALL_FILTER_VALUE ? '' : value)}
-          />
-          <FilterSelect
-            placeholder="Insurance"
-            options={INSURANCE_PROVIDERS}
-            value={filters.insurance}
-            onValueChange={(value) => handleFilterChange('insurance', value === ALL_FILTER_VALUE ? '' : value)}
           />
           <FilterSelect
             placeholder="Language"
