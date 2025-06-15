@@ -55,8 +55,9 @@ export default function FacilityDetailsClient({ facilityId, initialReviews }: Fa
   return (
     <div className="space-y-8">
       <ReviewSummary summaryData={reviewSummary} isLoading={isLoadingSummary} />
-      <ReviewList reviews={reviews} />
       <ReviewForm entityId={facilityId} entityType="facility" onReviewSubmitted={handleReviewSubmitted} />
+      <ReviewList reviews={reviews} />
     </div>
   );
 }
+
