@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useMemo } from 'react';
@@ -11,6 +12,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { Search, ListFilter, X } from 'lucide-react';
 import { FACILITY_TYPES, INSURANCE_PROVIDERS, LOCATIONS } from '@/lib/constants';
+
+const ALL_FILTER_VALUE = "_all_";
 
 export default function FacilitiesPage() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -53,12 +56,12 @@ export default function FacilitiesPage() {
     value: string;
     onValueChange: (value: string) => void;
   }) => (
-    <Select value={value} onValueChange={onValueChange}>
+    <Select value={value || ALL_FILTER_VALUE} onValueChange={onValueChange}>
       <SelectTrigger className="w-full md:w-[180px] bg-card">
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value="">All</SelectItem>
+        <SelectItem value={ALL_FILTER_VALUE}>All</SelectItem>
         {options.map(option => (
           <SelectItem key={option.value} value={option.value}>
             {option.label}
@@ -96,19 +99,19 @@ export default function FacilitiesPage() {
             placeholder="Facility Type"
             options={FACILITY_TYPES}
             value={filters.type}
-            onValueChange={(value) => handleFilterChange('type', value)}
+            onValueChange={(value) => handleFilterChange('type', value === ALL_FILTER_VALUE ? '' : value)}
           />
           <FilterSelect
             placeholder="Location"
             options={LOCATIONS}
             value={filters.location}
-            onValueChange={(value) => handleFilterChange('location', value)}
+            onValueChange={(value) => handleFilterChange('location', value === ALL_FILTER_VALUE ? '' : value)}
           />
           <FilterSelect
             placeholder="Insurance"
             options={INSURANCE_PROVIDERS}
             value={filters.insurance}
-            onValueChange={(value) => handleFilterChange('insurance', value)}
+            onValueChange={(value) => handleFilterChange('insurance', value === ALL_FILTER_VALUE ? '' : value)}
           />
         </div>
          {activeFilterCount > 0 && (
