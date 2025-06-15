@@ -1,11 +1,11 @@
 
-import type { Provider } from '@/lib/types';
+import type { Provider, Review } from '@/lib/types';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-// import { RatingStars } from '@/components/shared/RatingStars'; // Overall rating removed
-import { MapPin, Stethoscope } from 'lucide-react';
+import { RatingStars } from '@/components/shared/RatingStars';
+import { MapPin, Stethoscope, HeartHandshake, ShieldCheck, Clock } from 'lucide-react';
 
 interface ProviderCardProps {
   provider: Provider;
@@ -13,6 +13,21 @@ interface ProviderCardProps {
 
 export function ProviderCard({ provider }: ProviderCardProps) {
   const IconComponent = provider.specialtyIcon || Stethoscope;
+
+  const calculateAverageRating = (reviews: Provider['reviews'], criterion: keyof Review) => {
+    const validReviews = reviews.filter(review => typeof review[criterion] === 'number' && (review[criterion] as number) > 0);
+    if (validReviews.length === 0) return 0;
+    const totalRating = validReviews.reduce((sum, review) => sum + (review[criterion] as number), 0);
+    return totalRating / validReviews.length;
+  };
+
+  const avgBedsideManner = calculateAverageRating(provider.reviews, 'bedsideManner');
+  const avgMedicalAdherence = calculateAverageRating(provider.reviews, 'medicalAdherence');
+  const avgSpecialtyCare = calculateAverageRating(provider.reviews, 'specialtyCare');
+  const avgWaitTime = calculateAverageRating(provider.reviews, 'waitTime');
+
+  const hasRatings = avgBedsideManner > 0 || avgMedicalAdherence > 0 || avgSpecialtyCare > 0 || avgWaitTime > 0;
+
   return (
     <Card className="flex flex-col h-full overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 rounded-lg">
       <CardHeader className="p-0">
@@ -36,7 +51,37 @@ export function ProviderCard({ provider }: ProviderCardProps) {
           <MapPin className="h-4 w-4 mr-1.5" />
           <span>{provider.location}</span>
         </div>
-        {/* <RatingStars rating={provider.overallRating} size={18} showText /> Removed overall rating */}
+
+        {/* Average Ratings Section */}
+        {hasRatings && (
+          <div className="my-3 space-y-1.5 border-t border-b border-border/50 py-2.5">
+            {avgBedsideManner > 0 && (
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-muted-foreground flex items-center"><HeartHandshake className="mr-1.5 h-3.5 w-3.5" />Bedside Manner:</span>
+                <RatingStars rating={avgBedsideManner} size={12} showText />
+              </div>
+            )}
+            {avgMedicalAdherence > 0 && (
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-muted-foreground flex items-center"><Stethoscope className="mr-1.5 h-3.5 w-3.5" />Medical Adherence:</span>
+                <RatingStars rating={avgMedicalAdherence} size={12} showText />
+              </div>
+            )}
+            {avgSpecialtyCare > 0 && (
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-muted-foreground flex items-center"><ShieldCheck className="mr-1.5 h-3.5 w-3.5" />Specialty Care:</span>
+                <RatingStars rating={avgSpecialtyCare} size={12} showText />
+              </div>
+            )}
+            {avgWaitTime > 0 && (
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-muted-foreground flex items-center"><Clock className="mr-1.5 h-3.5 w-3.5" />Wait Time:</span>
+                <RatingStars rating={avgWaitTime} size={12} showText />
+              </div>
+            )}
+          </div>
+        )}
+
         <p className="text-sm text-muted-foreground mt-1">See profile for detailed reviews.</p>
         <p className="text-sm text-muted-foreground mt-2 line-clamp-3">
           {provider.bio}
@@ -50,4 +95,3 @@ export function ProviderCard({ provider }: ProviderCardProps) {
     </Card>
   );
 }
-

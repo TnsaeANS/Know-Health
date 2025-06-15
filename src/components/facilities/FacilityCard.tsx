@@ -1,11 +1,11 @@
 
-import type { Facility } from '@/lib/types';
+import type { Facility, Review } from '@/lib/types';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-// import { RatingStars } from '@/components/shared/RatingStars'; // Overall rating removed
-import { MapPin, Building } from 'lucide-react';
+import { RatingStars } from '@/components/shared/RatingStars';
+import { MapPin, Building, Clock } from 'lucide-react';
 
 interface FacilityCardProps {
   facility: Facility;
@@ -13,6 +13,19 @@ interface FacilityCardProps {
 
 export function FacilityCard({ facility }: FacilityCardProps) {
   const IconComponent = facility.typeIcon || Building;
+
+  const calculateAverageRating = (reviews: Facility['reviews'], criterion: keyof Review) => {
+    const validReviews = reviews.filter(review => typeof review[criterion] === 'number' && (review[criterion] as number) > 0);
+    if (validReviews.length === 0) return 0;
+    const totalRating = validReviews.reduce((sum, review) => sum + (review[criterion] as number), 0);
+    return totalRating / validReviews.length;
+  };
+
+  const avgFacilityQuality = calculateAverageRating(facility.reviews, 'facilityQuality');
+  const avgWaitTime = calculateAverageRating(facility.reviews, 'waitTime');
+
+  const hasRatings = avgFacilityQuality > 0 || avgWaitTime > 0;
+
   return (
     <Card className="flex flex-col h-full overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 rounded-lg">
       <CardHeader className="p-0">
@@ -36,7 +49,25 @@ export function FacilityCard({ facility }: FacilityCardProps) {
           <MapPin className="h-4 w-4 mr-1.5" />
           <span>{facility.location}</span>
         </div>
-        {/* <RatingStars rating={facility.overallRating} size={18} showText /> Removed overall rating */}
+
+        {/* Average Ratings Section */}
+        {hasRatings && (
+          <div className="my-3 space-y-1.5 border-t border-b border-border/50 py-2.5">
+            {avgFacilityQuality > 0 && (
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-muted-foreground flex items-center"><Building className="mr-1.5 h-3.5 w-3.5" />Facility Quality:</span>
+                <RatingStars rating={avgFacilityQuality} size={12} showText />
+              </div>
+            )}
+            {avgWaitTime > 0 && (
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-muted-foreground flex items-center"><Clock className="mr-1.5 h-3.5 w-3.5" />Wait Time:</span>
+                <RatingStars rating={avgWaitTime} size={12} showText />
+              </div>
+            )}
+          </div>
+        )}
+
         <p className="text-sm text-muted-foreground mt-1">See profile for detailed reviews.</p>
         <p className="text-sm text-muted-foreground mt-2 line-clamp-3">
           {facility.description}
@@ -50,4 +81,3 @@ export function FacilityCard({ facility }: FacilityCardProps) {
     </Card>
   );
 }
-
