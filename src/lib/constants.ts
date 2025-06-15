@@ -1,8 +1,8 @@
 
 import type { NavItem, FilterOption } from './types';
-import { Home, Stethoscope, Hospital, Info, MessageSquare, BriefcaseMedical, Building, Languages, MapPin, Smile, Bone, Brain, Baby, Eye } from 'lucide-react';
+import { Home, Stethoscope, Hospital, Info, MessageSquare, BriefcaseMedical, Building, Languages, MapPin, Smile, Bone, Brain, Baby, Eye, LucideIcon } from 'lucide-react';
 
-export const APP_NAME = "EthioHealth Connect";
+export const APP_NAME = "Know Health";
 
 export const NAV_LINKS: NavItem[] = [
   { label: 'Home', href: '/', icon: Home },
@@ -25,12 +25,12 @@ export const SPECIALTIES: FilterOption[] = [
 ];
 
 export const SPECIALTY_ICONS: { [key: string]: LucideIcon } = {
-  cardiology: BriefcaseMedical, // Using BriefcaseMedical as a generic medical icon, Heart icon is also an option
+  cardiology: BriefcaseMedical, 
   dentistry: Smile,
-  dermatology: Stethoscope, // Placeholder, consider specific icon
+  dermatology: Stethoscope, 
   general_practice: Stethoscope,
   neurology: Brain,
-  oncology: Stethoscope, // Placeholder
+  oncology: Stethoscope, 
   orthopedics: Bone,
   pediatrics: Baby,
   ophthalmology: Eye,
@@ -48,9 +48,9 @@ export const FACILITY_TYPES: FilterOption[] = [
 export const FACILITY_TYPE_ICONS: { [key: string]: LucideIcon } = {
   hospital: Hospital,
   clinic: Building,
-  pharmacy: BriefcaseMedical, // Placeholder
-  laboratory: BriefcaseMedical, // Placeholder
-  diagnostic_center: BriefcaseMedical, // Placeholder
+  pharmacy: BriefcaseMedical, 
+  laboratory: BriefcaseMedical, 
+  diagnostic_center: BriefcaseMedical, 
 };
 
 export const LANGUAGES_SPOKEN: FilterOption[] = [

@@ -21,7 +21,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     // Check for a logged-in user in localStorage (simple persistence)
-    const storedUser = localStorage.getItem('ethiohealth-user');
+    const storedUser = localStorage.getItem('knowhealth-user');
     if (storedUser) {
       setUser(JSON.parse(storedUser));
     }
@@ -34,7 +34,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const foundUser = mockUsers.find(u => u.email === email);
     if (foundUser) {
       setUser(foundUser);
-      localStorage.setItem('ethiohealth-user', JSON.stringify(foundUser));
+      localStorage.setItem('knowhealth-user', JSON.stringify(foundUser));
       setLoading(false);
       return true;
     }
@@ -44,7 +44,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem('ethiohealth-user');
+    localStorage.removeItem('knowhealth-user');
   };
 
   const signup = async (name: string, email: string, _pass: string): Promise<boolean> => {
@@ -57,7 +57,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const newUser: User = { id: `user-${Date.now()}`, name, email, avatarUrl: 'https://placehold.co/100x100.png' };
     mockUsers.push(newUser); // Add to mock data in memory (not persistent across reloads unless also stored)
     setUser(newUser);
-    localStorage.setItem('ethiohealth-user', JSON.stringify(newUser));
+    localStorage.setItem('knowhealth-user', JSON.stringify(newUser));
     setLoading(false);
     return true;
   };

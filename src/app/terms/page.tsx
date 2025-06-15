@@ -13,7 +13,7 @@ export default function TermsPage() {
 
         <h2>Agreement to Terms</h2>
         <p>
-          By using EthioHealth Connect (the "Service"), you agree to be bound by these Terms of Service ("Terms"). If you disagree with any part of the terms, then you may not access the Service.
+          By using Know Health (the "Service"), you agree to be bound by these Terms of Service ("Terms"). If you disagree with any part of the terms, then you may not access the Service.
         </p>
 
         <h2>Accounts</h2>
@@ -44,7 +44,7 @@ export default function TermsPage() {
 
         <h2>Intellectual Property</h2>
         <p>
-          The Service and its original content (excluding Content provided by users), features and functionality are and will remain the exclusive property of EthioHealth Connect and its licensors.
+          The Service and its original content (excluding Content provided by users), features and functionality are and will remain the exclusive property of Know Health and its licensors.
         </p>
 
         <h2>Termination</h2>
@@ -54,7 +54,7 @@ export default function TermsPage() {
 
         <h2>Limitation of Liability</h2>
         <p>
-          In no event shall EthioHealth Connect, nor its directors, employees, partners, agents, suppliers, or affiliates, be liable for any indirect, incidental, special, consequential or punitive damages, including without limitation, loss of profits, data, use, goodwill, or other intangible losses, resulting from your access to or use of or inability to access or use the Service.
+          In no event shall Know Health, nor its directors, employees, partners, agents, suppliers, or affiliates, be liable for any indirect, incidental, special, consequential or punitive damages, including without limitation, loss of profits, data, use, goodwill, or other intangible losses, resulting from your access to or use of or inability to access or use the Service.
         </p>
         
         <h2>Disclaimer</h2>
@@ -62,10 +62,10 @@ export default function TermsPage() {
           Your use of the Service is at your sole risk. The Service is provided on an "AS IS" and "AS AVAILABLE" basis. The Service is provided without warranties of any kind, whether express or implied, including, but not limited to, implied warranties of merchantability, fitness for a particular purpose, non-infringement or course of performance.
         </p>
         <p>
-          EthioHealth Connect does not warrant that a) the Service will function uninterrupted, secure or available at any particular time or location; b) any errors or defects will be corrected; c) the Service is free of viruses or other harmful components; or d) the results of using the Service will meet your requirements.
+          Know Health does not warrant that a) the Service will function uninterrupted, secure or available at any particular time or location; b) any errors or defects will be corrected; c) the Service is free of viruses or other harmful components; or d) the results of using the Service will meet your requirements.
         </p>
         <p>
-          The information provided on EthioHealth Connect is for general informational purposes only and does not constitute medical advice. Always seek the advice of your physician or other qualified health provider with any questions you may have regarding a medical condition.
+          The information provided on Know Health is for general informational purposes only and does not constitute medical advice. Always seek the advice of your physician or other qualified health provider with any questions you may have regarding a medical condition.
         </p>
 
         <h2>Changes to Terms</h2>
@@ -75,7 +75,7 @@ export default function TermsPage() {
 
         <h2>Contact Us</h2>
         <p>
-          If you have any questions about these Terms, please contact us at terms@ethiohealthconnect.com.
+          If you have any questions about these Terms, please contact us at terms@knowhealth.com.
         </p>
       </div>
     </PageWrapper>

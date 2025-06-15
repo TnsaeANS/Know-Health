@@ -42,7 +42,7 @@ export function SignupForm() {
     const success = await signup(data.name, data.email, data.password);
     setIsLoading(false);
     if (success) {
-      toast({ title: 'Signup Successful', description: 'Welcome to EthioHealth Connect!' });
+      toast({ title: 'Signup Successful', description: 'Welcome to Know Health!' });
       router.push('/account');
     } else {
       toast({
@@ -57,7 +57,7 @@ export function SignupForm() {
     <Card className="w-full max-w-md shadow-xl">
       <CardHeader>
         <CardTitle className="font-headline text-2xl">Create Your Account</CardTitle>
-        <CardDescription>Join EthioHealth Connect to find and review healthcare providers.</CardDescription>
+        <CardDescription>Join Know Health to find and review healthcare providers.</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">

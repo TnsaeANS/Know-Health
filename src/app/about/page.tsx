@@ -8,15 +8,15 @@ export default function AboutPage() {
   return (
     <PageWrapper>
       <PageHeader
-        title="About EthioHealth Connect"
-        description="Connecting you to better healthcare in Ethiopia."
+        title="About Know Health"
+        description="Connecting you to better healthcare."
       />
 
       <div className="grid md:grid-cols-2 gap-8 items-center mb-12">
         <div>
           <h2 className="font-headline text-2xl text-foreground mb-4">Our Story</h2>
           <p className="text-muted-foreground mb-4 leading-relaxed">
-            EthioHealth Connect was founded with a simple mission: to make healthcare more accessible and transparent for everyone in Ethiopia. We believe that finding the right doctor or facility shouldn't be a daunting task. Our platform empowers you with the information you need to make informed decisions about your health.
+            Know Health was founded with a simple mission: to make healthcare more accessible and transparent for everyone. We believe that finding the right doctor or facility shouldn't be a daunting task. Our platform empowers you with the information you need to make informed decisions about your health.
           </p>
           <p className="text-muted-foreground leading-relaxed">
             We are a team of passionate individuals dedicated to leveraging technology to solve real-world health challenges. We are committed to building a trustworthy and user-friendly service that connects patients with qualified healthcare providers seamlessly.
@@ -57,7 +57,7 @@ export default function AboutPage() {
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground">
-              To be the leading digital health platform in Ethiopia, fostering a healthier nation through accessible, reliable, and patient-centric healthcare connections.
+              To be the leading digital health platform, fostering a healthier nation through accessible, reliable, and patient-centric healthcare connections.
             </p>
           </CardContent>
         </Card>
@@ -82,7 +82,7 @@ export default function AboutPage() {
       <div>
         <h2 className="font-headline text-2xl text-foreground mb-4 text-center">Join Us on Our Journey</h2>
         <p className="text-muted-foreground text-center max-w-xl mx-auto">
-          We are continuously working to improve EthioHealth Connect. Your feedback and participation are invaluable as we strive to build a healthier future for Ethiopia.
+          We are continuously working to improve Know Health. Your feedback and participation are invaluable as we strive to build a healthier future.
         </p>
       </div>
     </PageWrapper>
