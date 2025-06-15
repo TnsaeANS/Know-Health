@@ -1,14 +1,14 @@
 
 // This should be a server component to fetch initial data
-import { getFacilityById } from '@/lib/mockData';
+import { getFacilityById, mockProviders } from '@/lib/mockData'; // Added mockProviders
 import { PageWrapper } from '@/components/ui/PageWrapper';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
-// import { RatingStars } from '@/components/shared/RatingStars'; // Removed overall rating
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Mail, Phone, MapPin, Building, ListChecks, ConciergeBell } from 'lucide-react';
+import { Mail, Phone, MapPin, Building, ListChecks, ConciergeBell, Users } from 'lucide-react'; // Added Users icon
 import FacilityDetailsClient from '@/components/facilities/FacilityDetailsClient';
+import { ProviderCard } from '@/components/providers/ProviderCard'; // Added ProviderCard
 
 export async function generateStaticParams() {
   const { mockFacilities } = await import('@/lib/mockData');
@@ -23,6 +23,10 @@ export default async function FacilityProfilePage({ params }: { params: { id: st
   }
 
   const TypeIcon = facility.typeIcon || Building;
+
+  const affiliatedProviders = facility.affiliatedProviderIds
+    ? mockProviders.filter(provider => facility.affiliatedProviderIds!.includes(provider.id))
+    : [];
 
   return (
     <PageWrapper>
@@ -46,7 +50,6 @@ export default async function FacilityProfilePage({ params }: { params: { id: st
                 <TypeIcon className="h-5 w-5 mr-2" />
                 <span>{facility.type}</span>
               </div>
-              {/* <RatingStars rating={facility.overallRating} size={22} showText className="justify-center"/> Removed overall rating */}
               <p className="text-sm text-muted-foreground mt-1">View reviews for detailed ratings.</p>
             </CardContent>
           </Card>
@@ -81,10 +84,11 @@ export default async function FacilityProfilePage({ params }: { params: { id: st
         {/* Right Column: Tabs for Details */}
         <div className="md:col-span-2">
           <Tabs defaultValue="overview" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 mb-6">
+            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-4 mb-6"> {/* Adjusted grid-cols */}
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="reviews">Reviews</TabsTrigger>
               <TabsTrigger value="services">Services & More</TabsTrigger>
+              <TabsTrigger value="doctors">Affiliated Doctors</TabsTrigger> {/* Added new tab */}
             </TabsList>
 
             <TabsContent value="overview">
@@ -99,6 +103,7 @@ export default async function FacilityProfilePage({ params }: { params: { id: st
             </TabsContent>
 
             <TabsContent value="reviews">
+              {/* Review form is now rendered first within FacilityDetailsClient */}
               <FacilityDetailsClient facilityId={facility.id} initialReviews={facility.reviews} />
             </TabsContent>
             
@@ -143,6 +148,28 @@ export default async function FacilityProfilePage({ params }: { params: { id: st
                 </CardContent>
               </Card>
             </TabsContent>
+
+            <TabsContent value="doctors"> {/* Content for new tab */}
+              <Card className="shadow-lg">
+                <CardHeader>
+                  <CardTitle className="font-headline text-xl flex items-center">
+                    <Users className="h-5 w-5 mr-2 text-primary" /> Affiliated Doctors
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {affiliatedProviders.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {affiliatedProviders.map(provider => (
+                        <ProviderCard key={provider.id} provider={provider} />
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-muted-foreground">No affiliated doctors listed for this facility at the moment.</p>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
           </Tabs>
         </div>
       </div>

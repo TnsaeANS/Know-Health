@@ -132,7 +132,8 @@ export const mockFacilities: Facility[] = [
     servicesOffered: ['Emergency Care', 'Surgery', 'Internal Medicine', 'Pediatrics', 'Obstetrics & Gynecology'],
     reviews: mockReviews.filter(r => r.facilityQuality !== undefined && r.id === 'review2'),
     location: 'Addis Ababa',
-    amenities: ['Parking', 'Pharmacy On-site', 'Cafeteria']
+    amenities: ['Parking', 'Pharmacy On-site', 'Cafeteria'],
+    affiliatedProviderIds: ['provider1', 'provider2'], // Added
   },
   {
     id: 'facility2',
@@ -149,7 +150,8 @@ export const mockFacilities: Facility[] = [
     servicesOffered: ['General Consultation', 'Specialist Consultation', 'Minor Procedures', 'Vaccinations'],
     reviews: [mockReviews.find(r => r.id === 'review2')!].filter(Boolean) as Review[],
     location: 'Addis Ababa',
-    amenities: ['Waiting Area', 'Wi-Fi', 'Accessible']
+    amenities: ['Waiting Area', 'Wi-Fi', 'Accessible'],
+    affiliatedProviderIds: ['provider3'], // Added
   },
 ];
 
@@ -215,7 +217,7 @@ export const getProviderById = (id: string): Provider | undefined => {
 
   provider.reviews = provider.reviews.map(review => {
     const cleanReview = deepCopy(review);
-    delete (cleanReview as any).facilityQuality; // Remove facility-specific ratings
+    delete (cleanReview as any).facilityQuality; 
     return cleanReview;
   });
   return provider;
@@ -229,7 +231,7 @@ export const getFacilityById = (id: string): Facility | undefined => {
 
   facility.reviews = facility.reviews.map(review => {
     const cleanReview = deepCopy(review);
-    delete (cleanReview as any).bedsideManner; // Remove provider-specific ratings
+    delete (cleanReview as any).bedsideManner; 
     delete (cleanReview as any).medicalAdherence;
     delete (cleanReview as any).specialtyCare;
     return cleanReview;

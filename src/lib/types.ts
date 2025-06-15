@@ -65,6 +65,7 @@ export interface Facility {
   reviews: Review[];
   location: string;
   amenities?: string[];
+  affiliatedProviderIds?: string[]; // Added this line
 }
 
 export interface FilterOption {
