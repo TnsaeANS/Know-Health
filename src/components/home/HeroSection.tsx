@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
@@ -9,7 +10,7 @@ export function HeroSection() {
     <div className="relative rounded-lg overflow-hidden bg-gradient-to-r from-primary/30 via-background to-accent/30 py-16 md:py-24 shadow-lg">
       <div className="absolute inset-0 opacity-20">
          <Image
-            src="https://img.freepik.com/free-photo/health-still-life-with-copy-space_23-2148854031.jpg?semt=ais_hybrid&w=740"
+            src="https://media.istockphoto.com/photos/medical-stethoscope-or-phonendoscope-picture-id492360768?k=6&m=492360768&s=612x612&w=0&h=Lknjn4xr0SSVDnRjavfGSkqRUm1Bgr58bmXva3rctCM="
             alt="Healthcare professionals"
             layout="fill"
             objectFit="cover"
