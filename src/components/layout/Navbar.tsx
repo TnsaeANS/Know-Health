@@ -1,10 +1,11 @@
+
 "use client";
 
 import Link from 'next/link';
 import { NAV_LINKS } from '@/lib/constants';
 import Logo from './Logo';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Menu, UserCircle } from 'lucide-react';
 import type { NavItem as NavItemType } from '@/lib/types';
 import { useAuth } from '@/context/AuthContext';
@@ -98,6 +99,9 @@ export function Navbar() {
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-[300px] sm:w-[400px]">
+              <SheetHeader>
+                <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+              </SheetHeader>
               <div className="flex flex-col space-y-4 p-4">
                 <Logo />
                 {NAV_LINKS.map((item) => (
@@ -136,3 +140,4 @@ export function Navbar() {
     </header>
   );
 }
+
