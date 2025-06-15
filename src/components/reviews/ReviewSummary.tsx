@@ -1,81 +1,51 @@
-import type { ReviewSummaryAI } from '@/lib/types';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ThumbsUp, ThumbsDown, MessageCircle } from 'lucide-react';
+import type { Facility } from '@/lib/types';
+import Image from 'next/image';
+import Link from 'next/link';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+// import { RatingStars } from '@/components/shared/RatingStars'; // Overall rating removed
+import { MapPin, Building } from 'lucide-react';
 
-interface ReviewSummaryProps {
-  summaryData: ReviewSummaryAI | null;
-  isLoading?: boolean;
+interface FacilityCardProps {
+  facility: Facility;
 }
 
-export function ReviewSummary({ summaryData, isLoading = false }: ReviewSummaryProps) {
-  if (isLoading) {
-    return (
-      <Card className="mt-8 shadow-lg animate-pulse">
-        <CardHeader>
-          <CardTitle className="font-headline text-xl flex items-center">
-            <MessageCircle className="h-6 w-6 mr-2 text-primary" />
-            AI Review Summary
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="h-4 bg-muted rounded w-3/4"></div>
-          <div className="h-4 bg-muted rounded w-1/2"></div>
-          <div className="h-4 bg-muted rounded w-full"></div>
-        </CardContent>
-      </Card>
-    )
-  }
-  
-  if (!summaryData) {
-    return (
-       <Card className="mt-8 shadow-lg">
-        <CardHeader>
-          <CardTitle className="font-headline text-xl flex items-center">
-             <MessageCircle className="h-6 w-6 mr-2 text-primary" />
-            AI Review Summary
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground">Not enough reviews to generate a summary yet.</p>
-        </CardContent>
-      </Card>
-    );
-  }
-
+export function FacilityCard({ facility }: FacilityCardProps) {
+  const IconComponent = facility.typeIcon || Building;
   return (
-    <Card className="mt-8 shadow-lg bg-gradient-to-br from-primary/5 via-background to-accent/5">
-      <CardHeader>
-        <CardTitle className="font-headline text-xl flex items-center">
-          <MessageCircle className="h-6 w-6 mr-2 text-primary" />
-          AI Review Summary
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div>
-          <h3 className="font-semibold text-lg text-foreground mb-2">Overall Sentiment:</h3>
-          <p className="text-muted-foreground leading-relaxed">{summaryData.summary}</p>
+    <Card className="flex flex-col h-full overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 rounded-lg">
+      <CardHeader className="p-0">
+        <div className="relative w-full h-48">
+          <Image
+            src={facility.photoUrl}
+            alt={facility.name}
+            layout="fill"
+            objectFit="cover"
+            data-ai-hint="hospital building"
+          />
         </div>
-        
-        {summaryData.positiveThemes && (
-          <div>
-            <h3 className="font-semibold text-lg text-foreground mb-2 flex items-center">
-              <ThumbsUp className="h-5 w-5 mr-2 text-green-500" />
-              Common Positive Themes:
-            </h3>
-            <p className="text-muted-foreground leading-relaxed">{summaryData.positiveThemes}</p>
-          </div>
-        )}
-
-        {summaryData.negativeThemes && (
-          <div>
-            <h3 className="font-semibold text-lg text-foreground mb-2 flex items-center">
-              <ThumbsDown className="h-5 w-5 mr-2 text-red-500" />
-              Common Negative Themes:
-            </h3>
-            <p className="text-muted-foreground leading-relaxed">{summaryData.negativeThemes}</p>
-          </div>
-        )}
+      </CardHeader>
+      <CardContent className="p-4 flex-grow">
+        <CardTitle className="font-headline text-xl mb-1">{facility.name}</CardTitle>
+        <div className="flex items-center text-sm text-primary mb-2">
+          <IconComponent className="h-4 w-4 mr-1.5" />
+          <span>{facility.type}</span>
+        </div>
+         <div className="flex items-center text-sm text-muted-foreground mb-3">
+          <MapPin className="h-4 w-4 mr-1.5" />
+          <span>{facility.location}</span>
+        </div>
+        {/* <RatingStars rating={facility.overallRating} size={18} showText /> Removed overall rating */}
+        <p className="text-sm text-muted-foreground mt-1">See profile for detailed reviews.</p>
+        <p className="text-sm text-muted-foreground mt-2 line-clamp-3">
+          {facility.description}
+        </p>
       </CardContent>
+      <CardFooter className="p-4 border-t">
+        <Button asChild className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
+          <Link href={`/facilities/${facility.id}`}>View Details</Link>
+        </Button>
+      </CardFooter>
     </Card>
   );
 }

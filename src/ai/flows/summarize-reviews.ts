@@ -1,68 +1,51 @@
-// SummarizeReviews.ts
-'use server';
-/**
- * @fileOverview Summarizes reviews for a doctor or facility.
- *
- * - summarizeReviews - A function that summarizes reviews.
- * - SummarizeReviewsInput - The input type for the summarizeReviews function.
- * - SummarizeReviewsOutput - The return type for the summarizeReviews function.
- */
+import type { Facility } from '@/lib/types';
+import Image from 'next/image';
+import Link from 'next/link';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+// import { RatingStars } from '@/components/shared/RatingStars'; // Overall rating removed
+import { MapPin, Building } from 'lucide-react';
 
-import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
-
-const SummarizeReviewsInputSchema = z.object({
-  reviews: z.array(z.string()).describe('An array of reviews to summarize.'),
-});
-export type SummarizeReviewsInput = z.infer<typeof SummarizeReviewsInputSchema>;
-
-const SummarizeReviewsOutputSchema = z.object({
-  summary: z.string().describe('A summary of the reviews.'),
-  positiveThemes: z.string().describe('Common positive themes in the reviews.'),
-  negativeThemes: z.string().describe('Common negative themes in the reviews.'),
-});
-export type SummarizeReviewsOutput = z.infer<typeof SummarizeReviewsOutputSchema>;
-
-export async function summarizeReviews(input: SummarizeReviewsInput): Promise<SummarizeReviewsOutput> {
-  return summarizeReviewsFlow(input);
+interface FacilityCardProps {
+  facility: Facility;
 }
 
-const summarizeReviewsPrompt = ai.definePrompt({
-  name: 'summarizeReviewsPrompt',
-  input: {schema: SummarizeReviewsInputSchema},
-  output: {schema: SummarizeReviewsOutputSchema},
-  prompt: `You are an AI expert in sentiment analysis and theme extraction from customer reviews.
-
-You will receive a list of reviews for a doctor or facility. Your task is to provide a concise summary of the reviews, identify common positive themes, and identify common negative themes.
-
-Reviews:
-{{#each reviews}}{{{this}}}
-{{/each}}
-
-Summary Instructions:
-*   Provide a brief overview of the general sentiment expressed in the reviews.
-*   Focus on the key aspects that are frequently mentioned.
-
-Positive Themes Instructions:
-*   Identify and list the recurring positive aspects highlighted in the reviews.
-*   Provide specific examples or keywords that represent these themes.
-
-Negative Themes Instructions:
-*   Identify and list the recurring negative aspects highlighted in the reviews.
-*   Provide specific examples or keywords that represent these themes.
-
-Output the summary, positive themes, and negative themes as strings.
-`,
-});
-
-const summarizeReviewsFlow = ai.defineFlow(
-  {
-    name: 'summarizeReviewsFlow',
-    inputSchema: SummarizeReviewsInputSchema,
-    outputSchema: SummarizeReviewsOutputSchema,
-  },
-  async input => {
-    const {output} = await summarizeReviewsPrompt(input);
-    return output!;
-  }
-);
+export function FacilityCard({ facility }: FacilityCardProps) {
+  const IconComponent = facility.typeIcon || Building;
+  return (
+    <Card className="flex flex-col h-full overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 rounded-lg">
+      <CardHeader className="p-0">
+        <div className="relative w-full h-48">
+          <Image
+            src={facility.photoUrl}
+            alt={facility.name}
+            layout="fill"
+            objectFit="cover"
+            data-ai-hint="hospital building"
+          />
+        </div>
+      </CardHeader>
+      <CardContent className="p-4 flex-grow">
+        <CardTitle className="font-headline text-xl mb-1">{facility.name}</CardTitle>
+        <div className="flex items-center text-sm text-primary mb-2">
+          <IconComponent className="h-4 w-4 mr-1.5" />
+          <span>{facility.type}</span>
+        </div>
+         <div className="flex items-center text-sm text-muted-foreground mb-3">
+          <MapPin className="h-4 w-4 mr-1.5" />
+          <span>{facility.location}</span>
+        </div>
+        {/* <RatingStars rating={facility.overallRating} size={18} showText /> Removed overall rating */}
+        <p className="text-sm text-muted-foreground mt-1">See profile for detailed reviews.</p>
+        <p className="text-sm text-muted-foreground mt-2 line-clamp-3">
+          {facility.description}
+        </p>
+      </CardContent>
+      <CardFooter className="p-4 border-t">
+        <Button asChild className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
+          <Link href={`/facilities/${facility.id}`}>View Details</Link>
+        </Button>
+      </CardFooter>
+    </Card>
+  );
+}

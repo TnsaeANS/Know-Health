@@ -1,14 +1,14 @@
 
 // This should be a server component to fetch initial data
-import { getFacilityById } from '@/lib/mockData'; // Will be replaced by actual data fetching
+import { getFacilityById } from '@/lib/mockData';
 import { PageWrapper } from '@/components/ui/PageWrapper';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
-import { RatingStars } from '@/components/shared/RatingStars';
+// import { RatingStars } from '@/components/shared/RatingStars'; // Removed overall rating
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Mail, Phone, MapPin, Building, ListChecks, ConciergeBell } from 'lucide-react';
-import FacilityDetailsClient from '@/components/facilities/FacilityDetailsClient'; // Client component
+import FacilityDetailsClient from '@/components/facilities/FacilityDetailsClient';
 
 export async function generateStaticParams() {
   const { mockFacilities } = await import('@/lib/mockData');
@@ -46,7 +46,8 @@ export default async function FacilityProfilePage({ params }: { params: { id: st
                 <TypeIcon className="h-5 w-5 mr-2" />
                 <span>{facility.type}</span>
               </div>
-              <RatingStars rating={facility.overallRating} size={22} showText className="justify-center"/>
+              {/* <RatingStars rating={facility.overallRating} size={22} showText className="justify-center"/> Removed overall rating */}
+              <p className="text-sm text-muted-foreground mt-1">View reviews for detailed ratings.</p>
             </CardContent>
           </Card>
 
@@ -148,3 +149,4 @@ export default async function FacilityProfilePage({ params }: { params: { id: st
     </PageWrapper>
   );
 }
+

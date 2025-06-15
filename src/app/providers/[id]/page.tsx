@@ -1,28 +1,27 @@
 
 // This should be a server component to fetch initial data
-import { getProviderById } from '@/lib/mockData'; // Will be replaced by actual data fetching
+import { getProviderById } from '@/lib/mockData'; 
 import { PageWrapper } from '@/components/ui/PageWrapper';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
-import { RatingStars } from '@/components/shared/RatingStars';
+// import { RatingStars } from '@/components/shared/RatingStars'; // Removed for overall rating
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Mail, Phone, MapPin, BriefcaseMedical, Languages, Stethoscope } from 'lucide-react';
-import { ReviewList } from '@/components/reviews/ReviewList';
-import { ReviewForm } from '@/components/reviews/ReviewForm';
-import { ReviewSummary } from '@/components/reviews/ReviewSummary';
-import ProviderDetailsClient from '@/components/providers/ProviderDetailsClient'; // Client component for summary + form
+// ReviewList and ReviewForm are now part of ProviderDetailsClient
+// import { ReviewList } from '@/components/reviews/ReviewList';
+// import { ReviewForm } from '@/components/reviews/ReviewForm';
+// import { ReviewSummary } from '@/components/reviews/ReviewSummary'; // Removed
+import ProviderDetailsClient from '@/components/providers/ProviderDetailsClient';
 
 export async function generateStaticParams() {
-  // In a real app, fetch all provider IDs
-  // For now, using mockData IDs
   const { mockProviders } = await import('@/lib/mockData');
   return mockProviders.map(provider => ({ id: provider.id }));
 }
 
 
 export default async function ProviderProfilePage({ params }: { params: { id: string } }) {
-  const provider = getProviderById(params.id); // In real app, await fetchProviderById(params.id);
+  const provider = getProviderById(params.id); 
 
   if (!provider) {
     notFound();
@@ -52,7 +51,8 @@ export default async function ProviderProfilePage({ params }: { params: { id: st
                 <SpecialtyIcon className="h-5 w-5 mr-2" />
                 <span>{provider.specialty}</span>
               </div>
-              <RatingStars rating={provider.overallRating} size={22} showText className="justify-center" />
+              {/* <RatingStars rating={provider.overallRating} size={22} showText className="justify-center" /> Removed overallRating */}
+              <p className="text-sm text-muted-foreground mt-1">View reviews for detailed ratings.</p>
             </CardContent>
           </Card>
 
@@ -112,7 +112,6 @@ export default async function ProviderProfilePage({ params }: { params: { id: st
             </TabsContent>
 
             <TabsContent value="reviews">
-              {/* Client component to handle review submission and AI summary display */}
               <ProviderDetailsClient providerId={provider.id} initialReviews={provider.reviews} />
             </TabsContent>
             
@@ -132,7 +131,6 @@ export default async function ProviderProfilePage({ params }: { params: { id: st
                       ))}
                     </div>
                   </div>
-                  {/* Placeholder for map */}
                   <div>
                     <h3 className="font-semibold text-md text-foreground mb-2 flex items-center">
                        <MapPin className="h-5 w-5 mr-2 text-primary" /> Location Map
@@ -150,3 +148,4 @@ export default async function ProviderProfilePage({ params }: { params: { id: st
     </PageWrapper>
   );
 }
+

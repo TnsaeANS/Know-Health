@@ -1,12 +1,12 @@
 
 "use client";
 
-import { useState, useEffect, useCallback } from 'react';
-import type { Review, ReviewSummaryAI } from '@/lib/types';
+import React, { useState, useEffect, useCallback } from 'react';
+import type { Review } from '@/lib/types';
 import { ReviewList } from '@/components/reviews/ReviewList';
 import { ReviewForm } from '@/components/reviews/ReviewForm';
-import { ReviewSummary } from '@/components/reviews/ReviewSummary';
-import { getReviewSummary } from '@/actions/reviews';
+// import { ReviewSummary } from '@/components/reviews/ReviewSummary'; // Removed
+// import { getReviewSummary } from '@/actions/reviews'; // Removed
 import { mockReviews } from '@/lib/mockData';
 
 interface FacilityDetailsClientProps {
@@ -16,45 +16,29 @@ interface FacilityDetailsClientProps {
 
 export default function FacilityDetailsClient({ facilityId, initialReviews }: FacilityDetailsClientProps) {
   const [reviews, setReviews] = useState<Review[]>(initialReviews);
-  const [reviewSummary, setReviewSummary] = useState<ReviewSummaryAI | null>(null);
-  const [isLoadingSummary, setIsLoadingSummary] = useState(false);
+  // const [reviewSummary, setReviewSummary] = useState<ReviewSummaryAI | null>(null); // Removed
+  // const [isLoadingSummary, setIsLoadingSummary] = useState(false); // Removed
 
-  const fetchSummary = useCallback(async () => {
-     if (reviews.length < 3) {
-        setReviewSummary(null);
-        return;
-    }
-    setIsLoadingSummary(true);
-    try {
-      const summary = await getReviewSummary(facilityId, 'facility');
-      setReviewSummary(summary);
-    } catch (error) {
-      console.error("Failed to fetch review summary:", error);
-      setReviewSummary(null);
-    } finally {
-      setIsLoadingSummary(false);
-    }
-  }, [facilityId, reviews.length]);
-
-  useEffect(() => {
-    fetchSummary();
-  }, [fetchSummary]);
+  // fetchSummary logic removed
 
   const handleReviewSubmitted = useCallback(() => {
+    // Simplified optimistic update
     const newMockReview: Review = {
-        ...mockReviews[1], 
         id: `optimistic-facility-${Date.now()}`,
-        comment: "This is a new facility review added client side for testing summary refresh.",
+        comment: "Thank you for your review! It's being processed.",
         date: new Date().toISOString(),
         userId: 'optimistic-user',
         userName: 'Optimistic User',
+        facilityQuality: 0,
+        waitTime: 0,
     };
-    setReviews(prevReviews => [...prevReviews, newMockReview]);
+    setReviews(prevReviews => [newMockReview, ...prevReviews]); // Add to top
+    // Potentially trigger a re-fetch of reviews from the server here
   }, []);
 
   return (
     <div className="space-y-8">
-      <ReviewSummary summaryData={reviewSummary} isLoading={isLoadingSummary} />
+      {/* <ReviewSummary summaryData={reviewSummary} isLoading={isLoadingSummary} /> Removed */}
       <ReviewForm entityId={facilityId} entityType="facility" onReviewSubmitted={handleReviewSubmitted} />
       <ReviewList reviews={reviews} />
     </div>

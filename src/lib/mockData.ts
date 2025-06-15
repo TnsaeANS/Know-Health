@@ -9,43 +9,56 @@ export const mockReviews: Review[] = [
     userId: 'user1',
     userName: 'Abebe Kebede',
     userAvatarUrl: 'https://placehold.co/40x40.png?text=AK',
-    rating: 5,
     comment: 'Excellent doctor, very knowledgeable and caring. Highly recommend!',
     date: '2024-05-10T10:00:00Z',
+    bedsideManner: 5,
+    medicalAdherence: 5,
+    waitTime: 4,
+    specialtyCare: 4,
   },
   {
     id: 'review2',
     userId: 'user2',
     userName: 'Fatuma Ahmed',
     userAvatarUrl: 'https://placehold.co/40x40.png?text=FA',
-    rating: 4,
     comment: 'Good experience, the facility was clean and staff were helpful. Waiting time was a bit long.',
     date: '2024-05-12T14:30:00Z',
+    facilityQuality: 4,
+    waitTime: 2,
   },
   {
     id: 'review3',
     userId: 'user3',
     userName: 'Chala Gemechu',
-    rating: 3,
     comment: 'Average service. The doctor seemed rushed.',
     date: '2024-04-20T09:15:00Z',
+    bedsideManner: 3,
+    medicalAdherence: 3,
+    waitTime: 3,
+    specialtyCare: 3,
   },
     {
     id: 'review4',
     userId: 'user4',
     userName: 'Sara Berhanu',
     userAvatarUrl: 'https://placehold.co/40x40.png?text=SB',
-    rating: 5,
     comment: 'The best pediatrician in town! My kids love Dr. Alem.',
     date: '2024-05-15T11:00:00Z',
+    bedsideManner: 5,
+    medicalAdherence: 5,
+    waitTime: 5,
+    specialtyCare: 4,
   },
   {
     id: 'review5',
     userId: 'user5',
     userName: 'John Doe',
-    rating: 2,
     comment: 'Not satisfied with the consultation. Felt like my concerns were not heard.',
     date: '2024-03-01T16:00:00Z',
+    bedsideManner: 2,
+    medicalAdherence: 2,
+    waitTime: 4,
+    specialtyCare: 3,
   }
 ];
 
@@ -59,12 +72,11 @@ export const mockProviders: Provider[] = [
     bio: 'Dr. Almaz Tesfaye is a renowned cardiologist with over 15 years of experience in treating various heart conditions. She is dedicated to providing compassionate and comprehensive care to her patients.',
     contact: {
       phone: '+251 912 345 678',
-      email: 'almaz.tesfaye@ethiohealth.com',
+      email: 'almaz.tesfaye@knowhealth.com',
       address: 'Bole Medhanialem, Addis Ababa',
     },
     languagesSpoken: ['Amharic', 'English'],
-    overallRating: 4.8,
-    reviews: mockReviews.slice(0, 2),
+    reviews: mockReviews.filter(r => r.bedsideManner !== undefined).slice(0,1), // Filter provider reviews
     location: 'Addis Ababa',
     qualifications: ['MD, Cardiology Fellowship', 'Member of Ethiopian Heart Association']
   },
@@ -77,12 +89,11 @@ export const mockProviders: Provider[] = [
     bio: 'Dr. Bruk Girma is a friendly and experienced pediatrician committed to the health and well-being of children. He believes in a holistic approach to child care.',
     contact: {
       phone: '+251 911 223 344',
-      email: 'bruk.girma@ethiohealth.com',
+      email: 'bruk.girma@knowhealth.com',
       address: 'Kazanchis, Addis Ababa',
     },
     languagesSpoken: ['Amharic', 'Oromo', 'English'],
-    overallRating: 4.5,
-    reviews: [mockReviews[3], mockReviews[1]],
+    reviews: [mockReviews[0], mockReviews[3]],
     location: 'Addis Ababa',
     qualifications: ['MD, Specialization in Pediatrics', 'Certified in Neonatal Resuscitation']
   },
@@ -95,11 +106,10 @@ export const mockProviders: Provider[] = [
     bio: 'Dr. Helen Getachew offers a wide range of dental services with a focus on patient comfort and satisfaction. She stays updated with the latest advancements in dental technology.',
     contact: {
       phone: '+251 922 111 000',
-      email: 'helen.getachew@ethiohealth.com',
+      email: 'helen.getachew@knowhealth.com',
       address: 'CMC area, Addis Ababa',
     },
     languagesSpoken: ['Amharic', 'English'],
-    overallRating: 4.2,
     reviews: [mockReviews[2]],
     location: 'Addis Ababa',
     qualifications: ['DDS (Doctor of Dental Surgery)', 'Advanced Course in Cosmetic Dentistry']
@@ -120,8 +130,7 @@ export const mockFacilities: Facility[] = [
       address: 'Gulele Sub-city, Addis Ababa',
     },
     servicesOffered: ['Emergency Care', 'Surgery', 'Internal Medicine', 'Pediatrics', 'Obstetrics & Gynecology'],
-    overallRating: 4.3,
-    reviews: mockReviews.slice(1, 3),
+    reviews: mockReviews.filter(r => r.facilityQuality !== undefined).slice(0,1), // Filter facility reviews
     location: 'Addis Ababa',
     amenities: ['Parking', 'Pharmacy On-site', 'Cafeteria']
   },
@@ -138,8 +147,7 @@ export const mockFacilities: Facility[] = [
       address: 'Old Airport, Addis Ababa',
     },
     servicesOffered: ['General Consultation', 'Specialist Consultation', 'Minor Procedures', 'Vaccinations'],
-    overallRating: 4.7,
-    reviews: mockReviews.slice(0, 2).reverse(),
+    reviews: [mockReviews[1]],
     location: 'Addis Ababa',
     amenities: ['Waiting Area', 'Wi-Fi', 'Accessible']
   },
@@ -160,5 +168,30 @@ export const mockUsers: User[] = [
   }
 ];
 
-export const getProviderById = (id: string): Provider | undefined => mockProviders.find(p => p.id === id);
-export const getFacilityById = (id: string): Facility | undefined => mockFacilities.find(f => f.id === id);
+export const getProviderById = (id: string): Provider | undefined => {
+  const provider = mockProviders.find(p => p.id === id);
+  if (provider) {
+    // Ensure reviews are correctly typed for the provider
+    provider.reviews = provider.reviews.map(review => ({
+      ...review,
+      // Ensure provider-specific fields are present or undefined
+      facilityQuality: undefined, 
+    }));
+  }
+  return provider;
+};
+export const getFacilityById = (id: string): Facility | undefined => {
+  const facility = mockFacilities.find(f => f.id === id);
+  if (facility) {
+    // Ensure reviews are correctly typed for the facility
+    facility.reviews = facility.reviews.map(review => ({
+      ...review,
+      // Ensure facility-specific fields are present or undefined
+      bedsideManner: undefined,
+      medicalAdherence: undefined,
+      specialtyCare: undefined,
+    }));
+  }
+  return facility;
+};
+

@@ -19,16 +19,23 @@ export interface Review {
   userId: string;
   userName: string;
   userAvatarUrl?: string;
-  rating: number; // 1-5 stars
   comment: string;
   date: string; // ISO date string
+  // Provider-specific ratings
+  bedsideManner?: number; // 1-5
+  medicalAdherence?: number; // 1-5
+  specialtyCare?: number; // 1-5
+  // Facility-specific ratings
+  facilityQuality?: number; // 1-5
+  // Common ratings
+  waitTime?: number; // 1-5
 }
 
 export interface Provider {
   id: string;
   name: string;
   specialty: string;
-  specialtyIcon?: LucideIcon | React.FC<React.SVGProps<SVGSVGElement>>; // Allow for custom SVGs if needed
+  specialtyIcon?: LucideIcon | React.FC<React.SVGProps<SVGSVGElement>>;
   photoUrl: string;
   bio: string;
   contact: {
@@ -37,9 +44,8 @@ export interface Provider {
     address?: string;
   };
   languagesSpoken: string[];
-  overallRating: number; // Calculated average
   reviews: Review[];
-  location: string; // Simple location string for now
+  location: string;
   qualifications?: string[];
 }
 
@@ -56,7 +62,6 @@ export interface Facility {
     address: string;
   };
   servicesOffered: string[];
-  overallRating: number; // Calculated average
   reviews: Review[];
   location: string;
   amenities?: string[];
@@ -67,8 +72,10 @@ export interface FilterOption {
   label: string;
 }
 
-export type ReviewSummaryAI = {
-  summary: string;
-  positiveThemes: string;
-  negativeThemes: string;
-};
+// ReviewSummaryAI is no longer needed
+// export type ReviewSummaryAI = {
+//   summary: string;
+//   positiveThemes: string;
+//   negativeThemes: string;
+// };
+

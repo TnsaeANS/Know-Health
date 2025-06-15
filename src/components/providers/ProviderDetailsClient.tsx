@@ -1,13 +1,13 @@
 
 "use client";
 
-import { useState, useEffect, useCallback } from 'react';
-import type { Review, ReviewSummaryAI } from '@/lib/types';
+import React, { useState, useEffect, useCallback } from 'react';
+import type { Review } from '@/lib/types';
 import { ReviewList } from '@/components/reviews/ReviewList';
 import { ReviewForm } from '@/components/reviews/ReviewForm';
-import { ReviewSummary } from '@/components/reviews/ReviewSummary';
-import { getReviewSummary } from '@/actions/reviews'; // Assuming server action lives here
-import { mockReviews } from '@/lib/mockData'; // For optimistic updates or local state if not using server state for reviews
+// import { ReviewSummary } from '@/components/reviews/ReviewSummary'; // Removed
+// import { getReviewSummary } from '@/actions/reviews'; // Removed
+import { mockReviews } from '@/lib/mockData'; 
 
 interface ProviderDetailsClientProps {
   providerId: string;
@@ -16,47 +16,34 @@ interface ProviderDetailsClientProps {
 
 export default function ProviderDetailsClient({ providerId, initialReviews }: ProviderDetailsClientProps) {
   const [reviews, setReviews] = useState<Review[]>(initialReviews);
-  const [reviewSummary, setReviewSummary] = useState<ReviewSummaryAI | null>(null);
-  const [isLoadingSummary, setIsLoadingSummary] = useState(false);
+  // const [reviewSummary, setReviewSummary] = useState<ReviewSummaryAI | null>(null); // Removed
+  // const [isLoadingSummary, setIsLoadingSummary] = useState(false); // Removed
 
-  const fetchSummary = useCallback(async () => {
-    if (reviews.length < 3) { // Only fetch summary if there are enough reviews. Min 3 for AI.
-        setReviewSummary(null); // Clear summary if not enough reviews
-        return;
-    }
-    setIsLoadingSummary(true);
-    try {
-      const summary = await getReviewSummary(providerId, 'provider');
-      setReviewSummary(summary);
-    } catch (error) {
-      console.error("Failed to fetch review summary:", error);
-      setReviewSummary(null); // Clear summary on error
-    } finally {
-      setIsLoadingSummary(false);
-    }
-  }, [providerId, reviews.length]);
-
-
-  useEffect(() => {
-    fetchSummary();
-  }, [fetchSummary]);
+  // fetchSummary logic removed as ReviewSummary component is removed
 
   const handleReviewSubmitted = useCallback(() => {
+    // This is a simplified optimistic update. 
+    // In a real app, you might re-fetch reviews or update more intelligently.
     const newMockReview: Review = {
-        ...mockReviews[0], 
         id: `optimistic-${Date.now()}`,
-        comment: "This is a new review added client side for testing summary refresh.",
+        comment: "Thank you for your review! It's being processed.",
         date: new Date().toISOString(),
         userId: 'optimistic-user', 
         userName: 'Optimistic User',
+        // Add dummy values for new rating fields or leave them undefined if optional
+        bedsideManner: 0, 
+        medicalAdherence: 0,
+        specialtyCare: 0,
+        waitTime: 0,
     };
-    setReviews(prevReviews => [...prevReviews, newMockReview]);
+    setReviews(prevReviews => [newMockReview, ...prevReviews]); // Add to top for visibility
+    // Potentially trigger a re-fetch of reviews from the server here
   }, []);
 
 
   return (
     <div className="space-y-8">
-      <ReviewSummary summaryData={reviewSummary} isLoading={isLoadingSummary} />
+      {/* <ReviewSummary summaryData={reviewSummary} isLoading={isLoadingSummary} /> Removed */}
       <ReviewForm entityId={providerId} entityType="provider" onReviewSubmitted={handleReviewSubmitted} />
       <ReviewList reviews={reviews} />
     </div>

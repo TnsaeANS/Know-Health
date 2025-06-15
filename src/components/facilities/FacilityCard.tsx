@@ -1,9 +1,10 @@
+
 import type { Facility } from '@/lib/types';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { RatingStars } from '@/components/shared/RatingStars';
+// import { RatingStars } from '@/components/shared/RatingStars'; // Overall rating removed
 import { MapPin, Building } from 'lucide-react';
 
 interface FacilityCardProps {
@@ -35,7 +36,8 @@ export function FacilityCard({ facility }: FacilityCardProps) {
           <MapPin className="h-4 w-4 mr-1.5" />
           <span>{facility.location}</span>
         </div>
-        <RatingStars rating={facility.overallRating} size={18} showText />
+        {/* <RatingStars rating={facility.overallRating} size={18} showText /> Removed overall rating */}
+        <p className="text-sm text-muted-foreground mt-1">See profile for detailed reviews.</p>
         <p className="text-sm text-muted-foreground mt-2 line-clamp-3">
           {facility.description}
         </p>

@@ -1,20 +1,25 @@
+
 "use server";
 
 import { z } from 'zod';
-import { summarizeReviews } from '@/ai/flows/summarize-reviews'; // Import the AI flow
-import type { ReviewSummaryAI } from '@/lib/types';
+// import { summarizeReviews } from '@/ai/flows/summarize-reviews'; // Removed AI summary
+// import type { ReviewSummaryAI } from '@/lib/types'; // ReviewSummaryAI type removed
 
 const reviewFormSchema = z.object({
-  rating: z.coerce.number().min(1).max(5),
-  comment: z.string().min(10, { message: 'Comment must be at least 10 characters' }),
-  providerId: z.string().optional(), // For provider reviews
-  facilityId: z.string().optional(), // For facility reviews
-  userId: z.string(), // Assuming userId is passed from authenticated context
+  comment: z.string().min(10, { message: 'Comment must be at least 10 characters' }).optional().or(z.literal('')),
+  providerId: z.string().optional(),
+  facilityId: z.string().optional(),
+  userId: z.string(),
+  bedsideManner: z.coerce.number().min(1).max(5).optional(),
+  medicalAdherence: z.coerce.number().min(1).max(5).optional(),
+  specialtyCare: z.coerce.number().min(1).max(5).optional(),
+  facilityQuality: z.coerce.number().min(1).max(5).optional(),
+  waitTime: z.coerce.number().min(1).max(5).optional(),
 });
 
 export type ReviewFormState = {
   message: string;
-  fields?: Record<string, string>;
+  fields?: Record<string, string | number>; // Allow number for ratings
   issues?: string[];
   success: boolean;
 };
@@ -33,22 +38,55 @@ export async function submitReviewAction(
   const parsed = reviewFormSchema.safeParse(formData);
 
   if (!parsed.success) {
+    const fieldErrors: Record<string, string | number> = {};
+    for (const key in formData) {
+        fieldErrors[key] = String(formData[key]);
+    }
     return {
       message: 'Invalid review data',
-      fields: formData as Record<string, string>,
-      issues: parsed.error.issues.map((issue) => issue.message),
+      fields: fieldErrors,
+      issues: parsed.error.issues.map((issue) => `${issue.path.join('.')}: ${issue.message}`),
       success: false,
     };
   }
 
-  const { rating, comment, providerId, facilityId, userId } = parsed.data;
+  const {
+    comment,
+    providerId,
+    facilityId,
+    userId,
+    bedsideManner,
+    medicalAdherence,
+    specialtyCare,
+    facilityQuality,
+    waitTime
+  } = parsed.data;
+
+  // At least one rating criterion or a comment must be provided
+  const hasProviderRatings = bedsideManner || medicalAdherence || specialtyCare || waitTime;
+  const hasFacilityRatings = facilityQuality || waitTime;
+  const hasContent = comment || (providerId && hasProviderRatings) || (facilityId && hasFacilityRatings);
+
+  if (!hasContent) {
+    return {
+      message: 'Please provide a rating for at least one criterion or write a comment.',
+      fields: formData as Record<string, string | number>,
+      success: false,
+    };
+  }
+
+
   const newReview = {
     id: `review-${Date.now()}`,
     userId,
     userName: "Mock User", // In real app, fetch user name based on userId
-    rating,
-    comment,
+    comment: comment || "",
     date: new Date().toISOString(),
+    bedsideManner,
+    medicalAdherence,
+    specialtyCare,
+    facilityQuality,
+    waitTime,
   };
 
   if (providerId) {
@@ -70,28 +108,8 @@ export async function submitReviewAction(
   };
 }
 
+// getReviewSummary is no longer needed as AI summary is removed
+// export async function getReviewSummary(entityId: string, entityType: 'provider' | 'facility'): Promise<ReviewSummaryAI | null> {
+//   // ... implementation removed ...
+// }
 
-export async function getReviewSummary(entityId: string, entityType: 'provider' | 'facility'): Promise<ReviewSummaryAI | null> {
-  let reviews: string[] = [];
-  if (entityType === 'provider') {
-    reviews = mockReviewStore.providers
-      .filter(r => r.providerId === entityId)
-      .map(r => r.comment);
-  } else {
-    reviews = mockReviewStore.facilities
-      .filter(r => r.facilityId === entityId)
-      .map(r => r.comment);
-  }
-
-  if (reviews.length < 3) { // Only summarize if there are enough reviews
-    return null; 
-  }
-
-  try {
-    const summaryResult = await summarizeReviews({ reviews });
-    return summaryResult;
-  } catch (error) {
-    console.error("Error summarizing reviews:", error);
-    return null;
-  }
-}

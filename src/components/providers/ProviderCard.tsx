@@ -1,9 +1,10 @@
+
 import type { Provider } from '@/lib/types';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { RatingStars } from '@/components/shared/RatingStars';
+// import { RatingStars } from '@/components/shared/RatingStars'; // Overall rating removed
 import { MapPin, Stethoscope } from 'lucide-react';
 
 interface ProviderCardProps {
@@ -35,7 +36,8 @@ export function ProviderCard({ provider }: ProviderCardProps) {
           <MapPin className="h-4 w-4 mr-1.5" />
           <span>{provider.location}</span>
         </div>
-        <RatingStars rating={provider.overallRating} size={18} showText />
+        {/* <RatingStars rating={provider.overallRating} size={18} showText /> Removed overall rating */}
+        <p className="text-sm text-muted-foreground mt-1">See profile for detailed reviews.</p>
         <p className="text-sm text-muted-foreground mt-2 line-clamp-3">
           {provider.bio}
         </p>
@@ -48,3 +50,4 @@ export function ProviderCard({ provider }: ProviderCardProps) {
     </Card>
   );
 }
+
