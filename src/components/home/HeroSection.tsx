@@ -8,8 +8,8 @@ export function HeroSection() {
   return (
     <div className="relative rounded-lg overflow-hidden bg-gradient-to-r from-primary/30 via-background to-accent/30 py-16 md:py-24 shadow-lg">
       <div className="absolute inset-0 opacity-20">
-         <Image 
-            src="https://placehold.co/1200x400.png" // Placeholder image for background
+         <Image
+            src="https://img.freepik.com/free-photo/health-still-life-with-copy-space_23-2148854031.jpg?semt=ais_hybrid&w=740"
             alt="Healthcare professionals"
             layout="fill"
             objectFit="cover"
