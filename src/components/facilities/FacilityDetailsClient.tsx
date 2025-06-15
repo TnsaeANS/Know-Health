@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useCallback } from 'react';
@@ -39,15 +40,17 @@ export default function FacilityDetailsClient({ facilityId, initialReviews }: Fa
     fetchSummary();
   }, [fetchSummary]);
 
-  const handleReviewSubmitted = () => {
+  const handleReviewSubmitted = useCallback(() => {
     const newMockReview: Review = {
         ...mockReviews[1], 
         id: `optimistic-facility-${Date.now()}`,
         comment: "This is a new facility review added client side for testing summary refresh.",
         date: new Date().toISOString(),
+        userId: 'optimistic-user',
+        userName: 'Optimistic User',
     };
     setReviews(prevReviews => [...prevReviews, newMockReview]);
-  };
+  }, []);
 
   return (
     <div className="space-y-8">

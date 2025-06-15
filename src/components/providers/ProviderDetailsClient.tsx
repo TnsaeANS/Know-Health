@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useCallback } from 'react';
@@ -40,21 +41,17 @@ export default function ProviderDetailsClient({ providerId, initialReviews }: Pr
     fetchSummary();
   }, [fetchSummary]);
 
-  const handleReviewSubmitted = () => {
-    // This is a simplified refresh. In a real app, you might re-fetch reviews
-    // or optimistically update the list. For now, we'll add a mock review to trigger re-summary.
-    // This part assumes the review list would be updated through another mechanism or re-fetched.
-    // For this mock, let's just add one to the local state to see if summary re-fetches.
-    // In a real app, you'd likely have a more robust state management or server-driven update.
+  const handleReviewSubmitted = useCallback(() => {
     const newMockReview: Review = {
-        ...mockReviews[0], // Use a base mock review
+        ...mockReviews[0], 
         id: `optimistic-${Date.now()}`,
         comment: "This is a new review added client side for testing summary refresh.",
         date: new Date().toISOString(),
+        userId: 'optimistic-user', 
+        userName: 'Optimistic User',
     };
     setReviews(prevReviews => [...prevReviews, newMockReview]);
-    // The useEffect for fetchSummary will pick up the change in reviews.length.
-  };
+  }, []);
 
 
   return (
