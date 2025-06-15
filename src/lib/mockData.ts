@@ -2,7 +2,7 @@ import type { Provider, Facility, Review, User } from './types';
 import { SPECIALTY_ICONS, FACILITY_TYPE_ICONS, DEFAULT_USER_AVATAR } from './constants';
 import { Stethoscope } from 'lucide-react';
 
-const mockReviews: Review[] = [
+export const mockReviews: Review[] = [
   {
     id: 'review1',
     userId: 'user1',
