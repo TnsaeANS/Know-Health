@@ -1,5 +1,6 @@
 "use client";
 
+import Link from 'next/link'; // Added import for next/link
 import { PageWrapper } from '@/components/ui/PageWrapper';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { useAuth } from '@/context/AuthContext';
@@ -95,8 +96,5 @@ export default function AccountPage() {
   );
 }
 
-// Helper Link component needed by account page for login redirection.
-const Link = ({ href, children, ...props }: React.AnchorHTMLAttributes<HTMLAnchorElement> & { href: string }) => {
-  const router = useRouter();
-  return <a href={href} onClick={(e) => { e.preventDefault(); router.push(href); }} {...props}>{children}</a>;
-};
+// Removed the custom Link component definition that was here.
+// The <Link> usages above will now use the imported `next/link` component.

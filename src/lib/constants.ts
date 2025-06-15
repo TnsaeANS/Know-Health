@@ -1,5 +1,5 @@
 import type { NavItem, FilterOption } from './types';
-import { Home, Stethoscope, Hospital, Info, MessageSquare, BriefcaseMedical, Building, ShieldCheck, Languages, MapPin, Smile, Bone, Brain, BabyHeart, Eye } from 'lucide-react';
+import { Home, Stethoscope, Hospital, Info, MessageSquare, BriefcaseMedical, Building, ShieldCheck, Languages, MapPin, Smile, Bone, Brain, Baby, Eye } from 'lucide-react';
 
 export const APP_NAME = "EthioHealth Connect";
 
@@ -31,7 +31,7 @@ export const SPECIALTY_ICONS: { [key: string]: LucideIcon } = {
   neurology: Brain,
   oncology: Stethoscope, // Placeholder
   orthopedics: Bone,
-  pediatrics: BabyHeart,
+  pediatrics: Baby,
   ophthalmology: Eye,
 };
 
