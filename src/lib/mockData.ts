@@ -76,7 +76,7 @@ export const mockProviders: Provider[] = [
       address: 'Bole Medhanialem, Addis Ababa',
     },
     languagesSpoken: ['Amharic', 'English'],
-    reviews: mockReviews.filter(r => r.bedsideManner !== undefined).slice(0,1), // Filter provider reviews
+    reviews: mockReviews.filter(r => r.bedsideManner !== undefined && r.id === 'review1'),
     location: 'Addis Ababa',
     qualifications: ['MD, Cardiology Fellowship', 'Member of Ethiopian Heart Association']
   },
@@ -93,7 +93,7 @@ export const mockProviders: Provider[] = [
       address: 'Kazanchis, Addis Ababa',
     },
     languagesSpoken: ['Amharic', 'Oromo', 'English'],
-    reviews: [mockReviews[0], mockReviews[3]],
+    reviews: [mockReviews.find(r => r.id === 'review1')!, mockReviews.find(r => r.id === 'review4')!].filter(Boolean) as Review[],
     location: 'Addis Ababa',
     qualifications: ['MD, Specialization in Pediatrics', 'Certified in Neonatal Resuscitation']
   },
@@ -110,7 +110,7 @@ export const mockProviders: Provider[] = [
       address: 'CMC area, Addis Ababa',
     },
     languagesSpoken: ['Amharic', 'English'],
-    reviews: [mockReviews[2]],
+    reviews: [mockReviews.find(r => r.id === 'review3')!].filter(Boolean) as Review[],
     location: 'Addis Ababa',
     qualifications: ['DDS (Doctor of Dental Surgery)', 'Advanced Course in Cosmetic Dentistry']
   },
@@ -130,7 +130,7 @@ export const mockFacilities: Facility[] = [
       address: 'Gulele Sub-city, Addis Ababa',
     },
     servicesOffered: ['Emergency Care', 'Surgery', 'Internal Medicine', 'Pediatrics', 'Obstetrics & Gynecology'],
-    reviews: mockReviews.filter(r => r.facilityQuality !== undefined).slice(0,1), // Filter facility reviews
+    reviews: mockReviews.filter(r => r.facilityQuality !== undefined && r.id === 'review2'),
     location: 'Addis Ababa',
     amenities: ['Parking', 'Pharmacy On-site', 'Cafeteria']
   },
@@ -147,7 +147,7 @@ export const mockFacilities: Facility[] = [
       address: 'Old Airport, Addis Ababa',
     },
     servicesOffered: ['General Consultation', 'Specialist Consultation', 'Minor Procedures', 'Vaccinations'],
-    reviews: [mockReviews[1]],
+    reviews: [mockReviews.find(r => r.id === 'review2')!].filter(Boolean) as Review[],
     location: 'Addis Ababa',
     amenities: ['Waiting Area', 'Wi-Fi', 'Accessible']
   },
@@ -165,33 +165,76 @@ export const mockUsers: User[] = [
     name: 'Fatuma Ahmed',
     email: 'fatuma@example.com',
     avatarUrl: 'https://placehold.co/100x100.png?text=FA',
+  },
+  {
+    id: 'user3',
+    name: 'Chala Gemechu',
+    email: 'chala@example.com',
+    avatarUrl: DEFAULT_USER_AVATAR,
+  },
+  {
+    id: 'user4',
+    name: 'Sara Berhanu',
+    email: 'sara@example.com',
+    avatarUrl: 'https://placehold.co/100x100.png?text=SB',
+  },
+   {
+    id: 'user5',
+    name: 'John Doe',
+    email: 'john.doe@example.com',
+    avatarUrl: DEFAULT_USER_AVATAR,
   }
 ];
 
-export const getProviderById = (id: string): Provider | undefined => {
-  const provider = mockProviders.find(p => p.id === id);
-  if (provider) {
-    // Ensure reviews are correctly typed for the provider
-    provider.reviews = provider.reviews.map(review => ({
-      ...review,
-      // Ensure provider-specific fields are present or undefined
-      facilityQuality: undefined, 
-    }));
+// Helper function to deep copy an object
+function deepCopy<T>(obj: T): T {
+  if (obj === null || typeof obj !== 'object') {
+    return obj;
   }
+  if (obj instanceof Date) {
+    return new Date(obj.getTime()) as any;
+  }
+  if (Array.isArray(obj)) {
+    return obj.map(item => deepCopy(item)) as any;
+  }
+  const copiedObject = {} as { [key: string]: any };
+  for (const key in obj) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      copiedObject[key] = deepCopy(obj[key]);
+    }
+  }
+  return copiedObject as T;
+}
+
+
+export const getProviderById = (id: string): Provider | undefined => {
+  const providerData = mockProviders.find(p => p.id === id);
+  if (!providerData) return undefined;
+
+  const provider = deepCopy(providerData);
+
+  provider.reviews = provider.reviews.map(review => {
+    const cleanReview = deepCopy(review);
+    delete (cleanReview as any).facilityQuality; // Remove facility-specific ratings
+    return cleanReview;
+  });
   return provider;
 };
+
 export const getFacilityById = (id: string): Facility | undefined => {
-  const facility = mockFacilities.find(f => f.id === id);
-  if (facility) {
-    // Ensure reviews are correctly typed for the facility
-    facility.reviews = facility.reviews.map(review => ({
-      ...review,
-      // Ensure facility-specific fields are present or undefined
-      bedsideManner: undefined,
-      medicalAdherence: undefined,
-      specialtyCare: undefined,
-    }));
-  }
+  const facilityData = mockFacilities.find(f => f.id === id);
+  if (!facilityData) return undefined;
+
+  const facility = deepCopy(facilityData);
+
+  facility.reviews = facility.reviews.map(review => {
+    const cleanReview = deepCopy(review);
+    delete (cleanReview as any).bedsideManner; // Remove provider-specific ratings
+    delete (cleanReview as any).medicalAdherence;
+    delete (cleanReview as any).specialtyCare;
+    return cleanReview;
+  });
   return facility;
 };
 
+    
