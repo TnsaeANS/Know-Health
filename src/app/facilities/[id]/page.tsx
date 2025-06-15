@@ -1,0 +1,161 @@
+// This should be a server component to fetch initial data
+import { getFacilityById } from '@/lib/mockData'; // Will be replaced by actual data fetching
+import { PageWrapper } from '@/components/ui/PageWrapper';
+import { notFound } from 'next/navigation';
+import Image from 'next/image';
+import { RatingStars } from '@/components/shared/RatingStars';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Mail, Phone, MapPin, Building, ShieldCheck, ListChecks, ConciergeBell } from 'lucide-react';
+import FacilityDetailsClient from '@/components/facilities/FacilityDetailsClient'; // Client component
+
+export async function generateStaticParams() {
+  const { mockFacilities } = await import('@/lib/mockData');
+  return mockFacilities.map(facility => ({ id: facility.id }));
+}
+
+export default async function FacilityProfilePage({ params }: { params: { id: string } }) {
+  const facility = getFacilityById(params.id);
+
+  if (!facility) {
+    notFound();
+  }
+
+  const TypeIcon = facility.typeIcon || Building;
+
+  return (
+    <PageWrapper>
+      <div className="grid md:grid-cols-3 gap-8">
+        {/* Left Column: Photo and Basic Info */}
+        <div className="md:col-span-1 space-y-6">
+          <Card className="shadow-xl overflow-hidden">
+            <div className="relative w-full aspect-[4/3]">
+              <Image
+                src={facility.photoUrl}
+                alt={facility.name}
+                layout="fill"
+                objectFit="cover"
+                priority
+                data-ai-hint="hospital building modern"
+              />
+            </div>
+            <CardContent className="p-6 text-center">
+              <h1 className="font-headline text-2xl md:text-3xl font-semibold text-foreground">{facility.name}</h1>
+              <div className="flex items-center justify-center text-lg text-primary my-2">
+                <TypeIcon className="h-5 w-5 mr-2" />
+                <span>{facility.type}</span>
+              </div>
+              <RatingStars rating={facility.overallRating} size={22} showText className="justify-center"/>
+            </CardContent>
+          </Card>
+
+          <Card className="shadow-lg">
+            <CardHeader>
+              <CardTitle className="font-headline text-xl">Contact & Location</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3 text-sm">
+              {facility.contact.address && (
+                <div className="flex items-start">
+                  <MapPin className="h-5 w-5 mr-3 mt-0.5 text-primary flex-shrink-0" />
+                  <span>{facility.contact.address}</span>
+                </div>
+              )}
+              {facility.contact.phone && (
+                <div className="flex items-start">
+                  <Phone className="h-5 w-5 mr-3 mt-0.5 text-primary flex-shrink-0" />
+                  <a href={`tel:${facility.contact.phone}`} className="hover:underline">{facility.contact.phone}</a>
+                </div>
+              )}
+              {facility.contact.email && (
+                <div className="flex items-start">
+                  <Mail className="h-5 w-5 mr-3 mt-0.5 text-primary flex-shrink-0" />
+                  <a href={`mailto:${facility.contact.email}`} className="hover:underline">{facility.contact.email}</a>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Right Column: Tabs for Details */}
+        <div className="md:col-span-2">
+          <Tabs defaultValue="overview" className="w-full">
+            <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 mb-6">
+              <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="reviews">Reviews</TabsTrigger>
+              <TabsTrigger value="services">Services & More</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="overview">
+              <Card className="shadow-lg">
+                <CardHeader>
+                  <CardTitle className="font-headline text-xl">About {facility.name}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-foreground leading-relaxed whitespace-pre-line">{facility.description}</p>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="reviews">
+              <FacilityDetailsClient facilityId={facility.id} initialReviews={facility.reviews} />
+            </TabsContent>
+            
+            <TabsContent value="services">
+              <Card className="shadow-lg">
+                <CardHeader>
+                  <CardTitle className="font-headline text-xl">Services & Information</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {facility.servicesOffered && facility.servicesOffered.length > 0 && (
+                    <div>
+                      <h3 className="font-semibold text-md text-foreground mb-2 flex items-center">
+                        <ListChecks className="h-5 w-5 mr-2 text-primary" /> Services Offered
+                      </h3>
+                      <div className="flex flex-wrap gap-2">
+                        {facility.servicesOffered.map(service => (
+                          <span key={service} className="px-3 py-1 bg-secondary text-secondary-foreground text-sm rounded-full">{service}</span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {facility.insurancesAccepted && facility.insurancesAccepted.length > 0 && (
+                    <div>
+                      <h3 className="font-semibold text-md text-foreground mb-2 flex items-center">
+                        <ShieldCheck className="h-5 w-5 mr-2 text-primary" /> Insurances Accepted
+                      </h3>
+                       <div className="flex flex-wrap gap-2">
+                        {facility.insurancesAccepted.map(ins => (
+                          <span key={ins} className="px-3 py-1 bg-secondary text-secondary-foreground text-sm rounded-full">{ins}</span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {facility.amenities && facility.amenities.length > 0 && (
+                     <div>
+                      <h3 className="font-semibold text-md text-foreground mb-2 flex items-center">
+                        <ConciergeBell className="h-5 w-5 mr-2 text-primary" /> Amenities
+                      </h3>
+                       <div className="flex flex-wrap gap-2">
+                        {facility.amenities.map(amenity => (
+                          <span key={amenity} className="px-3 py-1 bg-secondary text-secondary-foreground text-sm rounded-full">{amenity}</span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                   <div>
+                    <h3 className="font-semibold text-md text-foreground mb-2 flex items-center">
+                       <MapPin className="h-5 w-5 mr-2 text-primary" /> Location Map
+                    </h3>
+                     <div className="aspect-video bg-muted rounded-md flex items-center justify-center">
+                        <p className="text-muted-foreground">Map placeholder for {facility.contact.address || facility.location}</p>
+                     </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+        </div>
+      </div>
+    </PageWrapper>
+  );
+}
