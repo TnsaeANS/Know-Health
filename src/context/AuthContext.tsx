@@ -33,7 +33,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (firebaseUser) {
         const appUser: User = {
           id: firebaseUser.uid,
-          name: firebaseUser.displayName || 'User',
+          name: firebaseUser.displayName || 'User', // May be stale right after signup, but will be correct on subsequent loads
           email: firebaseUser.email || '',
           avatarUrl: firebaseUser.photoURL || undefined,
         };
@@ -72,21 +72,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setLoading(true);
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
-      if (userCredential.user) {
-        await updateProfile(userCredential.user, {
+      const firebaseUser = userCredential.user;
+      if (firebaseUser) {
+        await updateProfile(firebaseUser, {
           displayName: name,
         });
+
+        // Manually update the user state to reflect the new display name immediately.
+        // The onAuthStateChanged listener might have already fired with a null displayName.
+        const appUser: User = {
+          id: firebaseUser.uid,
+          name: name, // Use the name from the form directly
+          email: firebaseUser.email || '',
+          avatarUrl: firebaseUser.photoURL || undefined,
+        };
+        setUser(appUser);
       }
-      // Re-fetch or set user data after profile update
-      // The onAuthStateChanged listener will automatically pick up the new user state.
       return { success: true };
-    } catch (error: any) {
+    } catch (error: any)
+    {
       console.error("Firebase signup error:", error.code);
       return { success: false, error: error.code };
     } finally {
       setLoading(false);
     }
   };
+
 
   return (
     <AuthContext.Provider value={{ user, login, logout, signup, loading }}>

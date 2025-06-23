@@ -2,14 +2,15 @@
 "use server";
 
 import { z } from 'zod';
-// import { summarizeReviews } from '@/ai/flows/summarize-reviews'; // Removed AI summary
-// import type { ReviewSummaryAI } from '@/lib/types'; // ReviewSummaryAI type removed
+import { pool } from '@/lib/db';
+import type { Review } from '@/lib/types';
 
 const reviewFormSchema = z.object({
   comment: z.string().min(10, { message: 'Comment must be at least 10 characters' }).optional().or(z.literal('')),
   providerId: z.string().optional(),
   facilityId: z.string().optional(),
   userId: z.string(),
+  userName: z.string(), // Capture user's name from form
   bedsideManner: z.coerce.number().min(1).max(5).optional(),
   medicalAdherence: z.coerce.number().min(1).max(5).optional(),
   specialtyCare: z.coerce.number().min(1).max(5).optional(),
@@ -19,21 +20,19 @@ const reviewFormSchema = z.object({
 
 export type ReviewFormState = {
   message: string;
-  fields?: Record<string, string | number>; // Allow number for ratings
+  fields?: Record<string, string | number>;
   issues?: string[];
   success: boolean;
-};
-
-// This is a mock in-memory store for reviews. In a real app, use a database.
-const mockReviewStore: { [key: string]: any[] } = { // Using `any` for simplicity of mock store
-  providers: [],
-  facilities: [],
 };
 
 export async function submitReviewAction(
   prevState: ReviewFormState,
   data: FormData
 ): Promise<ReviewFormState> {
+  if (!pool) {
+    return { message: 'Database is not configured. Could not submit review.', success: false };
+  }
+
   const formData = Object.fromEntries(data);
   const parsed = reviewFormSchema.safeParse(formData);
 
@@ -55,6 +54,7 @@ export async function submitReviewAction(
     providerId,
     facilityId,
     userId,
+    userName,
     bedsideManner,
     medicalAdherence,
     specialtyCare,
@@ -62,7 +62,6 @@ export async function submitReviewAction(
     waitTime
   } = parsed.data;
 
-  // At least one rating criterion or a comment must be provided
   const hasProviderRatings = bedsideManner || medicalAdherence || specialtyCare || waitTime;
   const hasFacilityRatings = facilityQuality || waitTime;
   const hasContent = comment || (providerId && hasProviderRatings) || (facilityId && hasFacilityRatings);
@@ -75,41 +74,39 @@ export async function submitReviewAction(
     };
   }
 
+  const insertQuery = `
+    INSERT INTO reviews (
+      user_id, user_name, comment, date,
+      provider_id, facility_id,
+      bedside_manner, medical_adherence, specialty_care,
+      facility_quality, wait_time
+    )
+    VALUES ($1, $2, $3, NOW(), $4, $5, $6, $7, $8, $9, $10)
+  `;
 
-  const newReview = {
-    id: `review-${Date.now()}`,
-    userId,
-    userName: "Mock User", // In real app, fetch user name based on userId
-    comment: comment || "",
-    date: new Date().toISOString(),
-    bedsideManner,
-    medicalAdherence,
-    specialtyCare,
-    facilityQuality,
-    waitTime,
-  };
+  try {
+    await pool.query(insertQuery, [
+      userId,
+      userName,
+      comment || null,
+      providerId || null,
+      facilityId || null,
+      bedsideManner || null,
+      medicalAdherence || null,
+      specialtyCare || null,
+      facilityQuality || null,
+      waitTime || null,
+    ]);
 
-  if (providerId) {
-    mockReviewStore.providers.push({ ...newReview, providerId });
-    console.log('Provider review submitted:', newReview, 'for provider:', providerId);
-  } else if (facilityId) {
-    mockReviewStore.facilities.push({ ...newReview, facilityId });
-    console.log('Facility review submitted:', newReview, 'for facility:', facilityId);
-  } else {
-    return { message: 'Missing provider or facility ID', success: false };
+    return {
+      message: 'Review submitted successfully! Thank you for your feedback.',
+      success: true,
+    };
+  } catch (error) {
+    console.error('Database error on review submission:', error);
+    return {
+      message: 'A database error occurred. Please try again later.',
+      success: false,
+    };
   }
-  
-  // Simulate a delay
-  await new Promise(resolve => setTimeout(resolve, 1000));
-
-  return {
-    message: 'Review submitted successfully! Thank you for your feedback.',
-    success: true,
-  };
 }
-
-// getReviewSummary is no longer needed as AI summary is removed
-// export async function getReviewSummary(entityId: string, entityType: 'provider' | 'facility'): Promise<ReviewSummaryAI | null> {
-//   // ... implementation removed ...
-// }
-

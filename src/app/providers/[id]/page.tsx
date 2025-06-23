@@ -1,6 +1,6 @@
 
 // This should be a server component to fetch initial data
-import { getProviderById } from '@/lib/mockData'; 
+import { getProviderById, mockProviders } from '@/lib/mockData'; 
 import { PageWrapper } from '@/components/ui/PageWrapper';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
@@ -15,13 +15,12 @@ import { Mail, Phone, MapPin, BriefcaseMedical, Languages, Stethoscope } from 'l
 import ProviderDetailsClient from '@/components/providers/ProviderDetailsClient';
 
 export async function generateStaticParams() {
-  const { mockProviders } = await import('@/lib/mockData');
   return mockProviders.map(provider => ({ id: provider.id }));
 }
 
 
 export default async function ProviderProfilePage({ params }: { params: { id: string } }) {
-  const provider = getProviderById(params.id); 
+  const provider = await getProviderById(params.id); 
 
   if (!provider) {
     notFound();
@@ -148,4 +147,3 @@ export default async function ProviderProfilePage({ params }: { params: { id: st
     </PageWrapper>
   );
 }
-

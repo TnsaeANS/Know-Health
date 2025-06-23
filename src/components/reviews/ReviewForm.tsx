@@ -188,7 +188,8 @@ export function ReviewForm({ entityId, entityType, onReviewSubmitted }: ReviewFo
         <form action={formAction} className="space-y-6">
           <input type="hidden" name={entityType === 'provider' ? 'providerId' : 'facilityId'} value={entityId} />
           <input type="hidden" name="userId" value={user.id} />
-          
+          <input type="hidden" name="userName" value={user.name} />
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {entityType === 'provider' && (
               <>
@@ -258,4 +259,3 @@ export function ReviewForm({ entityId, entityType, onReviewSubmitted }: ReviewFo
     </Card>
   );
 }
-
