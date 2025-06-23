@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from 'react';
@@ -39,15 +40,28 @@ export function SignupForm() {
 
   const onSubmit: SubmitHandler<SignupFormInputs> = async (data) => {
     setIsLoading(true);
-    const success = await signup(data.name, data.email, data.password);
+    const result = await signup(data.name, data.email, data.password);
     setIsLoading(false);
-    if (success) {
+    
+    if (result.success) {
       toast({ title: 'Signup Successful', description: 'Welcome to Know Health!' });
       router.push('/account');
     } else {
+      let description = 'An unexpected error occurred. Please try again.';
+      switch (result.error) {
+        case 'auth/email-already-in-use':
+          description = 'An account with this email already exists. Please try logging in.';
+          break;
+        case 'auth/weak-password':
+          description = 'The password is too weak. Please choose a stronger password.';
+          break;
+        case 'auth/invalid-email':
+          description = 'The email address is not valid.';
+          break;
+      }
       toast({
         title: 'Signup Failed',
-        description: 'An account with this email may already exist. Please try again.',
+        description,
         variant: 'destructive',
       });
     }

@@ -1,6 +1,7 @@
+
 "use client";
 
-import Link from 'next/link'; // Added import for next/link
+import Link from 'next/link';
 import { PageWrapper } from '@/components/ui/PageWrapper';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { useAuth } from '@/context/AuthContext';
@@ -44,8 +45,8 @@ export default function AccountPage() {
     );
   }
   
-  // Mock: Filter reviews by current mock user (user1 or user2)
-  const userReviews = mockReviews.filter(review => review.userId === user.id || (user.id === 'user1' && review.userId === 'user1') || (user.id === 'user2' && review.userId === 'user2') );
+  // Mock: Filter reviews by current user's ID
+  const userReviews = mockReviews.filter(review => review.userId === user.id);
 
 
   return (

@@ -155,39 +155,6 @@ export const mockFacilities: Facility[] = [
   },
 ];
 
-export const mockUsers: User[] = [
-  {
-    id: 'user1',
-    name: 'Abebe Kebede',
-    email: 'abebe@example.com',
-    avatarUrl: 'https://placehold.co/100x100.png?text=AK',
-  },
-  {
-    id: 'user2',
-    name: 'Fatuma Ahmed',
-    email: 'fatuma@example.com',
-    avatarUrl: 'https://placehold.co/100x100.png?text=FA',
-  },
-  {
-    id: 'user3',
-    name: 'Chala Gemechu',
-    email: 'chala@example.com',
-    avatarUrl: DEFAULT_USER_AVATAR,
-  },
-  {
-    id: 'user4',
-    name: 'Sara Berhanu',
-    email: 'sara@example.com',
-    avatarUrl: 'https://placehold.co/100x100.png?text=SB',
-  },
-   {
-    id: 'user5',
-    name: 'John Doe',
-    email: 'john.doe@example.com',
-    avatarUrl: DEFAULT_USER_AVATAR,
-  }
-];
-
 // Helper function to deep copy an object
 function deepCopy<T>(obj: T): T {
   if (obj === null || typeof obj !== 'object') {
@@ -238,5 +205,3 @@ export const getFacilityById = (id: string): Facility | undefined => {
   });
   return facility;
 };
-
-    

@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from 'react';
@@ -10,7 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
 
@@ -24,6 +25,7 @@ type LoginFormInputs = z.infer<typeof loginSchema>;
 export function LoginForm() {
   const { login } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -38,15 +40,28 @@ export function LoginForm() {
 
   const onSubmit: SubmitHandler<LoginFormInputs> = async (data) => {
     setIsLoading(true);
-    const success = await login(data.email, data.password);
+    const result = await login(data.email, data.password);
     setIsLoading(false);
-    if (success) {
+    
+    if (result.success) {
       toast({ title: 'Login Successful', description: 'Welcome back!' });
-      router.push('/account');
+      const redirectUrl = searchParams.get('redirect') || '/account';
+      router.push(redirectUrl);
     } else {
+      let description = 'An unexpected error occurred. Please try again.';
+      switch (result.error) {
+        case 'auth/invalid-credential':
+        case 'auth/user-not-found':
+        case 'auth/wrong-password':
+          description = 'Invalid email or password. Please try again.';
+          break;
+        case 'auth/too-many-requests':
+          description = 'Access to this account has been temporarily disabled due to many failed login attempts. You can immediately restore it by resetting your password or you can try again later.';
+          break;
+      }
       toast({
         title: 'Login Failed',
-        description: 'Invalid email or password. Please try again.',
+        description: description,
         variant: 'destructive',
       });
     }

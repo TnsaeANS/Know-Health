@@ -1,15 +1,24 @@
+
 "use client";
 
 import type React from 'react';
 import { createContext, useContext, useState, useEffect } from 'react';
 import type { User } from '@/lib/types';
-import { mockUsers } from '@/lib/mockData'; // For mock login
+import { auth } from '@/lib/firebase';
+import { 
+  onAuthStateChanged, 
+  signInWithEmailAndPassword, 
+  createUserWithEmailAndPassword,
+  updateProfile,
+  signOut,
+  type User as FirebaseUser
+} from 'firebase/auth';
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, pass: string) => Promise<boolean>; // Simple mock login
+  login: (email: string, pass: string) => Promise<{ success: boolean; error?: string; }>;
   logout: () => void;
-  signup: (name: string, email: string, pass: string) => Promise<boolean>; // Simple mock signup
+  signup: (name: string, email: string, pass: string) => Promise<{ success: boolean; error?: string; }>;
   loading: boolean;
 }
 
@@ -20,46 +29,63 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check for a logged-in user in localStorage (simple persistence)
-    const storedUser = localStorage.getItem('knowhealth-user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-    setLoading(false);
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser: FirebaseUser | null) => {
+      if (firebaseUser) {
+        const appUser: User = {
+          id: firebaseUser.uid,
+          name: firebaseUser.displayName || 'User',
+          email: firebaseUser.email || '',
+          avatarUrl: firebaseUser.photoURL || undefined,
+        };
+        setUser(appUser);
+      } else {
+        setUser(null);
+      }
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
   }, []);
 
-  const login = async (email: string, _pass: string): Promise<boolean> => {
-    // Mock login: find user by email
+  const login = async (email: string, pass: string): Promise<{ success: boolean; error?: string; }> => {
     setLoading(true);
-    const foundUser = mockUsers.find(u => u.email === email);
-    if (foundUser) {
-      setUser(foundUser);
-      localStorage.setItem('knowhealth-user', JSON.stringify(foundUser));
+    try {
+      await signInWithEmailAndPassword(auth, email, pass);
+      return { success: true };
+    } catch (error: any) {
+      console.error("Firebase login error:", error.code);
+      return { success: false, error: error.code };
+    } finally {
       setLoading(false);
-      return true;
     }
-    setLoading(false);
-    return false;
   };
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('knowhealth-user');
+  const logout = async () => {
+    try {
+      await signOut(auth);
+    } catch (error) {
+      console.error("Firebase logout error:", error);
+    }
   };
 
-  const signup = async (name: string, email: string, _pass: string): Promise<boolean> => {
+  const signup = async (name: string, email: string, pass: string): Promise<{ success: boolean; error?: string; }> => {
     setLoading(true);
-    // Mock signup: check if email exists
-    if (mockUsers.find(u => u.email === email)) {
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
+      if (userCredential.user) {
+        await updateProfile(userCredential.user, {
+          displayName: name,
+        });
+      }
+      // Re-fetch or set user data after profile update
+      // The onAuthStateChanged listener will automatically pick up the new user state.
+      return { success: true };
+    } catch (error: any) {
+      console.error("Firebase signup error:", error.code);
+      return { success: false, error: error.code };
+    } finally {
       setLoading(false);
-      return false; // User already exists
     }
-    const newUser: User = { id: `user-${Date.now()}`, name, email, avatarUrl: 'https://placehold.co/100x100.png' };
-    mockUsers.push(newUser); // Add to mock data in memory (not persistent across reloads unless also stored)
-    setUser(newUser);
-    localStorage.setItem('knowhealth-user', JSON.stringify(newUser));
-    setLoading(false);
-    return true;
   };
 
   return (
