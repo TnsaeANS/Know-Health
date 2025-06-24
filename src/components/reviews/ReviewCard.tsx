@@ -9,7 +9,8 @@ import { formatDistanceToNow } from 'date-fns';
 import { HeartHandshake, Stethoscope, Clock, ShieldCheck, Building, Flag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
-import ReportReviewDialog from './ReportReviewDialog'; // New import
+import ReportReviewDialog from './ReportReviewDialog';
+import { useAuth } from '@/context/AuthContext';
 
 interface ReviewCardProps {
   review: Review;
@@ -30,6 +31,7 @@ const CriterionDisplay: React.FC<{ label: string; rating?: number; icon?: React.
 
 export function ReviewCard({ review }: ReviewCardProps) {
   const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
+  const { user } = useAuth();
   const timeAgo = review.date ? formatDistanceToNow(new Date(review.date), { addSuffix: true }) : '';
 
   return (
@@ -44,15 +46,17 @@ export function ReviewCard({ review }: ReviewCardProps) {
             <p className="font-semibold text-foreground">{review.userName}</p>
             <p className="text-xs text-muted-foreground">{timeAgo}</p>
           </div>
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="h-8 w-8 text-muted-foreground hover:text-destructive"
-            onClick={() => setIsReportDialogOpen(true)}
-            aria-label="Report review"
-          >
-            <Flag size={16} />
-          </Button>
+          {user && (
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="h-8 w-8 text-muted-foreground hover:text-destructive"
+              onClick={() => setIsReportDialogOpen(true)}
+              aria-label="Report review"
+            >
+              <Flag size={16} />
+            </Button>
+          )}
         </CardHeader>
         <CardContent>
           {review.comment && (

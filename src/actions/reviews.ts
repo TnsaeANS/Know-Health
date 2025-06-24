@@ -9,8 +9,8 @@ const reviewFormSchema = z.object({
   comment: z.string().min(10, { message: 'Comment must be at least 10 characters' }).optional().or(z.literal('')),
   providerId: z.string().optional(),
   facilityId: z.string().optional(),
-  userId: z.string(),
-  userName: z.string(), // Capture user's name from form
+  userId: z.string().min(1, { message: "User ID cannot be empty" }),
+  userName: z.string().min(1, { message: "User name cannot be empty" }),
   bedsideManner: z.coerce.number().min(1).max(5).optional(),
   medicalAdherence: z.coerce.number().min(1).max(5).optional(),
   specialtyCare: z.coerce.number().min(1).max(5).optional(),
