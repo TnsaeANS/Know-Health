@@ -26,7 +26,7 @@ export function ContactInfoDisplay() {
           <Mail className="h-6 w-6 mr-3 mt-1 text-primary flex-shrink-0" />
           <div>
             <h3 className="font-semibold text-foreground">Email Us</h3>
-            <p className="text-muted-foreground">info@ethiohealthconnect.com</p>
+            <p className="text-muted-foreground">info@knowhealth.com</p>
           </div>
         </div>
       </CardContent>

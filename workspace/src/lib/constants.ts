@@ -2,7 +2,7 @@
 import type { NavItem, FilterOption } from './types';
 import { Home, Stethoscope, Hospital, Info, MessageSquare, BriefcaseMedical, Building, Languages, MapPin, Smile, Bone, Brain, Baby, Eye, LucideIcon } from 'lucide-react';
 
-export const APP_NAME = "EthioHealth Connect";
+export const APP_NAME = "Know Health";
 
 export const NAV_LINKS: NavItem[] = [
   { label: 'Home', href: '/', icon: Home },

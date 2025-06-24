@@ -6,8 +6,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from '@/context/AuthContext';
 
 export const metadata: Metadata = {
-  title: 'EthioHealth Connect',
-  description: 'Find trusted healthcare providers and facilities in Ethiopia.',
+  title: 'Know Health',
+  description: 'Find trusted healthcare providers and facilities.',
 };
 
 export default function RootLayout({
