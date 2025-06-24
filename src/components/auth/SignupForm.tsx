@@ -49,6 +49,9 @@ export function SignupForm() {
     } else {
       let description = 'An unexpected error occurred. Please try again.';
       switch (result.error) {
+        case 'auth/not-configured':
+          description = 'Authentication is not configured. Please contact the site administrator.';
+          break;
         case 'auth/email-already-in-use':
           description = 'An account with this email already exists. Please try logging in.';
           break;

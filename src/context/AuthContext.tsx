@@ -4,7 +4,7 @@
 import type React from 'react';
 import { createContext, useContext, useState, useEffect } from 'react';
 import type { User } from '@/lib/types';
-import { auth } from '@/lib/firebase';
+import { auth } from '@/lib/firebase'; // auth can be null now
 import { 
   onAuthStateChanged, 
   signInWithEmailAndPassword, 
@@ -29,11 +29,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // If auth is not initialized, don't do anything.
+    if (!auth) {
+      setLoading(false);
+      return;
+    }
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser: FirebaseUser | null) => {
       if (firebaseUser) {
         const appUser: User = {
           id: firebaseUser.uid,
-          name: firebaseUser.displayName || 'User', // May be stale right after signup, but will be correct on subsequent loads
+          name: firebaseUser.displayName || 'User',
           email: firebaseUser.email || '',
           avatarUrl: firebaseUser.photoURL || undefined,
         };
@@ -48,6 +53,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const login = async (email: string, pass: string): Promise<{ success: boolean; error?: string; }> => {
+    if (!auth) {
+      return { success: false, error: 'auth/not-configured' };
+    }
     setLoading(true);
     try {
       await signInWithEmailAndPassword(auth, email, pass);
@@ -61,6 +69,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logout = async () => {
+    if (!auth) return;
     try {
       await signOut(auth);
     } catch (error) {
@@ -69,6 +78,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signup = async (name: string, email: string, pass: string): Promise<{ success: boolean; error?: string; }> => {
+    if (!auth) {
+      return { success: false, error: 'auth/not-configured' };
+    }
     setLoading(true);
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
@@ -77,12 +89,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         await updateProfile(firebaseUser, {
           displayName: name,
         });
-
-        // Manually update the user state to reflect the new display name immediately.
-        // The onAuthStateChanged listener might have already fired with a null displayName.
         const appUser: User = {
           id: firebaseUser.uid,
-          name: name, // Use the name from the form directly
+          name: name,
           email: firebaseUser.email || '',
           avatarUrl: firebaseUser.photoURL || undefined,
         };

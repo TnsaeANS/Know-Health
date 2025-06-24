@@ -50,6 +50,9 @@ export function LoginForm() {
     } else {
       let description = 'An unexpected error occurred. Please try again.';
       switch (result.error) {
+        case 'auth/not-configured':
+          description = 'Authentication is not configured. Please contact the site administrator.';
+          break;
         case 'auth/invalid-credential':
         case 'auth/user-not-found':
         case 'auth/wrong-password':
