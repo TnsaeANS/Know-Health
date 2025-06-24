@@ -38,7 +38,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (firebaseUser) {
         const appUser: User = {
           id: firebaseUser.uid,
-          name: firebaseUser.displayName || 'User',
+          name: firebaseUser.displayName || '',
           email: firebaseUser.email || '',
           avatarUrl: firebaseUser.photoURL || undefined,
         };
