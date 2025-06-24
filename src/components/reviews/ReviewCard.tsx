@@ -31,6 +31,7 @@ const CriterionDisplay: React.FC<{ label: string; rating?: number; icon?: React.
 
 export function ReviewCard({ review }: ReviewCardProps) {
   const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
+  const [dialogKey, setDialogKey] = useState(() => `dialog-${Date.now()}`);
   const { user } = useAuth();
   const timeAgo = review.date ? formatDistanceToNow(new Date(review.date), { addSuffix: true }) : '';
 
@@ -73,8 +74,15 @@ export function ReviewCard({ review }: ReviewCardProps) {
         </CardContent>
       </Card>
       <ReportReviewDialog 
+        key={dialogKey}
         open={isReportDialogOpen} 
-        onOpenChange={setIsReportDialogOpen} 
+        onOpenChange={(open) => {
+          setIsReportDialogOpen(open);
+          if (!open) {
+            // When dialog closes, update the key to force a re-mount next time it opens, resetting its state.
+            setDialogKey(`dialog-${Date.now()}`);
+          }
+        }} 
         reviewId={review.id}
         reviewComment={review.comment}
       />

@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useActionState, useEffect, useState } from 'react';
@@ -50,16 +49,6 @@ export default function ReportReviewDialog({ open, onOpenChange, reviewId, revie
   const [reason, setReason] = useState('');
 
   useEffect(() => {
-    if (!open) {
-        // Reset state when dialog closes
-        setReason('');
-        // A bit of a workaround to reset useActionState as it doesn't have a direct reset
-        formAction(new FormData()); // Call with empty FormData to potentially reset if action handles it
-    }
-  }, [open, formAction]);
-
-
-  useEffect(() => {
     if (state.message) {
       if (state.success) {
         toast({
@@ -67,7 +56,6 @@ export default function ReportReviewDialog({ open, onOpenChange, reviewId, revie
           description: state.message,
         });
         onOpenChange(false); // Close dialog on success
-        setReason(''); // Clear textarea
       } else {
         toast({
           title: state.issues ? 'Validation Error' : 'Error Submitting Report',
@@ -78,10 +66,9 @@ export default function ReportReviewDialog({ open, onOpenChange, reviewId, revie
     }
   }, [state, toast, onOpenChange]);
 
+  // This check is mainly for type safety, as the report button in ReviewCard is hidden for logged-out users.
   if (!user) {
-    // Optionally handle case where user is not logged in, e.g., disable reporting or show login prompt
-    // For now, if the dialog is opened by a non-logged-in user (which shouldn't happen if report button is hidden/disabled),
-    // it will simply not submit the userId. The server action should ideally validate this.
+    return null;
   }
   
   const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
