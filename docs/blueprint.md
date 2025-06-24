@@ -1,4 +1,4 @@
-# **App Name**: EthioHealth Connect
+# **App Name**: Know Health
 
 ## Core Features:
 
@@ -8,7 +8,6 @@
 - User Accounts and Login: Provide a secure login system with user authentication to enable personalized content and ratings submission.
 - About Us Section: A page with generic information about the company and their vision.
 - Contact Us Section: Provide contact information and a form for users to submit inquiries.
-- Review Summarization: Use AI to summarize the sentiment of written reviews using an LLM as a tool; highlight the most common positive and negative feedback themes.
 
 ## Style Guidelines:
 

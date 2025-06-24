@@ -1,6 +1,6 @@
-
 // This should be a server component to fetch initial data
-import { getProviderById, mockProviders } from '@/lib/mockData'; 
+import { getProviderById } from '@/lib/data'; 
+import { mockProviders } from '@/lib/mockData'; 
 import { PageWrapper } from '@/components/ui/PageWrapper';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
