@@ -11,6 +11,7 @@ import { Star, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { submitReviewAction, type ReviewFormState } from '@/actions/reviews';
 import { useAuth } from '@/context/AuthContext';
+import type { Review } from '@/lib/types';
 
 const initialState: ReviewFormState = {
   message: '',
@@ -81,7 +82,7 @@ const StarRatingInput: React.FC<StarRatingInputProps> = ({ criterionName, criter
 interface ReviewFormProps {
   entityId: string;
   entityType: 'provider' | 'facility';
-  onReviewSubmitted?: () => void;
+  onReviewSubmitted?: (newReview: Review) => void;
 }
 
 export function ReviewForm({ entityId, entityType, onReviewSubmitted }: ReviewFormProps) {
@@ -109,9 +110,26 @@ export function ReviewForm({ entityId, entityType, onReviewSubmitted }: ReviewFo
           title: 'Review Submitted!',
           description: state.message,
         });
+
+        if (onReviewSubmitted && user) {
+          const newReview: Review = {
+            id: `optimistic-${Date.now()}`, // Temporary ID for React key prop
+            userId: user.id,
+            userName: user.name,
+            userAvatarUrl: user.avatarUrl,
+            comment: comment,
+            date: new Date().toISOString(),
+            bedsideManner: ratings.bedsideManner > 0 ? ratings.bedsideManner : undefined,
+            medicalAdherence: ratings.medicalAdherence > 0 ? ratings.medicalAdherence : undefined,
+            specialtyCare: ratings.specialtyCare > 0 ? ratings.specialtyCare : undefined,
+            facilityQuality: ratings.facilityQuality > 0 ? ratings.facilityQuality : undefined,
+            waitTime: ratings.waitTime > 0 ? ratings.waitTime : undefined,
+          };
+          onReviewSubmitted(newReview);
+        }
+
         setRatings({ bedsideManner: 0, medicalAdherence: 0, specialtyCare: 0, facilityQuality: 0, waitTime: 0 });
         setComment('');
-        if (onReviewSubmitted) onReviewSubmitted();
       } else {
         const description = state.issues ? state.issues.join('\n') : state.message;
         toast({
@@ -121,7 +139,7 @@ export function ReviewForm({ entityId, entityType, onReviewSubmitted }: ReviewFo
         });
       }
     }
-  }, [state, toast, onReviewSubmitted]);
+  }, [state, toast, onReviewSubmitted, user, comment, ratings]);
 
   if (!user) {
     return (

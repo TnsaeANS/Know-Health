@@ -21,23 +21,9 @@ export default function ProviderDetailsClient({ providerId, initialReviews }: Pr
 
   // fetchSummary logic removed as ReviewSummary component is removed
 
-  const handleReviewSubmitted = useCallback(() => {
-    // This is a simplified optimistic update. 
-    // In a real app, you might re-fetch reviews or update more intelligently.
-    const newMockReview: Review = {
-        id: `optimistic-${Date.now()}`,
-        comment: "Thank you for your review! It's being processed.",
-        date: new Date().toISOString(),
-        userId: 'optimistic-user', 
-        userName: 'Optimistic User',
-        // Add dummy values for new rating fields or leave them undefined if optional
-        bedsideManner: 0, 
-        medicalAdherence: 0,
-        specialtyCare: 0,
-        waitTime: 0,
-    };
-    setReviews(prevReviews => [newMockReview, ...prevReviews]); // Add to top for visibility
-    // Potentially trigger a re-fetch of reviews from the server here
+  const handleReviewSubmitted = useCallback((newReview: Review) => {
+    // Add the newly submitted review to the top of the list for immediate feedback.
+    setReviews(prevReviews => [newReview, ...prevReviews]);
   }, []);
 
 
@@ -49,4 +35,3 @@ export default function ProviderDetailsClient({ providerId, initialReviews }: Pr
     </div>
   );
 }
-

@@ -21,19 +21,9 @@ export default function FacilityDetailsClient({ facilityId, initialReviews }: Fa
 
   // fetchSummary logic removed
 
-  const handleReviewSubmitted = useCallback(() => {
-    // Simplified optimistic update
-    const newMockReview: Review = {
-        id: `optimistic-facility-${Date.now()}`,
-        comment: "Thank you for your review! It's being processed.",
-        date: new Date().toISOString(),
-        userId: 'optimistic-user',
-        userName: 'Optimistic User',
-        facilityQuality: 0,
-        waitTime: 0,
-    };
-    setReviews(prevReviews => [newMockReview, ...prevReviews]); // Add to top
-    // Potentially trigger a re-fetch of reviews from the server here
+  const handleReviewSubmitted = useCallback((newReview: Review) => {
+    // Add the newly submitted review to the top of the list for immediate feedback.
+    setReviews(prevReviews => [newReview, ...prevReviews]);
   }, []);
 
   return (
@@ -44,4 +34,3 @@ export default function FacilityDetailsClient({ facilityId, initialReviews }: Fa
     </div>
   );
 }
-
