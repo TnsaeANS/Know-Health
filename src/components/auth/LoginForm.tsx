@@ -53,6 +53,9 @@ export function LoginForm() {
         case 'auth/not-configured':
           description = 'Authentication is not configured. Please contact the site administrator.';
           break;
+        case 'auth/invalid-api-key':
+          description = 'The provided Firebase API key is invalid. Please check your .env file and ensure it is correct.';
+          break;
         case 'auth/invalid-credential':
         case 'auth/user-not-found':
         case 'auth/wrong-password':

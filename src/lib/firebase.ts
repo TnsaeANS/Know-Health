@@ -13,17 +13,22 @@ const firebaseConfig = {
 
 let app: FirebaseApp | null = null;
 let auth: Auth | null = null;
+let firebaseInitializationError: string | null = null;
+
 
 // Only initialize Firebase if the API key is provided and not the placeholder
 if (firebaseConfig.apiKey && firebaseConfig.apiKey !== 'YOUR_API_KEY') {
   try {
     app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
     auth = getAuth(app);
-  } catch (error) {
+  } catch (error: any) {
     console.error("Firebase initialization failed:", error);
+    // Capture the specific error code from Firebase
+    firebaseInitializationError = error.code || 'auth/unknown-error';
   }
 } else {
   console.warn("Firebase API key is not configured. Authentication features will be disabled. Please set NEXT_PUBLIC_FIREBASE_API_KEY in your .env file.");
+  firebaseInitializationError = 'auth/not-configured';
 }
 
-export { app, auth };
+export { app, auth, firebaseInitializationError };

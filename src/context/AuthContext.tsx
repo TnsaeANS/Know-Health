@@ -4,7 +4,7 @@
 import type React from 'react';
 import { createContext, useContext, useState, useEffect } from 'react';
 import type { User } from '@/lib/types';
-import { auth } from '@/lib/firebase'; // auth can be null now
+import { auth, firebaseInitializationError } from '@/lib/firebase'; // import the new error variable
 import { 
   onAuthStateChanged, 
   signInWithEmailAndPassword, 
@@ -29,7 +29,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // If auth is not initialized, don't do anything.
+    // If auth object is null (due to init error), we don't need a listener.
     if (!auth) {
       setLoading(false);
       return;
@@ -38,7 +38,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (firebaseUser) {
         const appUser: User = {
           id: firebaseUser.uid,
-          name: firebaseUser.displayName || '',
+          name: firebaseUser.displayName || '', // Changed from 'User' to prevent flicker
           email: firebaseUser.email || '',
           avatarUrl: firebaseUser.photoURL || undefined,
         };
@@ -53,7 +53,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const login = async (email: string, pass: string): Promise<{ success: boolean; error?: string; }> => {
-    if (!auth) {
+    // Check for initialization error first
+    if (firebaseInitializationError) {
+      return { success: false, error: firebaseInitializationError };
+    }
+    if (!auth) { // This check is now somewhat redundant but safe to keep
       return { success: false, error: 'auth/not-configured' };
     }
     setLoading(true);
@@ -78,7 +82,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signup = async (name: string, email: string, pass: string): Promise<{ success: boolean; error?: string; }> => {
-    if (!auth) {
+    // Check for initialization error first
+    if (firebaseInitializationError) {
+      return { success: false, error: firebaseInitializationError };
+    }
+    if (!auth) { // Redundant but safe
       return { success: false, error: 'auth/not-configured' };
     }
     setLoading(true);

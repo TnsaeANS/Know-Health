@@ -52,6 +52,9 @@ export function SignupForm() {
         case 'auth/not-configured':
           description = 'Authentication is not configured. Please contact the site administrator.';
           break;
+        case 'auth/invalid-api-key':
+          description = 'The provided Firebase API key is invalid. Please check your .env file and ensure it is correct.';
+          break;
         case 'auth/email-already-in-use':
           description = 'An account with this email already exists. Please try logging in.';
           break;
