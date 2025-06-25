@@ -8,7 +8,7 @@ import { RatingStars } from '@/components/shared/RatingStars';
 import { formatDistanceToNow } from 'date-fns';
 import { HeartHandshake, Stethoscope, Clock, ShieldCheck, Building, Flag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import ReportReviewDialog from './ReportReviewDialog';
 import { useAuth } from '@/context/AuthContext';
 
@@ -34,6 +34,14 @@ export function ReviewCard({ review }: ReviewCardProps) {
   const [dialogKey, setDialogKey] = useState(() => `dialog-${Date.now()}`);
   const { user } = useAuth();
   const timeAgo = review.date ? formatDistanceToNow(new Date(review.date), { addSuffix: true }) : '';
+
+  const handleOpenChange = useCallback((open: boolean) => {
+    setIsReportDialogOpen(open);
+    if (!open) {
+      // When dialog closes, update the key to force a re-mount next time it opens, resetting its state.
+      setDialogKey(`dialog-${Date.now()}`);
+    }
+  }, []);
 
   return (
     <>
@@ -76,13 +84,7 @@ export function ReviewCard({ review }: ReviewCardProps) {
       <ReportReviewDialog 
         key={dialogKey}
         open={isReportDialogOpen} 
-        onOpenChange={(open) => {
-          setIsReportDialogOpen(open);
-          if (!open) {
-            // When dialog closes, update the key to force a re-mount next time it opens, resetting its state.
-            setDialogKey(`dialog-${Date.now()}`);
-          }
-        }} 
+        onOpenChange={handleOpenChange}
         reviewId={review.id}
         reviewComment={review.comment}
       />
