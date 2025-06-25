@@ -1,7 +1,17 @@
+"use client";
+
+import { useState, useEffect } from 'react';
 import { PageWrapper } from '@/components/ui/PageWrapper';
 import { PageHeader } from '@/components/shared/PageHeader';
 
 export default function PrivacyPage() {
+  const [lastUpdated, setLastUpdated] = useState('');
+
+  useEffect(() => {
+    // Set date on client-side to avoid hydration mismatch
+    setLastUpdated(new Date().toLocaleDateString());
+  }, []);
+
   return (
     <PageWrapper>
       <PageHeader
@@ -9,7 +19,7 @@ export default function PrivacyPage() {
         description="Your privacy is important to us."
       />
       <div className="prose prose-lg max-w-none dark:prose-invert text-foreground">
-        <p>Last updated: {new Date().toLocaleDateString()}</p>
+        {lastUpdated && <p>Last updated: {lastUpdated}</p>}
 
         <h2>Introduction</h2>
         <p>

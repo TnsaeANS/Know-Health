@@ -20,12 +20,12 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const NavItem = ({ item }: { item: NavItemType }) => (
-  <Link href={item.href} passHref>
-    <Button variant="ghost" className="text-foreground hover:bg-primary/10 hover:text-primary transition-colors px-3 py-2 rounded-md text-sm font-medium">
+  <Button asChild variant="ghost" className="text-foreground hover:bg-primary/10 hover:text-primary transition-colors px-3 py-2 rounded-md text-sm font-medium">
+    <Link href={item.href}>
       {item.icon && <item.icon className="mr-2 h-5 w-5" />}
       {item.label}
-    </Button>
-  </Link>
+    </Link>
+  </Button>
 );
 
 export function Navbar() {
@@ -105,12 +105,12 @@ export function Navbar() {
               <div className="flex flex-col space-y-4 p-4">
                 <Logo />
                 {NAV_LINKS.map((item) => (
-                  <Link key={item.label} href={item.href} passHref>
-                    <Button variant="ghost" className="w-full justify-start text-lg">
+                  <Button key={item.label} variant="ghost" className="w-full justify-start text-lg" asChild>
+                    <Link href={item.href}>
                       {item.icon && <item.icon className="mr-3 h-6 w-6" />}
                       {item.label}
-                    </Button>
-                  </Link>
+                    </Link>
+                  </Button>
                 ))}
                 <hr className="my-4" />
                 {user ? (
