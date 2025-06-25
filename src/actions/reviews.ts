@@ -5,22 +5,25 @@ import { z } from 'zod';
 import { pool } from '@/lib/db';
 import type { Review } from '@/lib/types';
 
-const emptyStringToUndefined = z.preprocess((val) => {
-    if (typeof val === 'string' && val === '') return undefined;
-    return val;
-});
+// A reusable schema for optional 1-5 star ratings.
+// It preprocesses empty strings from the form into `undefined` so they pass optional validation.
+const ratingSchema = z.preprocess(
+    (val) => (val === '' ? undefined : val),
+    z.coerce.number().min(1).max(5).optional()
+);
 
 const reviewFormSchema = z.object({
-  comment: z.string().min(10, { message: 'Comment must be at least 10 characters' }).optional().or(z.literal('')),
+  // The comment is optional, but if a non-empty string is provided, it must be at least 10 characters.
+  comment: z.string().min(10, { message: 'Comment must be at least 10 characters' }).or(z.literal('')).optional(),
   providerId: z.string().optional(),
   facilityId: z.string().optional(),
   userId: z.string().min(1, { message: "User ID cannot be empty" }),
   userName: z.string().min(1, { message: "User name cannot be empty" }),
-  bedsideManner: emptyStringToUndefined.pipe(z.coerce.number().min(1).max(5).optional()),
-  medicalAdherence: emptyStringToUndefined.pipe(z.coerce.number().min(1).max(5).optional()),
-  specialtyCare: emptyStringToUndefined.pipe(z.coerce.number().min(1).max(5).optional()),
-  facilityQuality: emptyStringToUndefined.pipe(z.coerce.number().min(1).max(5).optional()),
-  waitTime: emptyStringToUndefined.pipe(z.coerce.number().min(1).max(5).optional()),
+  bedsideManner: ratingSchema,
+  medicalAdherence: ratingSchema,
+  specialtyCare: ratingSchema,
+  facilityQuality: ratingSchema,
+  waitTime: ratingSchema,
 });
 
 export type ReviewFormState = {
@@ -47,7 +50,7 @@ export async function submitReviewAction(
         fieldErrors[key] = String(formData[key]);
     }
     return {
-      message: 'Invalid review data',
+      message: 'Invalid review data. Please check the fields.',
       fields: fieldErrors,
       issues: parsed.error.issues.map((issue) => `${issue.path.join('.')}: ${issue.message}`),
       success: false,
@@ -67,9 +70,12 @@ export async function submitReviewAction(
     waitTime
   } = parsed.data;
 
-  const hasProviderRatings = bedsideManner || medicalAdherence || specialtyCare || waitTime;
-  const hasFacilityRatings = facilityQuality || waitTime;
-  const hasContent = comment || (providerId && hasProviderRatings) || (facilityId && hasFacilityRatings);
+  // Business logic: A review must have a comment OR at least one rating.
+  const hasProviderRatings = bedsideManner || medicalAdherence || specialtyCare;
+  const hasFacilityRatings = facilityQuality;
+  const hasCommonRatings = waitTime; 
+  
+  const hasContent = (comment && comment.length > 0) || hasProviderRatings || hasFacilityRatings || hasCommonRatings;
 
   if (!hasContent) {
     return {
@@ -104,14 +110,12 @@ export async function submitReviewAction(
       waitTime || null,
     ]);
     
+    // This part is for optimistic updates on the client, so we construct a Review object.
     const newDbReview = result.rows[0];
 
     return {
-      message: 'Review submitted successfully! Thank you for your feedback.',
+      message: 'Thank you for your review!',
       success: true,
-      // Pass back the full review object if needed for optimistic updates
-      // Note: This part is for potential future use and doesn't affect the form directly
-      // as the optimistic update happens on the client.
     };
   } catch (error) {
     console.error('Database error on review submission:', error);
