@@ -5,17 +5,22 @@ import { z } from 'zod';
 import { pool } from '@/lib/db';
 import type { Review } from '@/lib/types';
 
+const emptyStringToUndefined = z.preprocess((val) => {
+    if (typeof val === 'string' && val === '') return undefined;
+    return val;
+});
+
 const reviewFormSchema = z.object({
   comment: z.string().min(10, { message: 'Comment must be at least 10 characters' }).optional().or(z.literal('')),
   providerId: z.string().optional(),
   facilityId: z.string().optional(),
   userId: z.string().min(1, { message: "User ID cannot be empty" }),
   userName: z.string().min(1, { message: "User name cannot be empty" }),
-  bedsideManner: z.coerce.number().min(1).max(5).optional(),
-  medicalAdherence: z.coerce.number().min(1).max(5).optional(),
-  specialtyCare: z.coerce.number().min(1).max(5).optional(),
-  facilityQuality: z.coerce.number().min(1).max(5).optional(),
-  waitTime: z.coerce.number().min(1).max(5).optional(),
+  bedsideManner: emptyStringToUndefined.pipe(z.coerce.number().min(1).max(5).optional()),
+  medicalAdherence: emptyStringToUndefined.pipe(z.coerce.number().min(1).max(5).optional()),
+  specialtyCare: emptyStringToUndefined.pipe(z.coerce.number().min(1).max(5).optional()),
+  facilityQuality: emptyStringToUndefined.pipe(z.coerce.number().min(1).max(5).optional()),
+  waitTime: emptyStringToUndefined.pipe(z.coerce.number().min(1).max(5).optional()),
 });
 
 export type ReviewFormState = {
@@ -82,10 +87,11 @@ export async function submitReviewAction(
       facility_quality, wait_time
     )
     VALUES ($1, $2, $3, NOW(), $4, $5, $6, $7, $8, $9, $10)
+    RETURNING *
   `;
 
   try {
-    await pool.query(insertQuery, [
+    const result = await pool.query(insertQuery, [
       userId,
       userName,
       comment || null,
@@ -97,10 +103,15 @@ export async function submitReviewAction(
       facilityQuality || null,
       waitTime || null,
     ]);
+    
+    const newDbReview = result.rows[0];
 
     return {
       message: 'Review submitted successfully! Thank you for your feedback.',
       success: true,
+      // Pass back the full review object if needed for optimistic updates
+      // Note: This part is for potential future use and doesn't affect the form directly
+      // as the optimistic update happens on the client.
     };
   } catch (error) {
     console.error('Database error on review submission:', error);
