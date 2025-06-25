@@ -53,8 +53,12 @@ export const getProviderById = async (id: string): Promise<Provider | undefined>
         delete review.facilityQuality;
         return review;
       });
-    } catch (error) {
-      console.error(`Failed to fetch reviews for provider ${id}:`, error);
+    } catch (error: any) {
+      if (error.code === '28P01') { // 28P01 is invalid_password in Postgres
+        console.error(`\n--- DATABASE AUTHENTICATION FAILED ---\nCould not connect to the database. Please check that the POSTGRES_URL in your .env file is correct.\nFalling back to mock data.\n---\n`);
+      } else {
+        console.error(`Failed to fetch reviews for provider ${id}:`, error);
+      }
       // Fallback to mock reviews or empty array
       provider.reviews = provider.reviews.map(review => {
         const cleanReview = deepCopy(review);
@@ -89,8 +93,12 @@ export const getFacilityById = async (id: string): Promise<Facility | undefined>
           delete review.specialtyCare;
           return review;
       });
-    } catch (error) {
-      console.error(`Failed to fetch reviews for facility ${id}:`, error);
+    } catch (error: any) {
+      if (error.code === '28P01') { // 28P01 is invalid_password in Postgres
+        console.error(`\n--- DATABASE AUTHENTICATION FAILED ---\nCould not connect to the database. Please check that the POSTGRES_URL in your .env file is correct.\nFalling back to mock data.\n---\n`);
+      } else {
+        console.error(`Failed to fetch reviews for facility ${id}:`, error);
+      }
       // Fallback to mock reviews or empty array
       facility.reviews = facility.reviews.map(review => {
         const cleanReview = deepCopy(review);
