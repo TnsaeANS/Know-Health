@@ -40,12 +40,13 @@ const mapDbRowToReview = (row: any): Review => {
   };
 };
 
+// Ensure bio is always a string
 const mapDbRowToProvider = (row: any): Provider => ({
   id: row.id,
   name: row.name,
   specialty: row.specialty,
   photoUrl: row.photo_url || `https://placehold.co/300x300.png?text=${row.name.substring(0,2)}`,
-  bio: row.bio,
+  bio: row.bio || '',
   contact: {
     phone: row.contact_phone,
     email: row.contact_email,
@@ -57,12 +58,13 @@ const mapDbRowToProvider = (row: any): Provider => ({
   qualifications: row.qualifications || [],
 });
 
+// Ensure description is always a string
 const mapDbRowToFacility = (row: any): Facility => ({
     id: row.id,
     name: row.name,
     type: row.type,
     photoUrl: row.photo_url || `https://placehold.co/400x300.png?text=${row.name.substring(0,2)}`,
-    description: row.description,
+    description: row.description || '',
     contact: {
       phone: row.contact_phone,
       email: row.contact_email,
@@ -83,41 +85,37 @@ async function fetchReviewsFromDB(query: string, params: string[]): Promise<Revi
     const result = await pool.query(query, params);
     return result.rows.map(mapDbRowToReview);
   } catch (error: any) {
-    if (error.code === '28P01') { 
-      console.error(`\n--- DATABASE AUTHENTICATION FAILED ---\nCould not connect to the database. Please check that the POSTGRES_URL in your .env file is correct.\n---\n`);
-    } else {
-      console.error(`Failed to fetch reviews with params ${params}:`, error);
-    }
-    return []; 
+    console.error(`Failed to fetch reviews with params ${params}:`, error);
+    throw new Error('A database error occurred while fetching reviews.');
   }
 }
 
 export const getProviders = async (): Promise<Provider[]> => {
-  if (pool) {
-    try {
-      const result = await pool.query('SELECT * FROM providers ORDER BY name');
-      return result.rows.map(mapDbRowToProvider);
-    } catch (e) {
-      console.error('Failed to fetch providers from DB, falling back to mock data:', e);
-    }
-  } else {
-    console.log('DB not configured, returning mock providers.');
+  if (!pool) {
+    console.warn('DB not configured, returning mock providers.');
+    return deepCopy(mockProviders);
   }
-  return deepCopy(mockProviders);
+  try {
+    const result = await pool.query('SELECT * FROM providers ORDER BY name');
+    return result.rows.map(mapDbRowToProvider);
+  } catch (error) {
+    console.error('Failed to fetch providers from DB:', error);
+    throw new Error('Could not fetch providers from the database.');
+  }
 };
 
 export const getFacilities = async (): Promise<Facility[]> => {
-  if (pool) {
-    try {
-      const result = await pool.query('SELECT * FROM facilities ORDER BY name');
-      return result.rows.map(mapDbRowToFacility);
-    } catch (e) {
-      console.error('Failed to fetch facilities from DB, falling back to mock data:', e);
-    }
-  } else {
-    console.log('DB not configured, returning mock facilities.');
+  if (!pool) {
+    console.warn('DB not configured, returning mock facilities.');
+    return deepCopy(mockFacilities);
   }
-  return deepCopy(mockFacilities);
+  try {
+    const result = await pool.query('SELECT * FROM facilities ORDER BY name');
+    return result.rows.map(mapDbRowToFacility);
+  } catch (error) {
+    console.error('Failed to fetch facilities from DB:', error);
+    throw new Error('Could not fetch facilities from the database.');
+  }
 };
 
 export const getProviderById = async (id: string): Promise<Provider | undefined> => {
@@ -154,7 +152,7 @@ export const getProviderById = async (id: string): Promise<Provider | undefined>
     return provider;
   } catch (error) {
     console.error(`Failed to fetch provider ${id} from DB.`, error);
-    return undefined;
+    throw new Error('Could not fetch provider details from the database.');
   }
 };
   
@@ -192,6 +190,6 @@ export const getFacilityById = async (id: string): Promise<Facility | undefined>
     return facility;
   } catch (error) {
     console.error(`Failed to fetch facility ${id} from DB.`, error);
-    return undefined;
+    throw new Error('Could not fetch facility details from the database.');
   }
 };
