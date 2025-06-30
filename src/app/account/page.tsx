@@ -6,22 +6,35 @@ import { PageWrapper } from '@/components/ui/PageWrapper';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Loader2, Edit3, ShieldAlert } from 'lucide-react';
-import { mockReviews } from '@/lib/mockData'; // For "My Reviews"
 import { ReviewCard } from '@/components/reviews/ReviewCard';
+import type { Review } from '@/lib/types';
+import { getReviewsByUserId } from '@/actions/users';
 
 
 export default function AccountPage() {
   const { user, loading, logout } = useAuth();
   const router = useRouter();
+  const [userReviews, setUserReviews] = useState<Review[]>([]);
+  const [reviewsLoading, setReviewsLoading] = useState(true);
 
   useEffect(() => {
     if (!loading && !user) {
       router.push('/login?redirect=/account');
+    } else if (user) {
+      setReviewsLoading(true);
+      getReviewsByUserId(user.id)
+        .then(reviews => {
+          setUserReviews(reviews);
+        })
+        .catch(console.error)
+        .finally(() => {
+          setReviewsLoading(false);
+        });
     }
   }, [user, loading, router]);
 
@@ -34,7 +47,6 @@ export default function AccountPage() {
   }
 
   if (!user) {
-    // This case should ideally be handled by the redirect, but as a fallback:
     return (
       <PageWrapper className="flex flex-col items-center justify-center min-h-[calc(100vh-theme(spacing.32))] text-center">
         <ShieldAlert className="h-16 w-16 text-destructive mb-4" />
@@ -45,10 +57,6 @@ export default function AccountPage() {
     );
   }
   
-  // Mock: Filter reviews by current user's ID
-  const userReviews = mockReviews.filter(review => review.userId === user.id);
-
-
   return (
     <PageWrapper>
       <PageHeader title="My Account" description="Manage your profile and view your activity." />
@@ -82,7 +90,11 @@ export default function AccountPage() {
               <CardDescription>Reviews you have submitted.</CardDescription>
             </CardHeader>
             <CardContent>
-              {userReviews.length > 0 ? (
+              {reviewsLoading ? (
+                 <div className="flex justify-center items-center h-24">
+                   <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                 </div>
+              ) : userReviews.length > 0 ? (
                 <div className="space-y-4">
                   {userReviews.map(review => <ReviewCard key={review.id} review={review} />)}
                 </div>
@@ -96,6 +108,3 @@ export default function AccountPage() {
     </PageWrapper>
   );
 }
-
-// Removed the custom Link component definition that was here.
-// The <Link> usages above will now use the imported `next/link` component.

@@ -9,17 +9,13 @@ import { Mail, Phone, MapPin, Languages, Stethoscope } from 'lucide-react';
 import ProviderDetailsClient from '@/components/providers/ProviderDetailsClient';
 import { SPECIALTY_ICONS } from '@/lib/constants';
 
-type Props = {
-  params: { id: string };
-};
-
 export async function generateStaticParams() {
   const providers = await getProviders();
   return providers.map(provider => ({ id: provider.id }));
 }
 
 
-export default async function ProviderProfilePage({ params }: Props) {
+export default async function ProviderProfilePage({ params }: { params: { id: string } }) {
   const provider = await getProviderById(params.id); 
 
   if (!provider) {

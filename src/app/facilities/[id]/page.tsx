@@ -10,16 +10,12 @@ import FacilityDetailsClient from '@/components/facilities/FacilityDetailsClient
 import { ProviderCard } from '@/components/providers/ProviderCard';
 import { FACILITY_TYPE_ICONS } from '@/lib/constants';
 
-type Props = {
-  params: { id: string };
-};
-
 export async function generateStaticParams() {
   const facilities = await getFacilities();
   return facilities.map(facility => ({ id: facility.id }));
 }
 
-export default async function FacilityProfilePage({ params }: Props) {
+export default async function FacilityProfilePage({ params }: { params: { id: string } }) {
   const facility = await getFacilityById(params.id);
 
   if (!facility) {

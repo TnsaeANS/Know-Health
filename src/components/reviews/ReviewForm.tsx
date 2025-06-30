@@ -117,7 +117,7 @@ export function ReviewForm({ entityId, entityType, onReviewSubmitted, reviews }:
 
         if (onReviewSubmitted && user) {
           const newReview: Review = {
-            id: `optimistic-${Date.now()}`, // Temporary ID for React key prop
+            id: `optimistic-${Date.now()}`,
             userId: user.id,
             userName: user.name,
             userAvatarUrl: user.avatarUrl,
@@ -225,6 +225,7 @@ export function ReviewForm({ entityId, entityType, onReviewSubmitted, reviews }:
           <input type="hidden" name={entityType === 'provider' ? 'providerId' : 'facilityId'} value={entityId} />
           <input type="hidden" name="userId" value={user.id} />
           <input type="hidden" name="userName" value={user.name} />
+          {user.avatarUrl && <input type="hidden" name="userAvatarUrl" value={user.avatarUrl} />}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {entityType === 'provider' && (

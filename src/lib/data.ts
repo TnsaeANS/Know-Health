@@ -4,9 +4,7 @@
 import type { Provider, Facility, Review } from './types';
 import { pool } from './db';
 import { mockProviders, mockFacilities } from './mockData';
-import { Stethoscope, Building } from 'lucide-react';
 
-// Helper function to deep copy an object
 function deepCopy<T>(obj: T): T {
   if (obj === null || typeof obj !== 'object') {
     return obj;
@@ -31,6 +29,7 @@ const mapDbRowToReview = (row: any): Review => {
     id: String(row.id),
     userId: row.user_id,
     userName: row.user_name,
+    userAvatarUrl: row.user_avatar_url,
     comment: row.comment || "",
     date: new Date(row.date).toISOString(),
     bedsideManner: row.bedside_manner,
@@ -53,7 +52,7 @@ const mapDbRowToProvider = (row: any): Provider => ({
     address: row.contact_address,
   },
   languagesSpoken: row.languages_spoken || [],
-  reviews: [], // Reviews are fetched separately
+  reviews: [], 
   location: row.location,
   qualifications: row.qualifications || [],
 });
@@ -70,34 +69,31 @@ const mapDbRowToFacility = (row: any): Facility => ({
       address: row.contact_address,
     },
     servicesOffered: row.services_offered || [],
-    reviews: [], // Reviews are fetched separately
+    reviews: [],
     location: row.location,
     amenities: row.amenities || [],
     affiliatedProviderIds: row.affiliated_provider_ids || [],
 });
 
-
-// Centralized function to fetch reviews from DB and handle errors
 async function fetchReviewsFromDB(
   query: string,
   params: string[],
   entityType: 'provider' | 'facility'
 ): Promise<Review[] | null> {
   if (!pool) {
-    // console.warn('Database not configured. Using mock reviews.');
-    return null; // Indicates fallback to mock data
+    return null; 
   }
   try {
     const result = await pool.query(query, params);
     return result.rows.map(mapDbRowToReview);
   } catch (error: any) {
-    if (error.code === '28P01') { // invalid_password
+    if (error.code === '28P01') { 
       console.error(`\n--- DATABASE AUTHENTICATION FAILED ---\nCould not connect to the database. Please check that the POSTGRES_URL in your .env file is correct.\nFalling back to mock data.\n---\n`);
     } else {
       console.error(`Failed to fetch reviews for ${entityType} with params ${params}:`, error);
       console.error('Falling back to mock data.');
     }
-    return null; // Signal failure to the caller function, so it can fall back
+    return null; 
   }
 }
 
@@ -105,30 +101,28 @@ export const getProviders = async (): Promise<Provider[]> => {
   if (pool) {
     try {
       const result = await pool.query('SELECT * FROM providers ORDER BY name');
-      if (result.rows.length > 0) {
-        return result.rows.map(mapDbRowToProvider);
-      }
+      return result.rows.map(mapDbRowToProvider);
     } catch (e) {
       console.error('Failed to fetch providers from DB, falling back to mock data:', e);
     }
+  } else {
+    console.log('DB not configured, returning mock providers.');
   }
-  console.log('No providers found in DB or DB not configured, returning mock data.');
-  return mockProviders;
+  return deepCopy(mockProviders);
 };
 
 export const getFacilities = async (): Promise<Facility[]> => {
   if (pool) {
     try {
       const result = await pool.query('SELECT * FROM facilities ORDER BY name');
-      if (result.rows.length > 0) {
-        return result.rows.map(mapDbRowToFacility);
-      }
+      return result.rows.map(mapDbRowToFacility);
     } catch (e) {
       console.error('Failed to fetch facilities from DB, falling back to mock data:', e);
     }
+  } else {
+    console.log('DB not configured, returning mock facilities.');
   }
-  console.log('No facilities found in DB or DB not configured, returning mock data.');
-  return mockFacilities;
+  return deepCopy(mockFacilities);
 };
 
 export const getProviderById = async (id: string): Promise<Provider | undefined> => {
@@ -161,7 +155,6 @@ export const getProviderById = async (id: string): Promise<Provider | undefined>
   
   const sourceReviews = dbReviews ?? provider.reviews;
 
-  // Non-mutating way to filter out facility-specific ratings
   provider.reviews = sourceReviews.map(review => {
     const { facilityQuality, ...providerReview } = review;
     return providerReview as Review;
@@ -200,7 +193,6 @@ export const getFacilityById = async (id: string): Promise<Facility | undefined>
 
   const sourceReviews = dbReviews ?? facility.reviews;
 
-  // Non-mutating way to filter out provider-specific ratings
   facility.reviews = sourceReviews.map(review => {
     const { bedsideManner, medicalAdherence, specialtyCare, ...facilityReview } = review;
     return facilityReview as Review;

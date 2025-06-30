@@ -6,20 +6,18 @@ import { pool } from '@/lib/db';
 import type { Review } from '@/lib/types';
 import { revalidatePath } from 'next/cache';
 
-// A reusable schema for optional 1-5 star ratings.
-// It preprocesses empty strings from the form into `undefined` so they pass optional validation.
 const ratingSchema = z.preprocess(
     (val) => (val === '' ? undefined : val),
     z.coerce.number().min(1).max(5).optional()
 );
 
 const reviewFormSchema = z.object({
-  // The comment is optional, but if a non-empty string is provided, it must be at least 10 characters.
   comment: z.string().min(10, { message: 'Comment must be at least 10 characters' }).or(z.literal('')).optional(),
   providerId: z.string().optional(),
   facilityId: z.string().optional(),
   userId: z.string().min(1, { message: "User ID cannot be empty" }),
   userName: z.string().min(1, { message: "User name cannot be empty" }),
+  userAvatarUrl: z.string().url().optional(),
   bedsideManner: ratingSchema,
   medicalAdherence: ratingSchema,
   specialtyCare: ratingSchema,
@@ -64,6 +62,7 @@ export async function submitReviewAction(
     facilityId,
     userId,
     userName,
+    userAvatarUrl,
     bedsideManner,
     medicalAdherence,
     specialtyCare,
@@ -71,7 +70,6 @@ export async function submitReviewAction(
     waitTime
   } = parsed.data;
 
-  // Business logic: A review must have a comment OR at least one rating.
   const hasProviderRatings = bedsideManner || medicalAdherence || specialtyCare;
   const hasFacilityRatings = facilityQuality;
   const hasCommonRatings = waitTime; 
@@ -87,42 +85,21 @@ export async function submitReviewAction(
   }
   
   try {
-    // Check for an existing review from this user for this entity
-    let existingReviewQuery = '';
-    const queryParams: string[] = [userId];
-
-    if (providerId) {
-        existingReviewQuery = 'SELECT id FROM reviews WHERE user_id = $1 AND provider_id = $2 LIMIT 1';
-        queryParams.push(providerId);
-    } else if (facilityId) {
-        existingReviewQuery = 'SELECT id FROM reviews WHERE user_id = $1 AND facility_id = $2 LIMIT 1';
-        queryParams.push(facilityId);
-    }
-
-    if (existingReviewQuery) {
-        const existingResult = await pool.query(existingReviewQuery, queryParams);
-        if (existingResult.rows.length > 0) {
-            return {
-                message: `You have already submitted a review for this ${providerId ? 'provider' : 'facility'}.`,
-                success: false,
-            };
-        }
-    }
-
     const insertQuery = `
       INSERT INTO reviews (
-        user_id, user_name, comment, date,
+        user_id, user_name, user_avatar_url, comment,
         provider_id, facility_id,
         bedside_manner, medical_adherence, specialty_care,
         facility_quality, wait_time
       )
-      VALUES ($1, $2, $3, NOW(), $4, $5, $6, $7, $8, $9, $10)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
       RETURNING *
     `;
 
-    const result = await pool.query(insertQuery, [
+    await pool.query(insertQuery, [
       userId,
       userName,
+      userAvatarUrl || null,
       comment || null,
       providerId || null,
       facilityId || null,
@@ -133,15 +110,22 @@ export async function submitReviewAction(
       waitTime || null,
     ]);
     
-    // Invalidate cache for the relevant page to show the new review
     if (providerId) revalidatePath(`/providers/${providerId}`);
     if (facilityId) revalidatePath(`/facilities/${facilityId}`);
+    revalidatePath('/account');
 
     return {
       message: 'Thank you for your review!',
       success: true,
     };
-  } catch (error) {
+  } catch (error: any) {
+    if (error.code === '23505') { // Unique violation
+        return {
+            message: `You have already submitted a review for this ${providerId ? 'provider' : 'facility'}.`,
+            success: false,
+        };
+    }
+
     console.error('Database error on review submission:', error);
     return {
       message: 'A database error occurred. Please try again later.',
