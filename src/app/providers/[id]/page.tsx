@@ -1,21 +1,17 @@
 // This should be a server component to fetch initial data
-import { getProviderById } from '@/lib/data'; 
-import { mockProviders } from '@/lib/mockData'; 
+import { getProviderById, getProviders } from '@/lib/data'; 
 import { PageWrapper } from '@/components/ui/PageWrapper';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
-// import { RatingStars } from '@/components/shared/RatingStars'; // Removed for overall rating
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Mail, Phone, MapPin, BriefcaseMedical, Languages, Stethoscope } from 'lucide-react';
-// ReviewList and ReviewForm are now part of ProviderDetailsClient
-// import { ReviewList } from '@/components/reviews/ReviewList';
-// import { ReviewForm } from '@/components/reviews/ReviewForm';
-// import { ReviewSummary } from '@/components/reviews/ReviewSummary'; // Removed
+import { Mail, Phone, MapPin, Languages, Stethoscope } from 'lucide-react';
 import ProviderDetailsClient from '@/components/providers/ProviderDetailsClient';
+import { SPECIALTY_ICONS } from '@/lib/constants';
 
 export async function generateStaticParams() {
-  return mockProviders.map(provider => ({ id: provider.id }));
+  const providers = await getProviders();
+  return providers.map(provider => ({ id: provider.id }));
 }
 
 
@@ -26,7 +22,7 @@ export default async function ProviderProfilePage({ params }: { params: { id: st
     notFound();
   }
   
-  const SpecialtyIcon = provider.specialtyIcon || Stethoscope;
+  const SpecialtyIcon = SPECIALTY_ICONS[provider.specialty.toLowerCase()] || Stethoscope;
 
   return (
     <PageWrapper>

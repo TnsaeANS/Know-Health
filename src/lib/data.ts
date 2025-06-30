@@ -4,7 +4,6 @@
 import type { Provider, Facility, Review } from './types';
 import { pool } from './db';
 import { mockProviders, mockFacilities } from './mockData';
-import { SPECIALTY_ICONS, FACILITY_TYPE_ICONS } from './constants';
 import { Stethoscope, Building } from 'lucide-react';
 
 // Helper function to deep copy an object
@@ -46,7 +45,6 @@ const mapDbRowToProvider = (row: any): Provider => ({
   id: row.id,
   name: row.name,
   specialty: row.specialty,
-  specialtyIcon: SPECIALTY_ICONS[row.specialty.toLowerCase()] || Stethoscope,
   photoUrl: row.photo_url || `https://placehold.co/300x300.png?text=${row.name.substring(0,2)}`,
   bio: row.bio,
   contact: {
@@ -64,7 +62,6 @@ const mapDbRowToFacility = (row: any): Facility => ({
     id: row.id,
     name: row.name,
     type: row.type,
-    typeIcon: FACILITY_TYPE_ICONS[row.type.toLowerCase()] || Building,
     photoUrl: row.photo_url || `https://placehold.co/400x300.png?text=${row.name.substring(0,2)}`,
     description: row.description,
     contact: {

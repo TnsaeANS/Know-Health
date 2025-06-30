@@ -35,7 +35,6 @@ export interface Provider {
   id: string;
   name: string;
   specialty: string;
-  specialtyIcon?: LucideIcon | React.FC<React.SVGProps<SVGSVGElement>>;
   photoUrl: string;
   bio: string;
   contact: {
@@ -53,7 +52,6 @@ export interface Facility {
   id:string;
   name: string;
   type: string; // e.g., Hospital, Clinic, Pharmacy
-  typeIcon?: LucideIcon | React.FC<React.SVGProps<SVGSVGElement>>;
   photoUrl: string;
   description: string;
   contact: {
@@ -72,11 +70,3 @@ export interface FilterOption {
   value: string;
   label: string;
 }
-
-// ReviewSummaryAI is no longer needed
-// export type ReviewSummaryAI = {
-//   summary: string;
-//   positiveThemes: string;
-//   negativeThemes: string;
-// };
-

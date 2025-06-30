@@ -6,13 +6,14 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Button } from '@/components/ui/button';
 import { RatingStars } from '@/components/shared/RatingStars';
 import { MapPin, Stethoscope, HeartHandshake, ShieldCheck, Clock } from 'lucide-react';
+import { SPECIALTY_ICONS } from '@/lib/constants';
 
 interface ProviderCardProps {
   provider: Provider;
 }
 
 export function ProviderCard({ provider }: ProviderCardProps) {
-  const IconComponent = provider.specialtyIcon || Stethoscope;
+  const IconComponent = SPECIALTY_ICONS[provider.specialty.toLowerCase()] || Stethoscope;
 
   const calculateAverageRating = (reviews: Provider['reviews'], criterion: keyof Review) => {
     const validReviews = reviews.filter(review => typeof review[criterion] === 'number' && (review[criterion] as number) > 0);

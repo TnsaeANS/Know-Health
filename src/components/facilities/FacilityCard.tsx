@@ -6,13 +6,14 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Button } from '@/components/ui/button';
 import { RatingStars } from '@/components/shared/RatingStars';
 import { MapPin, Building, Clock } from 'lucide-react';
+import { FACILITY_TYPE_ICONS } from '@/lib/constants';
 
 interface FacilityCardProps {
   facility: Facility;
 }
 
 export function FacilityCard({ facility }: FacilityCardProps) {
-  const IconComponent = facility.typeIcon || Building;
+  const IconComponent = FACILITY_TYPE_ICONS[facility.type.toLowerCase()] || Building;
 
   const calculateAverageRating = (reviews: Facility['reviews'], criterion: keyof Review) => {
     const validReviews = reviews.filter(review => typeof review[criterion] === 'number' && (review[criterion] as number) > 0);

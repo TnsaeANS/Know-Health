@@ -1,17 +1,18 @@
 // This should be a server component to fetch initial data
-import { getFacilityById } from '@/lib/data';
-import { mockProviders, mockFacilities } from '@/lib/mockData';
+import { getFacilityById, getFacilities, getProviders } from '@/lib/data';
 import { PageWrapper } from '@/components/ui/PageWrapper';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Mail, Phone, MapPin, Building, ListChecks, ConciergeBell, Users } from 'lucide-react'; // Added Users icon
+import { Mail, Phone, MapPin, Building, ListChecks, ConciergeBell, Users } from 'lucide-react';
 import FacilityDetailsClient from '@/components/facilities/FacilityDetailsClient';
-import { ProviderCard } from '@/components/providers/ProviderCard'; // Added ProviderCard
+import { ProviderCard } from '@/components/providers/ProviderCard';
+import { FACILITY_TYPE_ICONS } from '@/lib/constants';
 
 export async function generateStaticParams() {
-  return mockFacilities.map(facility => ({ id: facility.id }));
+  const facilities = await getFacilities();
+  return facilities.map(facility => ({ id: facility.id }));
 }
 
 export default async function FacilityProfilePage({ params }: { params: { id: string } }) {
@@ -21,10 +22,11 @@ export default async function FacilityProfilePage({ params }: { params: { id: st
     notFound();
   }
 
-  const TypeIcon = facility.typeIcon || Building;
-
+  const TypeIcon = FACILITY_TYPE_ICONS[facility.type.toLowerCase()] || Building;
+  
+  const allProviders = await getProviders();
   const affiliatedProviders = facility.affiliatedProviderIds
-    ? mockProviders.filter(provider => facility.affiliatedProviderIds!.includes(provider.id))
+    ? allProviders.filter(provider => facility.affiliatedProviderIds!.includes(provider.id))
     : [];
 
   return (

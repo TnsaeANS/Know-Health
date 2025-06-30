@@ -1,5 +1,5 @@
 import type { Provider, Facility, Review, User } from './types';
-import { SPECIALTY_ICONS, FACILITY_TYPE_ICONS, DEFAULT_USER_AVATAR } from './constants';
+import { DEFAULT_USER_AVATAR } from './constants';
 import { Stethoscope } from 'lucide-react';
 
 export const mockReviews: Review[] = [
@@ -66,7 +66,6 @@ export const mockProviders: Provider[] = [
     id: 'provider1',
     name: 'Dr. Almaz Tesfaye',
     specialty: 'Cardiology',
-    specialtyIcon: SPECIALTY_ICONS['cardiology'] || Stethoscope,
     photoUrl: 'https://placehold.co/300x300.png',
     bio: 'Dr. Almaz Tesfaye is a renowned cardiologist with over 15 years of experience in treating various heart conditions. She is dedicated to providing compassionate and comprehensive care to her patients.',
     contact: {
@@ -83,7 +82,6 @@ export const mockProviders: Provider[] = [
     id: 'provider2',
     name: 'Dr. Bruk Girma',
     specialty: 'Pediatrics',
-    specialtyIcon: SPECIALTY_ICONS['pediatrics'] || Stethoscope,
     photoUrl: 'https://placehold.co/300x300.png',
     bio: 'Dr. Bruk Girma is a friendly and experienced pediatrician committed to the health and well-being of children. He believes in a holistic approach to child care.',
     contact: {
@@ -100,7 +98,6 @@ export const mockProviders: Provider[] = [
     id: 'provider3',
     name: 'Dr. Helen Getachew',
     specialty: 'Dentistry',
-    specialtyIcon: SPECIALTY_ICONS['dentistry'] || Stethoscope,
     photoUrl: 'https://placehold.co/300x300.png',
     bio: 'Dr. Helen Getachew offers a wide range of dental services with a focus on patient comfort and satisfaction. She stays updated with the latest advancements in dental technology.',
     contact: {
@@ -120,7 +117,6 @@ export const mockFacilities: Facility[] = [
     id: 'facility1',
     name: 'St. Paulos Hospital Millennium Medical College',
     type: 'Hospital',
-    typeIcon: FACILITY_TYPE_ICONS['hospital'] || Stethoscope,
     photoUrl: 'https://placehold.co/400x300.png',
     description: 'A leading public teaching hospital offering a wide range of specialized medical services and advanced treatments. Known for its commitment to medical education and research.',
     contact: {
@@ -138,7 +134,6 @@ export const mockFacilities: Facility[] = [
     id: 'facility2',
     name: 'Ethio-American Clinic',
     type: 'Clinic',
-    typeIcon: FACILITY_TYPE_ICONS['clinic'] || Stethoscope,
     photoUrl: 'https://placehold.co/400x300.png',
     description: 'A modern private clinic providing high-quality outpatient services with a focus on patient-centered care. Offers consultations with various specialists.',
     contact: {
