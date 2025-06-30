@@ -4,6 +4,7 @@
 import { z } from 'zod';
 import { pool } from '@/lib/db';
 import type { Review } from '@/lib/types';
+import { revalidatePath } from 'next/cache';
 
 // A reusable schema for optional 1-5 star ratings.
 // It preprocesses empty strings from the form into `undefined` so they pass optional validation.
@@ -84,19 +85,41 @@ export async function submitReviewAction(
       success: false,
     };
   }
-
-  const insertQuery = `
-    INSERT INTO reviews (
-      user_id, user_name, comment, date,
-      provider_id, facility_id,
-      bedside_manner, medical_adherence, specialty_care,
-      facility_quality, wait_time
-    )
-    VALUES ($1, $2, $3, NOW(), $4, $5, $6, $7, $8, $9, $10)
-    RETURNING *
-  `;
-
+  
   try {
+    // Check for an existing review from this user for this entity
+    let existingReviewQuery = '';
+    const queryParams: string[] = [userId];
+
+    if (providerId) {
+        existingReviewQuery = 'SELECT id FROM reviews WHERE user_id = $1 AND provider_id = $2 LIMIT 1';
+        queryParams.push(providerId);
+    } else if (facilityId) {
+        existingReviewQuery = 'SELECT id FROM reviews WHERE user_id = $1 AND facility_id = $2 LIMIT 1';
+        queryParams.push(facilityId);
+    }
+
+    if (existingReviewQuery) {
+        const existingResult = await pool.query(existingReviewQuery, queryParams);
+        if (existingResult.rows.length > 0) {
+            return {
+                message: `You have already submitted a review for this ${providerId ? 'provider' : 'facility'}.`,
+                success: false,
+            };
+        }
+    }
+
+    const insertQuery = `
+      INSERT INTO reviews (
+        user_id, user_name, comment, date,
+        provider_id, facility_id,
+        bedside_manner, medical_adherence, specialty_care,
+        facility_quality, wait_time
+      )
+      VALUES ($1, $2, $3, NOW(), $4, $5, $6, $7, $8, $9, $10)
+      RETURNING *
+    `;
+
     const result = await pool.query(insertQuery, [
       userId,
       userName,
@@ -110,8 +133,9 @@ export async function submitReviewAction(
       waitTime || null,
     ]);
     
-    // This part is for optimistic updates on the client, so we construct a Review object.
-    const newDbReview = result.rows[0];
+    // Invalidate cache for the relevant page to show the new review
+    if (providerId) revalidatePath(`/providers/${providerId}`);
+    if (facilityId) revalidatePath(`/facilities/${facilityId}`);
 
     return {
       message: 'Thank you for your review!',

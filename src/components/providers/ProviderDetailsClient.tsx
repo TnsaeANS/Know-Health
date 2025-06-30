@@ -30,7 +30,12 @@ export default function ProviderDetailsClient({ providerId, initialReviews }: Pr
   return (
     <div className="space-y-8">
       {/* <ReviewSummary summaryData={reviewSummary} isLoading={isLoadingSummary} /> Removed */}
-      <ReviewForm entityId={providerId} entityType="provider" onReviewSubmitted={handleReviewSubmitted} />
+      <ReviewForm 
+        entityId={providerId} 
+        entityType="provider" 
+        onReviewSubmitted={handleReviewSubmitted} 
+        reviews={reviews}
+      />
       <ReviewList reviews={reviews} />
     </div>
   );

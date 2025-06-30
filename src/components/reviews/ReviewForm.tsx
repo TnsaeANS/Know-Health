@@ -12,6 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { submitReviewAction, type ReviewFormState } from '@/actions/reviews';
 import { useAuth } from '@/context/AuthContext';
 import type { Review } from '@/lib/types';
+import { ReviewCard } from './ReviewCard';
 
 const initialState: ReviewFormState = {
   message: '',
@@ -83,9 +84,10 @@ interface ReviewFormProps {
   entityId: string;
   entityType: 'provider' | 'facility';
   onReviewSubmitted?: (newReview: Review) => void;
+  reviews?: Review[];
 }
 
-export function ReviewForm({ entityId, entityType, onReviewSubmitted }: ReviewFormProps) {
+export function ReviewForm({ entityId, entityType, onReviewSubmitted, reviews }: ReviewFormProps) {
   const [state, formAction] = useActionState(submitReviewAction, initialState);
   const { toast } = useToast();
   const { user } = useAuth();
@@ -102,6 +104,8 @@ export function ReviewForm({ entityId, entityType, onReviewSubmitted }: ReviewFo
   const handleRatingChange = (criterionKey: keyof typeof ratings, value: number) => {
     setRatings(prev => ({ ...prev, [criterionKey]: value }));
   };
+  
+  const userReview = reviews?.find(review => review.userId === user?.id);
 
   useEffect(() => {
     if (state.message) {
@@ -140,6 +144,20 @@ export function ReviewForm({ entityId, entityType, onReviewSubmitted }: ReviewFo
       }
     }
   }, [state, toast, onReviewSubmitted, user, comment, ratings]);
+  
+  if (userReview) {
+    return (
+      <Card className="mt-8 shadow-lg">
+        <CardHeader>
+          <CardTitle className="font-headline text-xl">Thank You for Your Feedback!</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground mb-4">You have already submitted a review for this {entityType}.</p>
+          <ReviewCard review={userReview} />
+        </CardContent>
+      </Card>
+    )
+  }
 
   if (!user) {
     return (
@@ -148,7 +166,7 @@ export function ReviewForm({ entityId, entityType, onReviewSubmitted }: ReviewFo
           <CardTitle className="font-headline text-xl">Leave a Review</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground">Please <Button variant="link" asChild className="p-0 h-auto"><a href="/login">login</a></Button> to leave a review.</p>
+          <p className="text-muted-foreground">Please <Button variant="link" asChild className="p-0 h-auto"><a href={`/login?redirect=/` + (entityType === 'provider' ? 'providers' : 'facilities') + `/${entityId}`}>login</a></Button> to leave a review.</p>
         </CardContent>
       </Card>
     )
