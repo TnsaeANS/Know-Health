@@ -1,3 +1,4 @@
+
 import { getProviders, getFacilities } from '@/lib/data';
 import { PageWrapper } from '@/components/ui/PageWrapper';
 import { PageHeader } from '@/components/shared/PageHeader';
@@ -9,11 +10,11 @@ import type { Provider, Facility } from '@/lib/types';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 
-interface SearchPageProps {
+export default async function SearchPage({
+  searchParams,
+}: {
   searchParams: { [key: string]: string | string[] | undefined };
-}
-
-export default async function SearchPage({ searchParams }: SearchPageProps) {
+}) {
   const query = typeof searchParams.q === 'string' ? searchParams.q.trim() : '';
 
   if (!query) {
