@@ -1,12 +1,16 @@
-import { mockProviders, mockFacilities } from '@/lib/mockData';
+import { getProviders, getFacilities } from '@/lib/data';
 import { ProviderCard } from '@/components/providers/ProviderCard';
 import { FacilityCard } from '@/components/facilities/FacilityCard';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
-export function FeaturedSection() {
-  const featuredProviders = mockProviders.slice(0, 2);
-  const featuredFacilities = mockFacilities.slice(0, 2);
+export async function FeaturedSection() {
+  const allProviders = await getProviders();
+  const allFacilities = await getFacilities();
+
+  // A real app might have a more sophisticated "featured" logic, but for now we'll take the first two.
+  const featuredProviders = allProviders.slice(0, 2);
+  const featuredFacilities = allFacilities.slice(0, 2);
 
   return (
     <section className="py-12 md:py-16 bg-secondary/50 rounded-lg my-12">
