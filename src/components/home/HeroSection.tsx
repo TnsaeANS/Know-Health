@@ -1,11 +1,24 @@
+"use client";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import { useState, type FormEvent } from "react";
+import { useRouter } from "next/navigation";
 
 export function HeroSection() {
+  const [query, setQuery] = useState('');
+  const router = useRouter();
+
+  const handleSearch = (e: FormEvent) => {
+    e.preventDefault();
+    if (query.trim()) {
+      router.push(`/search?q=${encodeURIComponent(query)}`);
+    }
+  };
+
   return (
     <div className="relative rounded-lg overflow-hidden bg-gradient-to-r from-primary/30 via-background to-accent/30 py-16 md:py-24 shadow-lg">
       <div className="absolute inset-0 opacity-20">
@@ -26,12 +39,14 @@ export function HeroSection() {
           Connect with the best doctors and facilities in Ethiopia. Your health journey starts here.
         </p>
         <div className="max-w-xl mx-auto mb-8">
-          <form className="flex gap-2">
+          <form onSubmit={handleSearch} className="flex gap-2">
             <Input
               type="search"
               placeholder="Search doctors, specialties, facilities..."
               className="flex-grow text-base h-12 shadow-sm"
               aria-label="Search healthcare"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
             />
             <Button type="submit" size="lg" className="h-12 bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm">
               <Search className="mr-2 h-5 w-5" />
