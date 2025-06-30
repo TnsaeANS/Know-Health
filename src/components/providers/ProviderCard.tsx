@@ -36,8 +36,8 @@ export function ProviderCard({ provider }: ProviderCardProps) {
           <Image
             src={provider.photoUrl}
             alt={provider.name}
-            layout="fill"
-            objectFit="cover"
+            fill
+            className="object-cover"
             data-ai-hint="doctor portrait"
           />
         </div>

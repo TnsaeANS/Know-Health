@@ -10,12 +10,16 @@ import FacilityDetailsClient from '@/components/facilities/FacilityDetailsClient
 import { ProviderCard } from '@/components/providers/ProviderCard';
 import { FACILITY_TYPE_ICONS } from '@/lib/constants';
 
+type Props = {
+  params: { id: string };
+};
+
 export async function generateStaticParams() {
   const facilities = await getFacilities();
   return facilities.map(facility => ({ id: facility.id }));
 }
 
-export default async function FacilityProfilePage({ params }: { params: { id: string } }) {
+export default async function FacilityProfilePage({ params }: Props) {
   const facility = await getFacilityById(params.id);
 
   if (!facility) {
@@ -39,8 +43,8 @@ export default async function FacilityProfilePage({ params }: { params: { id: st
               <Image
                 src={facility.photoUrl}
                 alt={facility.name}
-                layout="fill"
-                objectFit="cover"
+                fill
+                className="object-cover"
                 priority
                 data-ai-hint="hospital building modern"
               />

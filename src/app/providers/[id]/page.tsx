@@ -9,13 +9,17 @@ import { Mail, Phone, MapPin, Languages, Stethoscope } from 'lucide-react';
 import ProviderDetailsClient from '@/components/providers/ProviderDetailsClient';
 import { SPECIALTY_ICONS } from '@/lib/constants';
 
+type Props = {
+  params: { id: string };
+};
+
 export async function generateStaticParams() {
   const providers = await getProviders();
   return providers.map(provider => ({ id: provider.id }));
 }
 
 
-export default async function ProviderProfilePage({ params }: { params: { id: string } }) {
+export default async function ProviderProfilePage({ params }: Props) {
   const provider = await getProviderById(params.id); 
 
   if (!provider) {
@@ -34,8 +38,8 @@ export default async function ProviderProfilePage({ params }: { params: { id: st
               <Image
                 src={provider.photoUrl}
                 alt={provider.name}
-                layout="fill"
-                objectFit="cover"
+                fill
+                className="object-cover"
                 priority
                 data-ai-hint="doctor portrait professional"
               />

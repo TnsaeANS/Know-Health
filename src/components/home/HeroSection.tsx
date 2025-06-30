@@ -12,8 +12,8 @@ export function HeroSection() {
          <Image
             src="https://media.istockphoto.com/photos/medical-stethoscope-or-phonendoscope-picture-id492360768?k=6&m=492360768&s=612x612&w=0&h=Lknjn4xr0SSVDnRjavfGSkqRUm1Bgr58bmXva3rctCM="
             alt="Healthcare professionals"
-            layout="fill"
-            objectFit="cover"
+            fill
+            className="object-cover"
             priority
             data-ai-hint="medical background"
           />

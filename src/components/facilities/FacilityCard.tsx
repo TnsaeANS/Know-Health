@@ -34,8 +34,8 @@ export function FacilityCard({ facility }: FacilityCardProps) {
           <Image
             src={facility.photoUrl}
             alt={facility.name}
-            layout="fill"
-            objectFit="cover"
+            fill
+            className="object-cover"
             data-ai-hint="hospital building"
           />
         </div>
