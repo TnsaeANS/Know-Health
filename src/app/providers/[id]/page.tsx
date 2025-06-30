@@ -1,5 +1,6 @@
+
 // This should be a server component to fetch initial data
-import { getProviderById, getProviders } from '@/lib/data'; 
+import { getProviderById } from '@/lib/data'; 
 import { PageWrapper } from '@/components/ui/PageWrapper';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
@@ -9,14 +10,12 @@ import { Mail, Phone, MapPin, Languages, Stethoscope } from 'lucide-react';
 import ProviderDetailsClient from '@/components/providers/ProviderDetailsClient';
 import { SPECIALTY_ICONS } from '@/lib/constants';
 
-export async function generateStaticParams() {
-  const providers = await getProviders();
-  return providers.map(provider => ({ id: provider.id }));
-}
+// Removed generateStaticParams to fix build errors with Next.js 15.
+// These pages are dynamic and should not be statically generated.
 
-
-export default async function ProviderProfilePage({ params }: { params: { id: string } }) {
-  const provider = await getProviderById(params.id); 
+export default async function ProviderProfilePage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const provider = await getProviderById(id);
 
   if (!provider) {
     notFound();
@@ -46,7 +45,6 @@ export default async function ProviderProfilePage({ params }: { params: { id: st
                 <SpecialtyIcon className="h-5 w-5 mr-2" />
                 <span>{provider.specialty}</span>
               </div>
-              {/* <RatingStars rating={provider.overallRating} size={22} showText className="justify-center" /> Removed overallRating */}
               <p className="text-sm text-muted-foreground mt-1">View reviews for detailed ratings.</p>
             </CardContent>
           </Card>

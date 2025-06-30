@@ -1,3 +1,4 @@
+
 // This should be a server component to fetch initial data
 import { getFacilityById, getFacilities, getProviders } from '@/lib/data';
 import { PageWrapper } from '@/components/ui/PageWrapper';
@@ -10,14 +11,13 @@ import FacilityDetailsClient from '@/components/facilities/FacilityDetailsClient
 import { ProviderCard } from '@/components/providers/ProviderCard';
 import { FACILITY_TYPE_ICONS } from '@/lib/constants';
 
-export async function generateStaticParams() {
-  const facilities = await getFacilities();
-  return facilities.map(facility => ({ id: facility.id }));
-}
+// Removed generateStaticParams to fix build errors with Next.js 15.
+// These pages are dynamic and should not be statically generated.
 
-export default async function FacilityProfilePage({ params }: { params: { id: string } }) {
-  const facility = await getFacilityById(params.id);
+export default async function FacilityProfilePage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
 
+  const facility = await getFacilityById(id);
   if (!facility) {
     notFound();
   }

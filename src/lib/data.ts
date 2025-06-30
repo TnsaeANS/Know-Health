@@ -75,25 +75,20 @@ const mapDbRowToFacility = (row: any): Facility => ({
     affiliatedProviderIds: row.affiliated_provider_ids || [],
 });
 
-async function fetchReviewsFromDB(
-  query: string,
-  params: string[],
-  entityType: 'provider' | 'facility'
-): Promise<Review[] | null> {
+async function fetchReviewsFromDB(query: string, params: string[]): Promise<Review[]> {
   if (!pool) {
-    return null; 
+    return []; 
   }
   try {
     const result = await pool.query(query, params);
     return result.rows.map(mapDbRowToReview);
   } catch (error: any) {
     if (error.code === '28P01') { 
-      console.error(`\n--- DATABASE AUTHENTICATION FAILED ---\nCould not connect to the database. Please check that the POSTGRES_URL in your .env file is correct.\nFalling back to mock data.\n---\n`);
+      console.error(`\n--- DATABASE AUTHENTICATION FAILED ---\nCould not connect to the database. Please check that the POSTGRES_URL in your .env file is correct.\n---\n`);
     } else {
-      console.error(`Failed to fetch reviews for ${entityType} with params ${params}:`, error);
-      console.error('Falling back to mock data.');
+      console.error(`Failed to fetch reviews with params ${params}:`, error);
     }
-    return null; 
+    return []; 
   }
 }
 
@@ -126,77 +121,77 @@ export const getFacilities = async (): Promise<Facility[]> => {
 };
 
 export const getProviderById = async (id: string): Promise<Provider | undefined> => {
-  let providerData: Provider | undefined;
+  if (!pool) {
+    console.warn('Database not configured. Falling back to mock data for getProviderById.');
+    const mockProvider = mockProviders.find(p => p.id === id);
+    if (!mockProvider) return undefined;
 
-  if (pool) {
-    try {
-      const result = await pool.query('SELECT * FROM providers WHERE id = $1', [id]);
-      if (result.rows.length > 0) {
-        providerData = mapDbRowToProvider(result.rows[0]);
-      }
-    } catch (error) {
-      console.error(`Failed to fetch provider ${id} from DB, falling back to mock data:`, error);
+    const provider = deepCopy(mockProvider);
+    provider.reviews = (provider.reviews || []).map(review => {
+        const { facilityQuality, ...providerReview } = review;
+        return providerReview;
+    });
+    return provider;
+  }
+  
+  try {
+    const result = await pool.query('SELECT * FROM providers WHERE id = $1', [id]);
+    if (result.rows.length === 0) {
+      return undefined;
     }
+    const provider = mapDbRowToProvider(result.rows[0]);
+
+    const reviews = await fetchReviewsFromDB(
+      'SELECT * FROM reviews WHERE provider_id = $1 ORDER BY date DESC',
+      [id]
+    );
+    
+    provider.reviews = reviews.map(review => {
+        const { facilityQuality, ...providerReview } = review;
+        return providerReview as Review;
+    });
+
+    return provider;
+  } catch (error) {
+    console.error(`Failed to fetch provider ${id} from DB.`, error);
+    return undefined;
   }
-
-  if (!providerData) {
-    providerData = mockProviders.find(p => p.id === id);
-  }
-
-  if (!providerData) return undefined;
-
-  const provider = deepCopy(providerData);
-
-  const dbReviews = await fetchReviewsFromDB(
-    'SELECT * FROM reviews WHERE provider_id = $1 ORDER BY date DESC',
-    [id],
-    'provider'
-  );
-  
-  const sourceReviews = dbReviews ?? provider.reviews;
-
-  provider.reviews = sourceReviews.map(review => {
-    const { facilityQuality, ...providerReview } = review;
-    return providerReview as Review;
-  });
-  
-  return provider;
 };
   
 export const getFacilityById = async (id: string): Promise<Facility | undefined> => {
-  let facilityData: Facility | undefined;
-
-  if (pool) {
-      try {
-          const result = await pool.query('SELECT * FROM facilities WHERE id = $1', [id]);
-          if (result.rows.length > 0) {
-              facilityData = mapDbRowToFacility(result.rows[0]);
-          }
-      } catch (error) {
-          console.error(`Failed to fetch facility ${id} from DB, falling back to mock data:`, error);
-      }
+  if (!pool) {
+      console.warn('Database not configured. Falling back to mock data for getFacilityById.');
+      const mockFacility = mockFacilities.find(f => f.id === id);
+      if (!mockFacility) return undefined;
+      
+      const facility = deepCopy(mockFacility);
+      facility.reviews = (facility.reviews || []).map(review => {
+          const { bedsideManner, medicalAdherence, specialtyCare, ...facilityReview } = review;
+          return facilityReview;
+      });
+      return facility;
   }
 
-  if (!facilityData) {
-      facilityData = mockFacilities.find(f => f.id === id);
+  try {
+    const result = await pool.query('SELECT * FROM facilities WHERE id = $1', [id]);
+    if (result.rows.length === 0) {
+        return undefined;
+    }
+    const facility = mapDbRowToFacility(result.rows[0]);
+    
+    const reviews = await fetchReviewsFromDB(
+      'SELECT * FROM reviews WHERE facility_id = $1 ORDER BY date DESC',
+      [id]
+    );
+
+    facility.reviews = reviews.map(review => {
+      const { bedsideManner, medicalAdherence, specialtyCare, ...facilityReview } = review;
+      return facilityReview as Review;
+    });
+
+    return facility;
+  } catch (error) {
+    console.error(`Failed to fetch facility ${id} from DB.`, error);
+    return undefined;
   }
-
-  if (!facilityData) return undefined;
-
-  const facility = deepCopy(facilityData);
-  
-  const dbReviews = await fetchReviewsFromDB(
-    'SELECT * FROM reviews WHERE facility_id = $1 ORDER BY date DESC',
-    [id],
-    'facility'
-  );
-
-  const sourceReviews = dbReviews ?? facility.reviews;
-
-  facility.reviews = sourceReviews.map(review => {
-    const { bedsideManner, medicalAdherence, specialtyCare, ...facilityReview } = review;
-    return facilityReview as Review;
-  });
-
-  return facility;
 };
