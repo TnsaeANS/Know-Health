@@ -10,7 +10,6 @@ import { Mail, Phone, MapPin, Languages, Stethoscope } from 'lucide-react';
 import ProviderDetailsClient from '@/components/providers/ProviderDetailsClient';
 import { SPECIALTY_ICONS } from '@/lib/constants';
 
-// Removed generateStaticParams to fix build errors with Next.js 15.
 // These pages are dynamic and should not be statically generated.
 
 export default async function ProviderProfilePage({ params }: { params: Promise<{ id: string }> }) {

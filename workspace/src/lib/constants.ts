@@ -1,7 +1,7 @@
 
-import type { NavItem, FilterOption } from './types';
+import type { NavItem, FilterOption } from '@/lib/types';
 import { Home, Stethoscope, Hospital, Info, MessageSquare, BriefcaseMedical, Building, Languages, MapPin, Smile, Bone, Brain, Baby, Eye, LucideIcon } from 'lucide-react';
-
+///home/user/studio/src/lib/types.ts
 export const APP_NAME = "Know Health";
 
 export const NAV_LINKS: NavItem[] = [
