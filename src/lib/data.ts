@@ -132,93 +132,79 @@ export const getFacilities = async (): Promise<Facility[]> => {
 };
 
 export const getProviderById = async (id: string): Promise<Provider | undefined> => {
-    let providerData: Provider | undefined;
-  
-    if (pool) {
-      try {
-        const result = await pool.query('SELECT * FROM providers WHERE id = $1', [id]);
-        if (result.rows.length > 0) {
-          providerData = mapDbRowToProvider(result.rows[0]);
-        }
-      } catch (error) {
-        console.error(`Failed to fetch provider ${id} from DB, will try mock data:`, error);
+  let providerData: Provider | undefined;
+
+  if (pool) {
+    try {
+      const result = await pool.query('SELECT * FROM providers WHERE id = $1', [id]);
+      if (result.rows.length > 0) {
+        providerData = mapDbRowToProvider(result.rows[0]);
       }
+    } catch (error) {
+      console.error(`Failed to fetch provider ${id} from DB, falling back to mock data:`, error);
     }
+  }
 
-    if (!providerData) {
-        providerData = mockProviders.find(p => p.id === id);
-    }
-  
-    if (!providerData) return undefined;
-  
-    const provider = deepCopy(providerData);
-  
-    const dbReviews = await fetchReviewsFromDB(
-      'SELECT * FROM reviews WHERE provider_id = $1 ORDER BY date DESC',
-      [id],
-      'provider'
-    );
-    
-    if (dbReviews !== null) {
-      provider.reviews = dbReviews.map(review => {
-        delete review.facilityQuality; // Clean up facility-specific ratings
-        return review;
-      });
-    } else {
-      provider.reviews = provider.reviews.map(review => {
-        const cleanReview = deepCopy(review);
-        delete (cleanReview as any).facilityQuality;
-        return cleanReview;
-      });
-    }
-    
-    return provider;
-  };
-  
-  export const getFacilityById = async (id: string): Promise<Facility | undefined> => {
-    let facilityData: Facility | undefined;
+  if (!providerData) {
+    providerData = mockProviders.find(p => p.id === id);
+  }
 
-    if (pool) {
-        try {
-            const result = await pool.query('SELECT * FROM facilities WHERE id = $1', [id]);
-            if (result.rows.length > 0) {
-                facilityData = mapDbRowToFacility(result.rows[0]);
-            }
-        } catch (error) {
-            console.error(`Failed to fetch facility ${id} from DB, will try mock data:`, error);
-        }
-    }
+  if (!providerData) return undefined;
 
-    if (!facilityData) {
-        facilityData = mockFacilities.find(f => f.id === id);
-    }
+  const provider = deepCopy(providerData);
 
-    if (!facilityData) return undefined;
+  const dbReviews = await fetchReviewsFromDB(
+    'SELECT * FROM reviews WHERE provider_id = $1 ORDER BY date DESC',
+    [id],
+    'provider'
+  );
   
-    const facility = deepCopy(facilityData);
-    
-    const dbReviews = await fetchReviewsFromDB(
-      'SELECT * FROM reviews WHERE facility_id = $1 ORDER BY date DESC',
-      [id],
-      'facility'
-    );
+  const sourceReviews = dbReviews ?? provider.reviews;
+
+  // Non-mutating way to filter out facility-specific ratings
+  provider.reviews = sourceReviews.map(review => {
+    const { facilityQuality, ...providerReview } = review;
+    return providerReview as Review;
+  });
   
-    if (dbReviews !== null) {
-      facility.reviews = dbReviews.map(review => {
-        delete review.bedsideManner;
-        delete review.medicalAdherence;
-        delete review.specialtyCare;
-        return review;
-      });
-    } else {
-      facility.reviews = facility.reviews.map(review => {
-        const cleanReview = deepCopy(review);
-        delete (cleanReview as any).bedsideManner;
-        delete (cleanReview as any).medicalAdherence;
-        delete (cleanReview as any).specialtyCare;
-        return cleanReview;
-      });
-    }
+  return provider;
+};
   
-    return facility;
-  };
+export const getFacilityById = async (id: string): Promise<Facility | undefined> => {
+  let facilityData: Facility | undefined;
+
+  if (pool) {
+      try {
+          const result = await pool.query('SELECT * FROM facilities WHERE id = $1', [id]);
+          if (result.rows.length > 0) {
+              facilityData = mapDbRowToFacility(result.rows[0]);
+          }
+      } catch (error) {
+          console.error(`Failed to fetch facility ${id} from DB, falling back to mock data:`, error);
+      }
+  }
+
+  if (!facilityData) {
+      facilityData = mockFacilities.find(f => f.id === id);
+  }
+
+  if (!facilityData) return undefined;
+
+  const facility = deepCopy(facilityData);
+  
+  const dbReviews = await fetchReviewsFromDB(
+    'SELECT * FROM reviews WHERE facility_id = $1 ORDER BY date DESC',
+    [id],
+    'facility'
+  );
+
+  const sourceReviews = dbReviews ?? facility.reviews;
+
+  // Non-mutating way to filter out provider-specific ratings
+  facility.reviews = sourceReviews.map(review => {
+    const { bedsideManner, medicalAdherence, specialtyCare, ...facilityReview } = review;
+    return facilityReview as Review;
+  });
+
+  return facility;
+};
