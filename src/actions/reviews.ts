@@ -12,7 +12,7 @@ const ratingSchema = z.preprocess(
 );
 
 const reviewFormSchema = z.object({
-  comment: z.string().min(10, { message: 'Comment must be at least 10 characters' }).or(z.literal('')).optional(),
+  comment: z.string().optional(),
   providerId: z.string().optional(),
   facilityId: z.string().optional(),
   userId: z.string().min(1, { message: "User ID cannot be empty" }),
@@ -93,7 +93,6 @@ export async function submitReviewAction(
         facility_quality, wait_time
       )
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-      RETURNING *
     `;
 
     await pool.query(insertQuery, [
