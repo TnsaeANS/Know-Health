@@ -31,16 +31,19 @@ const CriterionDisplay: React.FC<{ label: string; rating?: number; icon?: React.
 
 export function ReviewCard({ review }: ReviewCardProps) {
   const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
-  const [dialogKey, setDialogKey] = useState(() => `dialog-${Date.now()}`);
+  // The key is used to force a re-mount of the dialog, resetting its internal state.
+  const [dialogKey, setDialogKey] = useState(() => `dialog-${review.id}`);
   const { user } = useAuth();
   const timeAgo = review.date ? formatDistanceToNow(new Date(review.date), { addSuffix: true }) : '';
 
+  const handleOpenReportDialog = () => {
+    // By changing the key each time the dialog is opened, we ensure it's a fresh instance.
+    setDialogKey(`dialog-${review.id}-${Date.now()}`);
+    setIsReportDialogOpen(true);
+  };
+
   const handleOpenChange = useCallback((open: boolean) => {
     setIsReportDialogOpen(open);
-    if (!open) {
-      // When dialog closes, update the key to force a re-mount next time it opens, resetting its state.
-      setDialogKey(`dialog-${Date.now()}`);
-    }
   }, []);
 
   return (
@@ -60,7 +63,7 @@ export function ReviewCard({ review }: ReviewCardProps) {
               variant="ghost" 
               size="icon" 
               className="h-8 w-8 text-muted-foreground hover:text-destructive"
-              onClick={() => setIsReportDialogOpen(true)}
+              onClick={handleOpenReportDialog}
               aria-label="Report review"
             >
               <Flag size={16} />
