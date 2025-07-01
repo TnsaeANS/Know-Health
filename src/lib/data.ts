@@ -40,7 +40,6 @@ const mapDbRowToReview = (row: any): Review => {
   };
 };
 
-// Ensure bio is always a string
 const mapDbRowToProvider = (row: any): Provider => ({
   id: row.id,
   name: row.name,
@@ -58,7 +57,6 @@ const mapDbRowToProvider = (row: any): Provider => ({
   qualifications: row.qualifications || [],
 });
 
-// Ensure description is always a string
 const mapDbRowToFacility = (row: any): Facility => ({
     id: row.id,
     name: row.name,
@@ -99,8 +97,7 @@ export const getProviders = async (): Promise<Provider[]> => {
     const result = await pool.query('SELECT * FROM providers ORDER BY name');
     return result.rows.map(mapDbRowToProvider);
   } catch (error) {
-    console.error('Failed to fetch providers from DB for featured section. Returning empty array.', error);
-    // Return empty array to prevent homepage from crashing if DB is unavailable.
+    console.warn('Could not fetch providers from DB. This is expected if the database is not configured locally. Returning empty array.');
     return [];
   }
 };
@@ -114,24 +111,15 @@ export const getFacilities = async (): Promise<Facility[]> => {
     const result = await pool.query('SELECT * FROM facilities ORDER BY name');
     return result.rows.map(mapDbRowToFacility);
   } catch (error) {
-    console.error('Failed to fetch facilities from DB for featured section. Returning empty array.', error);
-    // Return empty array to prevent homepage from crashing if DB is unavailable.
+    console.warn('Could not fetch facilities from DB. This is expected if the database is not configured locally. Returning empty array.');
     return [];
   }
 };
 
 export const getProviderById = async (id: string): Promise<Provider | undefined> => {
   if (!pool) {
-    console.warn('Database not configured. Falling back to mock data for getProviderById.');
-    const mockProvider = mockProviders.find(p => p.id === id);
-    if (!mockProvider) return undefined;
-
-    const provider = deepCopy(mockProvider);
-    provider.reviews = (provider.reviews || []).map(review => {
-        const { facilityQuality, ...providerReview } = review;
-        return providerReview;
-    });
-    return provider;
+    console.error('Database not configured. Could not fetch provider.');
+    throw new Error('Database is not configured.');
   }
   
   try {
@@ -160,16 +148,8 @@ export const getProviderById = async (id: string): Promise<Provider | undefined>
   
 export const getFacilityById = async (id: string): Promise<Facility | undefined> => {
   if (!pool) {
-      console.warn('Database not configured. Falling back to mock data for getFacilityById.');
-      const mockFacility = mockFacilities.find(f => f.id === id);
-      if (!mockFacility) return undefined;
-      
-      const facility = deepCopy(mockFacility);
-      facility.reviews = (facility.reviews || []).map(review => {
-          const { bedsideManner, medicalAdherence, specialtyCare, ...facilityReview } = review;
-          return facilityReview;
-      });
-      return facility;
+      console.error('Database not configured. Could not fetch facility.');
+      throw new Error('Database is not configured.');
   }
 
   try {
