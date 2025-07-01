@@ -2,7 +2,7 @@
 "use client";
 
 import type { Review } from '@/lib/types';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { RatingStars } from '@/components/shared/RatingStars';
 import { formatDistanceToNow } from 'date-fns';
@@ -51,7 +51,6 @@ export function ReviewCard({ review }: ReviewCardProps) {
       <Card className="shadow-sm">
         <CardHeader className="flex flex-row items-start space-x-3 pb-3">
           <Avatar className="h-10 w-10 mt-1">
-            <AvatarImage alt={review.userName} data-ai-hint="user avatar" />
             <AvatarFallback>{review.userName?.substring(0, 2).toUpperCase() || 'U'}</AvatarFallback>
           </Avatar>
           <div className="flex-grow">
