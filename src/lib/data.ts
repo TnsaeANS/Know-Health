@@ -29,7 +29,6 @@ const mapDbRowToReview = (row: any): Review => {
     id: String(row.id),
     userId: row.user_id,
     userName: row.user_name,
-    userAvatarUrl: row.user_avatar_url,
     comment: row.comment || "",
     date: new Date(row.date).toISOString(),
     bedsideManner: row.bedside_manner,
@@ -90,7 +89,7 @@ async function fetchReviewsFromDB(query: string, params: string[]): Promise<Revi
 
 export const getProviders = async (): Promise<Provider[]> => {
   if (!pool) {
-    console.warn('Database not configured. Cannot fetch providers.');
+    console.warn('Database not configured. Cannot fetch providers. Returning empty array.');
     return [];
   }
   try {
@@ -104,7 +103,7 @@ export const getProviders = async (): Promise<Provider[]> => {
 
 export const getFacilities = async (): Promise<Facility[]> => {
   if (!pool) {
-    console.warn('Database not configured. Cannot fetch facilities.');
+    console.warn('Database not configured. Cannot fetch facilities. Returning empty array.');
     return [];
   }
   try {

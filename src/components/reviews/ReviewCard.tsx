@@ -48,7 +48,7 @@ export function ReviewCard({ review }: ReviewCardProps) {
       <Card className="shadow-sm">
         <CardHeader className="flex flex-row items-start space-x-3 pb-3">
           <Avatar className="h-10 w-10 mt-1">
-            <AvatarImage src={review.userAvatarUrl} alt={review.userName} data-ai-hint="user avatar" />
+            <AvatarImage alt={review.userName} data-ai-hint="user avatar" />
             <AvatarFallback>{review.userName?.substring(0, 2).toUpperCase() || 'U'}</AvatarFallback>
           </Avatar>
           <div className="flex-grow">

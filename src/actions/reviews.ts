@@ -17,7 +17,6 @@ const reviewFormSchema = z.object({
   facilityId: z.string().optional(),
   userId: z.string().min(1, { message: "User ID cannot be empty" }),
   userName: z.string().min(1, { message: "User name cannot be empty" }),
-  userAvatarUrl: z.string().url().optional(),
   bedsideManner: ratingSchema,
   medicalAdherence: ratingSchema,
   specialtyCare: ratingSchema,
@@ -62,7 +61,6 @@ export async function submitReviewAction(
     facilityId,
     userId,
     userName,
-    userAvatarUrl,
     bedsideManner,
     medicalAdherence,
     specialtyCare,
@@ -87,18 +85,17 @@ export async function submitReviewAction(
   try {
     const insertQuery = `
       INSERT INTO reviews (
-        user_id, user_name, user_avatar_url, comment,
+        user_id, user_name, comment,
         provider_id, facility_id,
         bedside_manner, medical_adherence, specialty_care,
         facility_quality, wait_time
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
     `;
 
     await pool.query(insertQuery, [
       userId,
       userName,
-      userAvatarUrl || null,
       comment || null,
       providerId || null,
       facilityId || null,
@@ -118,16 +115,18 @@ export async function submitReviewAction(
       success: true,
     };
   } catch (error: any) {
+    console.error('Database error on review submission:', error);
+
     if (error.code === '23505') { // Unique violation
         return {
             message: `You have already submitted a review for this ${providerId ? 'provider' : 'facility'}.`,
             success: false,
         };
     }
-
-    console.error('Database error on review submission:', error);
+    
+    const dbErrorMessage = error.message || 'An unknown database error occurred.';
     return {
-      message: 'A database error occurred. Please try again later.',
+      message: `Database Error: ${dbErrorMessage} Please try again later.`,
       success: false,
     };
   }

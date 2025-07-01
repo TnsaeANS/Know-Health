@@ -18,7 +18,6 @@ export interface Review {
   id: string;
   userId: string;
   userName:string;
-  userAvatarUrl?: string;
   comment: string;
   date: string; // ISO date string
   // Provider-specific ratings

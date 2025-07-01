@@ -120,7 +120,6 @@ export function ReviewForm({ entityId, entityType, onReviewSubmitted, reviews }:
             id: `optimistic-${Date.now()}`,
             userId: user.id,
             userName: user.name,
-            userAvatarUrl: user.avatarUrl,
             comment: comment,
             date: new Date().toISOString(),
             bedsideManner: ratings.bedsideManner > 0 ? ratings.bedsideManner : undefined,
@@ -225,7 +224,6 @@ export function ReviewForm({ entityId, entityType, onReviewSubmitted, reviews }:
           <input type="hidden" name={entityType === 'provider' ? 'providerId' : 'facilityId'} value={entityId} />
           <input type="hidden" name="userId" value={user.id} />
           <input type="hidden" name="userName" value={user.name} />
-          {user.avatarUrl && <input type="hidden" name="userAvatarUrl" value={user.avatarUrl} />}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {entityType === 'provider' && (

@@ -1,3 +1,4 @@
+
 import type { Provider, Facility, Review, User } from './types';
 import { DEFAULT_USER_AVATAR } from './constants';
 import { Stethoscope } from 'lucide-react';
@@ -7,7 +8,6 @@ export const mockReviews: Review[] = [
     id: 'review1',
     userId: 'user1',
     userName: 'Abebe Kebede',
-    userAvatarUrl: 'https://placehold.co/40x40.png?text=AK',
     comment: 'Excellent doctor, very knowledgeable and caring. Highly recommend!',
     date: '2024-05-10T10:00:00Z',
     bedsideManner: 5,
@@ -19,7 +19,6 @@ export const mockReviews: Review[] = [
     id: 'review2',
     userId: 'user2',
     userName: 'Fatuma Ahmed',
-    userAvatarUrl: 'https://placehold.co/40x40.png?text=FA',
     comment: 'Good experience, the facility was clean and staff were helpful. Waiting time was a bit long.',
     date: '2024-05-12T14:30:00Z',
     facilityQuality: 4,
@@ -40,7 +39,6 @@ export const mockReviews: Review[] = [
     id: 'review4',
     userId: 'user4',
     userName: 'Sara Berhanu',
-    userAvatarUrl: 'https://placehold.co/40x40.png?text=SB',
     comment: 'The best pediatrician in town! My kids love Dr. Alem.',
     date: '2024-05-15T11:00:00Z',
     bedsideManner: 5,
