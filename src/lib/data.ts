@@ -3,7 +3,6 @@
 
 import type { Provider, Facility, Review } from './types';
 import { pool } from './db';
-import { mockProviders, mockFacilities } from './mockData';
 
 function deepCopy<T>(obj: T): T {
   if (obj === null || typeof obj !== 'object') {
@@ -31,11 +30,11 @@ const mapDbRowToReview = (row: any): Review => {
     userName: row.user_name,
     comment: row.comment || "",
     date: new Date(row.date).toISOString(),
-    bedsideManner: row.bedside_manner,
-    medicalAdherence: row.medical_adherence,
-    specialtyCare: row.specialty_care,
-    facilityQuality: row.facility_quality,
-    waitTime: row.wait_time,
+    bedsideManner: row.bedside_manner ?? undefined,
+    medicalAdherence: row.medical_adherence ?? undefined,
+    specialtyCare: row.specialty_care ?? undefined,
+    facilityQuality: row.facility_quality ?? undefined,
+    waitTime: row.wait_time ?? undefined,
   };
 };
 
