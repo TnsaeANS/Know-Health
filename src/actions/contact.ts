@@ -1,6 +1,9 @@
+
 "use server";
 
 import { z } from 'zod';
+import { pool } from '@/lib/db';
+import { revalidatePath } from 'next/cache';
 
 const contactFormSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters' }),
@@ -20,6 +23,10 @@ export async function submitContactForm(
   prevState: ContactFormState,
   data: FormData
 ): Promise<ContactFormState> {
+  if (!pool) {
+    return { message: 'Database is not configured. Could not send message.', success: false };
+  }
+
   const formData = Object.fromEntries(data);
   const parsed = contactFormSchema.safeParse(formData);
 
@@ -32,23 +39,26 @@ export async function submitContactForm(
     };
   }
 
-  // Simulate sending email or saving to database
-  console.log('Contact form submitted:', parsed.data);
-  // In a real app, you would integrate with an email service or database here.
+  const { name, email, subject, message } = parsed.data;
 
-  // Simulate a delay
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  
-  // Simulate potential server error (uncomment to test)
-  // if (Math.random() > 0.5) {
-  //   return {
-  //     message: "Failed to send message due to a server error. Please try again later.",
-  //     success: false,
-  //   };
-  // }
+  try {
+    const insertQuery = `
+      INSERT INTO messages (name, email, subject, message)
+      VALUES ($1, $2, $3, $4)
+    `;
+    await pool.query(insertQuery, [name, email, subject, message]);
 
-  return {
-    message: 'Thank you for your message! We will get back to you soon.',
-    success: true,
-  };
+    revalidatePath('/admin/messages');
+    
+    return {
+      message: 'Thank you for your message! We will get back to you soon.',
+      success: true,
+    };
+  } catch (error) {
+    console.error('Database error on contact form submission:', error);
+    return {
+      message: 'A database error occurred. Please try again later.',
+      success: false,
+    };
+  }
 }

@@ -1,3 +1,4 @@
+
 import type { LucideIcon } from 'lucide-react';
 
 export interface NavItem {
@@ -16,7 +17,7 @@ export interface User {
 export interface Review {
   id: string;
   userId: string;
-  userName: string;
+  userName:string;
   userAvatarUrl?: string;
   comment: string;
   date: string; // ISO date string
@@ -68,4 +69,14 @@ export interface Facility {
 export interface FilterOption {
   value: string;
   label: string;
+}
+
+export interface ContactMessage {
+  id: number;
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+  created_at: string; // ISO date string
+  is_read: boolean;
 }

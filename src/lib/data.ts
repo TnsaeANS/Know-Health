@@ -92,29 +92,31 @@ async function fetchReviewsFromDB(query: string, params: string[]): Promise<Revi
 
 export const getProviders = async (): Promise<Provider[]> => {
   if (!pool) {
-    console.warn('DB not configured, returning mock providers.');
-    return deepCopy(mockProviders);
+    console.warn('Database not configured. Cannot fetch providers.');
+    return [];
   }
   try {
     const result = await pool.query('SELECT * FROM providers ORDER BY name');
     return result.rows.map(mapDbRowToProvider);
   } catch (error) {
-    console.error('Failed to fetch providers from DB:', error);
-    throw new Error('Could not fetch providers from the database.');
+    console.error('Failed to fetch providers from DB for featured section. Returning empty array.', error);
+    // Return empty array to prevent homepage from crashing if DB is unavailable.
+    return [];
   }
 };
 
 export const getFacilities = async (): Promise<Facility[]> => {
   if (!pool) {
-    console.warn('DB not configured, returning mock facilities.');
-    return deepCopy(mockFacilities);
+    console.warn('Database not configured. Cannot fetch facilities.');
+    return [];
   }
   try {
     const result = await pool.query('SELECT * FROM facilities ORDER BY name');
     return result.rows.map(mapDbRowToFacility);
   } catch (error) {
-    console.error('Failed to fetch facilities from DB:', error);
-    throw new Error('Could not fetch facilities from the database.');
+    console.error('Failed to fetch facilities from DB for featured section. Returning empty array.', error);
+    // Return empty array to prevent homepage from crashing if DB is unavailable.
+    return [];
   }
 };
 

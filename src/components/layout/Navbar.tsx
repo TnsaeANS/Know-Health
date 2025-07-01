@@ -6,7 +6,7 @@ import { NAV_LINKS } from '@/lib/constants';
 import Logo from './Logo';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { Menu, UserCircle } from 'lucide-react';
+import { Menu, UserCircle, Inbox } from 'lucide-react';
 import type { NavItem as NavItemType } from '@/lib/types';
 import { useAuth } from '@/context/AuthContext';
 import {
@@ -55,6 +55,12 @@ export function Navbar() {
           <Link href="/account">
             <UserCircle className="mr-2 h-4 w-4" />
             <span>My Account</span>
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href="/admin/messages">
+            <Inbox className="mr-2 h-4 w-4" />
+            <span>View Messages</span>
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
@@ -118,6 +124,9 @@ export function Navbar() {
                      <Button variant="outline" className="w-full" asChild>
                         <Link href="/account">My Account</Link>
                       </Button>
+                     <Button variant="outline" className="w-full" asChild>
+                        <Link href="/admin/messages">View Messages</Link>
+                      </Button>
                     <Button variant="destructive" className="w-full" onClick={logout}>
                       Logout
                     </Button>
@@ -140,4 +149,3 @@ export function Navbar() {
     </header>
   );
 }
-
