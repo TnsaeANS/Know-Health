@@ -92,8 +92,28 @@ export const getProviders = async (): Promise<Provider[]> => {
     return [];
   }
   try {
-    const result = await pool.query('SELECT * FROM providers ORDER BY name');
-    return result.rows.map(mapDbRowToProvider);
+    const providersResult = await pool.query('SELECT * FROM providers ORDER BY name');
+    
+    const allReviewsResult = await pool.query('SELECT * FROM reviews WHERE provider_id IS NOT NULL');
+    const reviewsByProvider = new Map<string, Review[]>();
+
+    for (const row of allReviewsResult.rows) {
+      if (!reviewsByProvider.has(row.provider_id)) {
+        reviewsByProvider.set(row.provider_id, []);
+      }
+      reviewsByProvider.get(row.provider_id)!.push(mapDbRowToReview(row));
+    }
+
+    const providersWithReviews = providersResult.rows.map(row => {
+      const provider = mapDbRowToProvider(row);
+      provider.reviews = (reviewsByProvider.get(provider.id) || []).map(review => {
+        const { facilityQuality, ...providerReview } = review;
+        return providerReview as Review;
+      });
+      return provider;
+    });
+
+    return providersWithReviews;
   } catch (error) {
     console.warn('Could not fetch providers from DB. This is expected if the database is not configured locally. Returning empty array.');
     return [];
@@ -106,8 +126,28 @@ export const getFacilities = async (): Promise<Facility[]> => {
     return [];
   }
   try {
-    const result = await pool.query('SELECT * FROM facilities ORDER BY name');
-    return result.rows.map(mapDbRowToFacility);
+    const facilitiesResult = await pool.query('SELECT * FROM facilities ORDER BY name');
+      
+    const allReviewsResult = await pool.query('SELECT * FROM reviews WHERE facility_id IS NOT NULL');
+    const reviewsByFacility = new Map<string, Review[]>();
+  
+    for (const row of allReviewsResult.rows) {
+      if (!reviewsByFacility.has(row.facility_id)) {
+        reviewsByFacility.set(row.facility_id, []);
+      }
+      reviewsByFacility.get(row.facility_id)!.push(mapDbRowToReview(row));
+    }
+  
+    const facilitiesWithReviews = facilitiesResult.rows.map(row => {
+      const facility = mapDbRowToFacility(row);
+      facility.reviews = (reviewsByFacility.get(facility.id) || []).map(review => {
+        const { bedsideManner, medicalAdherence, specialtyCare, ...facilityReview } = review;
+        return facilityReview as Review;
+      });
+      return facility;
+    });
+  
+    return facilitiesWithReviews;
   } catch (error) {
     console.warn('Could not fetch facilities from DB. This is expected if the database is not configured locally. Returning empty array.');
     return [];
