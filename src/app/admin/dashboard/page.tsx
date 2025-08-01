@@ -9,8 +9,8 @@ import { PageWrapper } from '@/components/ui/PageWrapper';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, ShieldAlert, Inbox, Check, Trash2, Quote, Users, MessageSquareWarning } from 'lucide-react';
-import { getReportedReviews, getMessageCounts as getDbMessageCounts } from '@/lib/data';
+import { Loader2, ShieldAlert, Inbox, Check, Trash2, Quote, Users, MessageSquareWarning, Hospital, Star } from 'lucide-react';
+import { getReportedReviews, getMessageCounts as getDbMessageCounts, getTotalReviewsCount, getTotalFacilitiesCount } from '@/lib/data';
 import type { ReportedReview } from '@/lib/types';
 import { ReviewCard } from '@/components/reviews/ReviewCard';
 import { approveReviewAction, deleteReportedReviewAction, type ModerationResult } from '@/actions/report';
@@ -99,7 +99,11 @@ export default function AdminDashboardPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
   const [reportedReviews, setReportedReviews] = useState<ReportedReview[]>([]);
-  const [messageCounts, setMessageCounts] = useState<{unread: number, total: number}>({unread: 0, total: 0});
+  const [stats, setStats] = useState({
+      unreadMessages: 0,
+      totalReviews: 0,
+      totalFacilities: 0,
+  });
   const [isLoading, setIsLoading] = useState(true);
 
   const isAuthorized = !loading && user?.email === 'hellos@gmail.com';
@@ -113,10 +117,16 @@ export default function AdminDashboardPage() {
       setIsLoading(true);
       Promise.all([
         getReportedReviews(),
-        getDbMessageCounts()
-      ]).then(([reviews, counts]) => {
+        getDbMessageCounts(),
+        getTotalReviewsCount(),
+        getTotalFacilitiesCount(),
+      ]).then(([reviews, msgCounts, reviewsCount, facilitiesCount]) => {
         setReportedReviews(reviews);
-        setMessageCounts(counts);
+        setStats({
+            unreadMessages: msgCounts.unread,
+            totalReviews: reviewsCount,
+            totalFacilities: facilitiesCount,
+        });
       }).catch(console.error)
        .finally(() => setIsLoading(false));
     }
@@ -150,7 +160,7 @@ export default function AdminDashboardPage() {
     <PageWrapper>
       <PageHeader title="Admin Dashboard" description="Oversee and moderate platform activity." />
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mb-8">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mb-8">
         <StatCard 
             title="Reviews for Moderation" 
             value={reportedReviews.length} 
@@ -158,15 +168,19 @@ export default function AdminDashboardPage() {
         />
         <StatCard 
             title="Unread Messages" 
-            value={messageCounts.unread} 
+            value={stats.unreadMessages} 
             icon={<Inbox className="h-4 w-4 text-muted-foreground" />}
             action={<Button asChild size="sm" variant="link" className="p-0 h-auto"><Link href="/admin/messages">View Messages</Link></Button>}
         />
-        {/* Placeholder for future stats */}
         <StatCard 
-            title="Total Users" 
-            value="N/A" 
-            icon={<Users className="h-4 w-4 text-muted-foreground" />} 
+            title="Total Reviews" 
+            value={stats.totalReviews} 
+            icon={<Star className="h-4 w-4 text-muted-foreground" />} 
+        />
+        <StatCard 
+            title="Total Facilities" 
+            value={stats.totalFacilities} 
+            icon={<Hospital className="h-4 w-4 text-muted-foreground" />} 
         />
       </div>
 

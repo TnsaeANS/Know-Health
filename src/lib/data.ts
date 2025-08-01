@@ -242,6 +242,27 @@ export async function getReportedReviews(): Promise<ReportedReview[]> {
   }
 }
 
+export async function getTotalReviewsCount(): Promise<number> {
+    if (!pool) return 0;
+    try {
+        const result = await pool.query("SELECT COUNT(*) FROM reviews");
+        return parseInt(result.rows[0].count, 10);
+    } catch (error) {
+        console.error('Failed to fetch total reviews count:', error);
+        return 0;
+    }
+}
+
+export async function getTotalFacilitiesCount(): Promise<number> {
+    if (!pool) return 0;
+    try {
+        const result = await pool.query("SELECT COUNT(*) FROM facilities");
+        return parseInt(result.rows[0].count, 10);
+    } catch (error) {
+        console.error('Failed to fetch total facilities count:', error);
+        return 0;
+    }
+}
 
 export async function getMessageCounts(): Promise<{ unread: number; total: number }> {
     if (!pool) {
