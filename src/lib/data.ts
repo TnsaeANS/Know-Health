@@ -30,6 +30,8 @@ const mapDbRowToReview = (row: any): Review => {
     userName: row.user_name,
     comment: row.comment || "",
     date: new Date(row.date).toISOString(),
+    providerId: row.provider_id ?? undefined,
+    facilityId: row.facility_id ?? undefined,
     bedsideManner: row.bedside_manner ?? undefined,
     medicalAdherence: row.medical_adherence ?? undefined,
     specialtyCare: row.specialty_care ?? undefined,
@@ -213,3 +215,4 @@ export const getFacilityById = async (id: string): Promise<Facility | undefined>
     throw new Error('Could not fetch facility details from the database.');
   }
 };
+

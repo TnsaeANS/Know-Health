@@ -6,7 +6,7 @@ import { PageWrapper } from '@/components/ui/PageWrapper';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -37,6 +37,14 @@ export default function AccountPage() {
         });
     }
   }, [user, loading, router]);
+  
+  const handleReviewDeleted = useCallback((reviewId: string) => {
+    setUserReviews(prev => prev.filter(r => r.id !== reviewId));
+  }, []);
+
+  const handleReviewUpdated = useCallback((updatedReview: Review) => {
+    setUserReviews(prev => prev.map(r => r.id === updatedReview.id ? updatedReview : r));
+  }, []);
 
   if (loading) {
     return (
@@ -96,7 +104,13 @@ export default function AccountPage() {
                  </div>
               ) : userReviews.length > 0 ? (
                 <div className="space-y-4">
-                  {userReviews.map(review => <ReviewCard key={review.id} review={review} />)}
+                  {userReviews.map(review => 
+                    <ReviewCard 
+                      key={review.id} 
+                      review={review}
+                      onReviewDeleted={handleReviewDeleted}
+                      onReviewUpdated={handleReviewUpdated}
+                    />)}
                 </div>
               ) : (
                 <p className="text-muted-foreground">You haven't submitted any reviews yet.</p>

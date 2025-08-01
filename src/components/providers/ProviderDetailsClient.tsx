@@ -26,6 +26,14 @@ export default function ProviderDetailsClient({ providerId, initialReviews }: Pr
     setReviews(prevReviews => [newReview, ...prevReviews]);
   }, []);
 
+  const handleReviewDeleted = useCallback((reviewId: string) => {
+    setReviews(prevReviews => prevReviews.filter(r => r.id !== reviewId));
+  }, []);
+  
+  const handleReviewUpdated = useCallback((updatedReview: Review) => {
+    setReviews(prevReviews => prevReviews.map(r => r.id === updatedReview.id ? updatedReview : r));
+  }, []);
+
 
   return (
     <div className="space-y-8">
@@ -36,7 +44,11 @@ export default function ProviderDetailsClient({ providerId, initialReviews }: Pr
         onReviewSubmitted={handleReviewSubmitted} 
         reviews={reviews}
       />
-      <ReviewList reviews={reviews} />
+      <ReviewList 
+        reviews={reviews} 
+        onReviewDeleted={handleReviewDeleted}
+        onReviewUpdated={handleReviewUpdated}
+      />
     </div>
   );
 }

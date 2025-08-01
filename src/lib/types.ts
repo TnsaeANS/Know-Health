@@ -20,12 +20,19 @@ export interface Review {
   userName:string;
   comment: string;
   date: string; // ISO date string
+  
+  // Entity IDs
+  providerId?: string;
+  facilityId?: string;
+  
   // Provider-specific ratings
   bedsideManner?: number; // 1-5
   medicalAdherence?: number; // 1-5
   specialtyCare?: number; // 1-5
+  
   // Facility-specific ratings
   facilityQuality?: number; // 1-5
+
   // Common ratings
   waitTime?: number; // 1-5
 }
