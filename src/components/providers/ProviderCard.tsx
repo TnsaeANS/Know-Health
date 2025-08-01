@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { RatingStars } from '@/components/shared/RatingStars';
-import { MapPin, Stethoscope, HeartHandshake, ShieldCheck, Clock } from 'lucide-react';
+import { MapPin, Stethoscope, HeartHandshake, ShieldCheck, Clock, MessageSquarePlus } from 'lucide-react';
 import { SPECIALTY_ICONS } from '@/lib/constants';
 
 interface ProviderCardProps {
@@ -88,9 +88,15 @@ export function ProviderCard({ provider }: ProviderCardProps) {
           {provider.bio}
         </p>
       </CardContent>
-      <CardFooter className="p-4 border-t">
+      <CardFooter className="p-4 border-t grid grid-cols-2 gap-2">
         <Button asChild className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
           <Link href={`/providers/${provider.id}`}>View Profile</Link>
+        </Button>
+        <Button asChild variant="outline" className="w-full">
+            <Link href={`/providers/${provider.id}#leave-review`}>
+                <MessageSquarePlus className="mr-2 h-4 w-4" />
+                Leave a review
+            </Link>
         </Button>
       </CardFooter>
     </Card>

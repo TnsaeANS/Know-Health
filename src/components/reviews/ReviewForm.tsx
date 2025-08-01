@@ -156,7 +156,7 @@ export function ReviewForm({ entityId, entityType, onReviewSubmitted, reviews, e
   if (userHasAlreadyReviewed) {
     const userReview = reviews?.find(review => review.userId === user?.id);
     return (
-      <Card className="mt-8 shadow-lg">
+      <Card className="mt-8 shadow-lg" id="leave-review">
         <CardHeader>
           <CardTitle className="font-headline text-xl">Thank You for Your Feedback!</CardTitle>
         </CardHeader>
@@ -170,7 +170,7 @@ export function ReviewForm({ entityId, entityType, onReviewSubmitted, reviews, e
 
   if (!user) {
     return (
-      <Card className="mt-8 shadow-lg">
+      <Card className="mt-8 shadow-lg" id="leave-review">
         <CardHeader>
           <CardTitle className="font-headline text-xl">Leave a Review</CardTitle>
         </CardHeader>
@@ -224,7 +224,7 @@ export function ReviewForm({ entityId, entityType, onReviewSubmitted, reviews, e
   ];
 
   return (
-    <Card className="mt-8 shadow-lg">
+    <Card className="mt-8 shadow-lg" id="leave-review">
       <CardHeader>
         <CardTitle className="font-headline text-xl">{isEditing ? 'Edit Your Review' : 'Leave a Review'}</CardTitle>
         {!isEditing && <CardDescription>Share your experience to help others. Rate the criteria below and optionally leave a comment.</CardDescription>}
