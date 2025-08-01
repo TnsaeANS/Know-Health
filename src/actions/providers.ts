@@ -30,6 +30,9 @@ export async function submitProviderAction(
   prevState: ProviderFormState,
   data: FormData
 ): Promise<ProviderFormState> {
+  // Simulate network delay
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  
   if (!pool) {
     return { message: 'Database is not configured. Could not add provider.', success: false };
   }
@@ -60,7 +63,7 @@ export async function submitProviderAction(
   const { name, specialty, location, bio, languages, qualifications, contactPhone, contactEmail, contactAddress } = parsed.data;
 
   const newId = `provider-${randomUUID()}`;
-  const photoUrl = `https://placehold.co/300x300.png?text=${name.substring(0,2)}`;
+  const photoUrl = `https://placehold.co/300x300.png`;
 
   const qualificationsArray = qualifications?.split(',').map(q => q.trim()).filter(Boolean) || [];
 

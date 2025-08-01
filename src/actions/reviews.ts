@@ -35,6 +35,9 @@ export async function submitReviewAction(
   prevState: ReviewFormState,
   data: FormData
 ): Promise<ReviewFormState> {
+  // Simulate network delay
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  
   if (!pool) {
     return { message: 'Database is not configured. Could not submit review.', success: false };
   }

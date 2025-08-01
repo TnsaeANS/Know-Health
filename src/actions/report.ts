@@ -42,7 +42,7 @@ export async function submitReportAction(
   console.log('Review reported:', parsed.data);
 
   // Simulate a delay
-  await new Promise(resolve => setTimeout(resolve, 700));
+  await new Promise(resolve => setTimeout(resolve, 1000));
   
   // Simulate potential server error (uncomment to test)
   // if (Math.random() > 0.8) {

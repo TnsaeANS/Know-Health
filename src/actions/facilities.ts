@@ -30,6 +30,9 @@ export async function submitFacilityAction(
   prevState: FacilityFormState,
   data: FormData
 ): Promise<FacilityFormState> {
+  // Simulate network delay
+  await new Promise(resolve => setTimeout(resolve, 1000));
+
   if (!pool) {
     return { message: 'Database is not configured. Could not add facility.', success: false };
   }
@@ -60,7 +63,7 @@ export async function submitFacilityAction(
   const { name, type, location, description, servicesOffered, amenities, contactPhone, contactEmail, contactAddress } = parsed.data;
 
   const newId = `facility-${randomUUID()}`;
-  const photoUrl = `https://placehold.co/400x300.png?text=${name.substring(0, 2)}`;
+  const photoUrl = `https://placehold.co/400x300.png`;
 
   const insertQuery = `
     INSERT INTO facilities (
