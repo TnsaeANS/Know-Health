@@ -39,7 +39,7 @@ export async function submitProviderAction(
   }
 
   const formData = {
-      id: data.get('id'),
+      id: data.get('id') || undefined,
       name: data.get('name'),
       specialty: data.get('specialty'),
       location: data.get('location'),

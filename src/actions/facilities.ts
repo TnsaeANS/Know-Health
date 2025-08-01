@@ -39,7 +39,7 @@ export async function submitFacilityAction(
   }
 
   const formData = {
-    id: data.get('id'),
+    id: data.get('id') || undefined,
     name: data.get('name'),
     type: data.get('type'),
     location: data.get('location'),

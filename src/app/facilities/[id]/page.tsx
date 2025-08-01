@@ -13,8 +13,8 @@ import { FACILITY_TYPE_ICONS } from '@/lib/constants';
 
 // These pages are dynamic and should not be statically generated.
 
-export default async function FacilityProfilePage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+export default async function FacilityProfilePage({ params, searchParams }: { params: { id: string }, searchParams?: { [key: string]: string | string[] | undefined } }) {
+  const { id } = params;
 
   const facility = await getFacilityById(id);
   if (!facility) {
@@ -83,7 +83,7 @@ export default async function FacilityProfilePage({ params }: { params: Promise<
 
         {/* Right Column: Tabs for Details */}
         <div className="md:col-span-2">
-          <Tabs defaultValue="overview" className="w-full">
+          <Tabs defaultValue="overview" className="w-full" key={id}>
             <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-4 mb-6"> {/* Adjusted grid-cols */}
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="reviews">Reviews</TabsTrigger>

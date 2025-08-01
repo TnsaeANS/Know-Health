@@ -2,10 +2,51 @@
 
 import * as React from "react"
 import * as TabsPrimitive from "@radix-ui/react-tabs"
+import { useSearchParams } from "next/navigation";
 
 import { cn } from "@/lib/utils"
 
-const Tabs = TabsPrimitive.Root
+const Tabs = React.forwardRef<
+  React.ElementRef<typeof TabsPrimitive.Root>,
+  React.ComponentPropsWithoutRef<typeof TabsPrimitive.Root>
+>(({ defaultValue, ...props }, ref) => {
+  const searchParams = useSearchParams();
+  const tab = searchParams.get("tab");
+  const [activeTab, setActiveTab] = React.useState(tab || defaultValue);
+
+  React.useEffect(() => {
+    // This part handles updating the tab if the URL hash changes
+    // after the component has already mounted.
+    const handleHashChange = () => {
+      const hash = window.location.hash;
+      if (hash === '#leave-review') {
+        setActiveTab('reviews');
+      }
+    };
+
+    // Check initial hash
+    if (window.location.hash === '#leave-review') {
+      setActiveTab('reviews');
+    }
+    
+    window.addEventListener('hashchange', handleHashChange, false);
+    return () => {
+      window.removeEventListener('hashchange', handleHashChange, false);
+    };
+  }, []);
+
+  return (
+    <TabsPrimitive.Root
+      ref={ref}
+      value={activeTab}
+      onValueChange={setActiveTab}
+      defaultValue={defaultValue}
+      {...props}
+    />
+  )
+})
+Tabs.displayName = TabsPrimitive.Root.displayName
+
 
 const TabsList = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.List>,

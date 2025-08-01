@@ -12,8 +12,8 @@ import { SPECIALTY_ICONS } from '@/lib/constants';
 
 // These pages are dynamic and should not be statically generated.
 
-export default async function ProviderProfilePage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+export default async function ProviderProfilePage({ params, searchParams }: { params: { id: string }, searchParams?: { [key: string]: string | string[] | undefined } }) {
+  const { id } = params;
   const provider = await getProviderById(id);
 
   if (!provider) {
@@ -77,7 +77,7 @@ export default async function ProviderProfilePage({ params }: { params: Promise<
 
         {/* Right Column: Tabs for Details */}
         <div className="md:col-span-2">
-          <Tabs defaultValue="overview" className="w-full">
+          <Tabs defaultValue="overview" className="w-full" key={id}>
             <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 mb-6">
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="reviews">Reviews</TabsTrigger>
