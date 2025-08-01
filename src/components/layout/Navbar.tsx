@@ -6,7 +6,7 @@ import { NAV_LINKS } from '@/lib/constants';
 import Logo from './Logo';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { Menu, UserCircle, Inbox, ShieldCheck } from 'lucide-react';
+import { Menu, UserCircle, Inbox, ShieldCheck, Loader2 } from 'lucide-react';
 import type { NavItem as NavItemType } from '@/lib/types';
 import { useAuth } from '@/context/AuthContext';
 import {
@@ -21,6 +21,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useEffect, useState } from 'react';
 import { getMessageCounts } from '@/actions/messages';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useRouter } from 'next/navigation';
 
 const NavItem = ({ item }: { item: NavItemType }) => (
   <Button asChild variant="ghost" className="text-foreground hover:bg-primary/10 hover:text-primary transition-colors px-3 py-2 rounded-md text-sm font-medium">
@@ -33,6 +34,8 @@ const NavItem = ({ item }: { item: NavItemType }) => (
 
 export function Navbar() {
   const { user, logout, loading } = useAuth();
+  const router = useRouter();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [unreadMessages, setUnreadMessages] = useState(0);
 
   const isAdmin = user?.email === 'hellos@gmail.com';
@@ -49,6 +52,13 @@ export function Navbar() {
       return () => clearInterval(interval);
     }
   }, [isAdmin]);
+
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    await logout();
+    router.push('/');
+    setIsLoggingOut(false);
+  };
 
   const UserMenu = () => (
     <DropdownMenu>
@@ -98,8 +108,8 @@ export function Navbar() {
           </>
         )}
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={logout}>
-          {/* <LogOut className="mr-2 h-4 w-4" /> */}
+        <DropdownMenuItem onClick={handleLogout} disabled={isLoggingOut}>
+          {isLoggingOut && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           <span>Log out</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
@@ -117,7 +127,9 @@ export function Navbar() {
           ))}
         </nav>
         <div className="hidden md:flex items-center space-x-2">
-          {user ? (
+          {loading ? (
+             <Skeleton className="h-10 w-24" />
+          ) : user ? (
             <UserMenu />
           ) : (
             <>
@@ -180,7 +192,8 @@ export function Navbar() {
                             </Button>
                         </>
                      )}
-                    <Button variant="destructive" className="w-full" onClick={logout}>
+                    <Button variant="destructive" className="w-full" onClick={handleLogout} disabled={isLoggingOut}>
+                       {isLoggingOut && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                       Logout
                     </Button>
                   </div>
