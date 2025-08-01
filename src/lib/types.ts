@@ -20,6 +20,7 @@ export interface Review {
   userName:string;
   comment: string;
   date: string; // ISO date string
+  status: 'published' | 'under_review' | 'hidden';
   
   // Entity IDs
   providerId?: string;
@@ -35,6 +36,12 @@ export interface Review {
 
   // Common ratings
   waitTime?: number; // 1-5
+}
+
+export interface ReportedReview extends Review {
+  reportReason: string;
+  reportId: number;
+  reporterUserId: string;
 }
 
 export interface Provider {

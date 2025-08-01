@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { RatingStars } from '@/components/shared/RatingStars';
 import { formatDistanceToNow } from 'date-fns';
-import { HeartHandshake, Stethoscope, Clock, ShieldCheck, Building, Flag, Edit, Trash2, Loader2 } from 'lucide-react';
+import { HeartHandshake, Stethoscope, Clock, ShieldCheck, Building, Flag, Edit, Trash2, Loader2, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useState, useCallback } from 'react';
 import ReportReviewDialog from './ReportReviewDialog';
@@ -56,11 +56,12 @@ export function ReviewCard({ review, onReviewDeleted, onReviewUpdated }: ReviewC
   const timeAgo = review.date ? formatDistanceToNow(new Date(review.date), { addSuffix: true }) : '';
   
   const isAuthor = user?.id === review.userId;
+  const isUnderReview = review.status === 'under_review';
 
-  const handleOpenReportDialog = () => {
+  const handleOpenReportDialog = useCallback(() => {
     setDialogKey(`dialog-${review.id}-${Date.now()}`);
     setIsReportDialogOpen(true);
-  };
+  }, [review.id]);
   
   const handleReportDialogChange = useCallback((open: boolean) => {
     setIsReportDialogOpen(open);
@@ -102,7 +103,7 @@ export function ReviewCard({ review, onReviewDeleted, onReviewUpdated }: ReviewC
 
   return (
     <>
-      <Card className="shadow-sm">
+      <Card className={`shadow-sm ${isUnderReview ? 'bg-yellow-50 border-yellow-200' : ''}`}>
         <CardHeader className="flex flex-row items-start space-x-3 pb-3">
           <Avatar className="h-10 w-10 mt-1">
             <AvatarFallback>{review.userName?.substring(0, 2).toUpperCase() || 'U'}</AvatarFallback>
@@ -118,12 +119,13 @@ export function ReviewCard({ review, onReviewDeleted, onReviewUpdated }: ReviewC
                 size="icon" 
                 className="h-8 w-8"
                 onClick={() => setIsEditing(true)}
+                disabled={isUnderReview}
               >
                 <Edit size={16} />
               </Button>
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 hover:text-destructive">
+                    <Button variant="ghost" size="icon" className="h-8 w-8 hover:text-destructive" disabled={isDeleting}>
                         <Trash2 size={16} />
                     </Button>
                 </AlertDialogTrigger>
@@ -144,7 +146,7 @@ export function ReviewCard({ review, onReviewDeleted, onReviewUpdated }: ReviewC
                 </AlertDialogContent>
               </AlertDialog>
             </div>
-          ) : user && (
+          ) : user && !isUnderReview && (
             <Button 
               variant="ghost" 
               size="icon" 
@@ -157,6 +159,12 @@ export function ReviewCard({ review, onReviewDeleted, onReviewUpdated }: ReviewC
           )}
         </CardHeader>
         <CardContent>
+           {isUnderReview && (
+            <div className="mb-4 rounded-md border border-yellow-300 bg-yellow-100 p-3 text-sm text-yellow-800 flex items-center">
+              <AlertCircle className="h-4 w-4 mr-2" />
+              This review is currently under review by our moderation team.
+            </div>
+          )}
           {review.comment && (
             <p className="text-sm text-foreground leading-relaxed mb-4 whitespace-pre-line">{review.comment}</p>
           )}
@@ -180,4 +188,3 @@ export function ReviewCard({ review, onReviewDeleted, onReviewUpdated }: ReviewC
     </>
   );
 }
-

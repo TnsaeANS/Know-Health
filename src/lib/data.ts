@@ -1,27 +1,8 @@
 
 'use server';
 
-import type { Provider, Facility, Review } from './types';
+import type { Provider, Facility, Review, ReportedReview } from './types';
 import { pool } from './db';
-
-function deepCopy<T>(obj: T): T {
-  if (obj === null || typeof obj !== 'object') {
-    return obj;
-  }
-  if (obj instanceof Date) {
-    return new Date(obj.getTime()) as any;
-  }
-  if (Array.isArray(obj)) {
-    return obj.map(item => deepCopy(item)) as any;
-  }
-  const copiedObject = {} as { [key: string]: any };
-  for (const key in obj) {
-    if (Object.prototype.hasOwnProperty.call(obj, key)) {
-      copiedObject[key] = deepCopy(obj[key]);
-    }
-  }
-  return copiedObject as T;
-}
 
 const mapDbRowToReview = (row: any): Review => {
   return {
@@ -30,6 +11,7 @@ const mapDbRowToReview = (row: any): Review => {
     userName: row.user_name,
     comment: row.comment || "",
     date: new Date(row.date).toISOString(),
+    status: row.status || 'published',
     providerId: row.provider_id ?? undefined,
     facilityId: row.facility_id ?? undefined,
     bedsideManner: row.bedside_manner ?? undefined,
@@ -96,7 +78,8 @@ export const getProviders = async (): Promise<Provider[]> => {
   try {
     const providersResult = await pool.query('SELECT * FROM providers ORDER BY name');
     
-    const allReviewsResult = await pool.query('SELECT * FROM reviews WHERE provider_id IS NOT NULL');
+    // Only fetch published reviews
+    const allReviewsResult = await pool.query("SELECT * FROM reviews WHERE provider_id IS NOT NULL AND status = 'published'");
     const reviewsByProvider = new Map<string, Review[]>();
 
     for (const row of allReviewsResult.rows) {
@@ -130,7 +113,8 @@ export const getFacilities = async (): Promise<Facility[]> => {
   try {
     const facilitiesResult = await pool.query('SELECT * FROM facilities ORDER BY name');
       
-    const allReviewsResult = await pool.query('SELECT * FROM reviews WHERE facility_id IS NOT NULL');
+    // Only fetch published reviews
+    const allReviewsResult = await pool.query("SELECT * FROM reviews WHERE facility_id IS NOT NULL AND status = 'published'");
     const reviewsByFacility = new Map<string, Review[]>();
   
     for (const row of allReviewsResult.rows) {
@@ -169,8 +153,9 @@ export const getProviderById = async (id: string): Promise<Provider | undefined>
     }
     const provider = mapDbRowToProvider(result.rows[0]);
 
+    // Only fetch published reviews
     const reviews = await fetchReviewsFromDB(
-      'SELECT * FROM reviews WHERE provider_id = $1 ORDER BY date DESC',
+      "SELECT * FROM reviews WHERE provider_id = $1 AND status = 'published' ORDER BY date DESC",
       [id]
     );
     
@@ -199,8 +184,9 @@ export const getFacilityById = async (id: string): Promise<Facility | undefined>
     }
     const facility = mapDbRowToFacility(result.rows[0]);
     
+    // Only fetch published reviews
     const reviews = await fetchReviewsFromDB(
-      'SELECT * FROM reviews WHERE facility_id = $1 ORDER BY date DESC',
+      "SELECT * FROM reviews WHERE facility_id = $1 AND status = 'published' ORDER BY date DESC",
       [id]
     );
 
@@ -216,3 +202,42 @@ export const getFacilityById = async (id: string): Promise<Facility | undefined>
   }
 };
 
+export async function getReportedReviews(): Promise<ReportedReview[]> {
+  if (!pool) {
+    console.warn('Database not configured. Cannot fetch reported reviews.');
+    return [];
+  }
+  
+  try {
+    // Join reviews with the latest unresolved report for that review
+    const query = `
+      SELECT
+        r.*,
+        rep.id as report_id,
+        rep.reason as report_reason,
+        rep.reporter_user_id
+      FROM reviews r
+      JOIN (
+        SELECT review_id, MAX(created_at) as max_created_at
+        FROM reports
+        WHERE is_resolved = false
+        GROUP BY review_id
+      ) latest_reports ON r.id = latest_reports.review_id
+      JOIN reports rep ON r.id = rep.review_id AND rep.created_at = latest_reports.max_created_at
+      WHERE r.status = 'under_review'
+      ORDER BY rep.created_at ASC;
+    `;
+    const result = await pool.query(query);
+    
+    return result.rows.map(row => {
+      const review = mapDbRowToReview(row) as ReportedReview;
+      review.reportId = row.report_id;
+      review.reportReason = row.report_reason;
+      review.reporterUserId = row.reporter_user_id;
+      return review;
+    });
+  } catch (error) {
+    console.error('Failed to fetch reported reviews:', error);
+    return [];
+  }
+}

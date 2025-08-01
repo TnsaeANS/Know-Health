@@ -11,6 +11,7 @@ const mapDbRowToReview = (row: any): Review => {
     userName: row.user_name,
     comment: row.comment || "",
     date: new Date(row.date).toISOString(),
+    status: row.status || 'published',
     bedsideManner: row.bedside_manner ?? undefined,
     medicalAdherence: row.medical_adherence ?? undefined,
     specialtyCare: row.specialty_care ?? undefined,
@@ -26,6 +27,7 @@ export async function getReviewsByUserId(userId: string): Promise<Review[]> {
   }
 
   try {
+    // Fetches all reviews by user, regardless of status, so they can see their own reported reviews
     const query = 'SELECT * FROM reviews WHERE user_id = $1 ORDER BY date DESC';
     const result = await pool.query(query, [userId]);
     return result.rows.map(mapDbRowToReview);
