@@ -108,8 +108,14 @@ export default function AccountClientPage({ initialReviews, initialProviders, in
   }, [user, loading, router]);
   
   useEffect(() => {
-    fetchUserReviews();
-  }, [fetchUserReviews]);
+    // This effect runs when the page loads or when the user object changes.
+    // We already have initial data, but we can re-fetch for absolute freshness
+    // if we want to, though it might cause a flicker.
+    // For now, we rely on the initial data and the re-fetch logic in ReviewForm.
+    setUserReviews(initialReviews);
+    setUserProviders(initialProviders);
+    setUserFacilities(initialFacilities);
+  }, [initialReviews, initialProviders, initialFacilities]);
 
 
   const handleReviewDeleted = useCallback((reviewId: string) => {

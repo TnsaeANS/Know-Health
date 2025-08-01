@@ -37,6 +37,7 @@ const mapDbRowToProvider = (row: any): Provider => ({
   reviews: [], 
   location: row.location,
   qualifications: row.qualifications || [],
+  submitted_by_user_id: row.submitted_by_user_id,
 });
 
 const mapDbRowToFacility = (row: any): Facility => ({
@@ -55,6 +56,7 @@ const mapDbRowToFacility = (row: any): Facility => ({
     location: row.location,
     amenities: row.amenities || [],
     affiliatedProviderIds: row.affiliated_provider_ids || [],
+    submitted_by_user_id: row.submitted_by_user_id,
 });
 
 async function fetchReviewsFromDB(query: string, params: string[]): Promise<Review[]> {
@@ -303,5 +305,28 @@ export async function getMessageCounts(): Promise<{ unread: number; total: numbe
     } catch (error) {
         console.error('Failed to get message counts:', error);
         return { unread: 0, total: 0 };
+    }
+}
+
+
+export async function getProvidersByUserId(userId: string): Promise<Provider[]> {
+    if (!pool) return [];
+    try {
+        const result = await pool.query("SELECT * FROM providers WHERE submitted_by_user_id = $1 ORDER BY name", [userId]);
+        return result.rows.map(mapDbRowToProvider);
+    } catch (error) {
+        console.error('Failed to fetch providers by user ID:', error);
+        return [];
+    }
+}
+
+export async function getFacilitiesByUserId(userId: string): Promise<Facility[]> {
+    if (!pool) return [];
+    try {
+        const result = await pool.query("SELECT * FROM facilities WHERE submitted_by_user_id = $1 ORDER BY name", [userId]);
+        return result.rows.map(mapDbRowToFacility);
+    } catch (error) {
+        console.error('Failed to fetch facilities by user ID:', error);
+        return [];
     }
 }
