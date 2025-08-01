@@ -1,7 +1,7 @@
 
 'use server';
 
-import type { Provider, Facility, Review, ReportedReview } from './types';
+import type { Provider, Facility, Review, ReportedReview, ContactMessage } from './types';
 import { pool } from './db';
 
 const mapDbRowToReview = (row: any): Review => {
@@ -240,4 +240,24 @@ export async function getReportedReviews(): Promise<ReportedReview[]> {
     console.error('Failed to fetch reported reviews:', error);
     return [];
   }
+}
+
+
+export async function getMessageCounts(): Promise<{ unread: number; total: number }> {
+    if (!pool) {
+        return { unread: 0, total: 0 };
+    }
+    try {
+        const result = await pool.query(
+            "SELECT COUNT(*) as total, COUNT(*) FILTER (WHERE is_read = false) as unread FROM messages"
+        );
+        const { total = '0', unread = '0' } = result.rows[0] || {};
+        return {
+            total: parseInt(total, 10),
+            unread: parseInt(unread, 10),
+        };
+    } catch (error) {
+        console.error('Failed to get message counts:', error);
+        return { unread: 0, total: 0 };
+    }
 }

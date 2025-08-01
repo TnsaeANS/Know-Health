@@ -18,6 +18,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useEffect, useState } from 'react';
+import { getMessageCounts } from '@/actions/messages';
 
 const NavItem = ({ item }: { item: NavItemType }) => (
   <Button asChild variant="ghost" className="text-foreground hover:bg-primary/10 hover:text-primary transition-colors px-3 py-2 rounded-md text-sm font-medium">
@@ -30,13 +32,27 @@ const NavItem = ({ item }: { item: NavItemType }) => (
 
 export function Navbar() {
   const { user, logout } = useAuth();
+  const [unreadMessages, setUnreadMessages] = useState(0);
+
+  useEffect(() => {
+    if (user) {
+      const interval = setInterval(() => {
+        getMessageCounts().then(counts => setUnreadMessages(counts.unread));
+      }, 30000); // Poll every 30 seconds
+
+      // Initial fetch
+      getMessageCounts().then(counts => setUnreadMessages(counts.unread));
+
+      return () => clearInterval(interval);
+    }
+  }, [user]);
 
   const UserMenu = () => (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-10 w-10 rounded-full">
           <Avatar className="h-9 w-9">
-            <AvatarImage src={user?.avatarUrl || "https://placehold.co/40x40.png"} alt={user?.name} data-ai-hint="user avatar" />
+            <AvatarImage src={user?.avatarUrl || "https://placehold.co/40x40.png"} alt={user?.name || ''} data-ai-hint="user avatar" />
             <AvatarFallback>{user?.name?.substring(0,2).toUpperCase() || 'U'}</AvatarFallback>
           </Avatar>
         </Button>
@@ -64,9 +80,14 @@ export function Navbar() {
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link href="/admin/messages">
+          <Link href="/admin/messages" className="relative">
             <Inbox className="mr-2 h-4 w-4" />
             <span>View Messages</span>
+            {unreadMessages > 0 && (
+              <span className="absolute right-2 top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-xs text-destructive-foreground">
+                {unreadMessages}
+              </span>
+            )}
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
@@ -134,7 +155,14 @@ export function Navbar() {
                         <Link href="/admin/dashboard">Admin Dashboard</Link>
                       </Button>
                      <Button variant="outline" className="w-full" asChild>
-                        <Link href="/admin/messages">View Messages</Link>
+                        <Link href="/admin/messages" className="relative">
+                          View Messages
+                           {unreadMessages > 0 && (
+                            <span className="absolute right-4 top-1/2 -translate-y-1/2 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-xs text-destructive-foreground">
+                                {unreadMessages}
+                            </span>
+                            )}
+                        </Link>
                       </Button>
                     <Button variant="destructive" className="w-full" onClick={logout}>
                       Logout

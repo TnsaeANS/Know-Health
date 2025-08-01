@@ -9,8 +9,8 @@ import { PageWrapper } from '@/components/ui/PageWrapper';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, ShieldAlert, Inbox, Check, Trash2, Quote } from 'lucide-react';
-import { getReportedReviews } from '@/lib/data';
+import { Loader2, ShieldAlert, Inbox, Check, Trash2, Quote, Users, MessageSquareWarning } from 'lucide-react';
+import { getReportedReviews, getMessageCounts as getDbMessageCounts } from '@/lib/data';
 import type { ReportedReview } from '@/lib/types';
 import { ReviewCard } from '@/components/reviews/ReviewCard';
 import { approveReviewAction, deleteReportedReviewAction, type ModerationResult } from '@/actions/report';
@@ -79,21 +79,42 @@ function ModerationCard({ review, onModerated }: { review: ReportedReview, onMod
   )
 }
 
+function StatCard({ title, value, icon, action }: { title: string, value: string | number, icon: React.ReactNode, action?: React.ReactNode }) {
+  return (
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-sm font-medium">{title}</CardTitle>
+        {icon}
+      </CardHeader>
+      <CardContent>
+        <div className="text-2xl font-bold">{value}</div>
+      </CardContent>
+      {action && <CardFooter>{action}</CardFooter>}
+    </Card>
+  )
+}
+
+
 export default function AdminDashboardPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
   const [reportedReviews, setReportedReviews] = useState<ReportedReview[]>([]);
-  const [isLoadingReviews, setIsLoadingReviews] = useState(true);
+  const [messageCounts, setMessageCounts] = useState<{unread: number, total: number}>({unread: 0, total: 0});
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (!loading && !user) {
       router.push('/login?redirect=/admin/dashboard');
     } else if (user) {
-      setIsLoadingReviews(true);
-      getReportedReviews()
-        .then(setReportedReviews)
-        .catch(console.error)
-        .finally(() => setIsLoadingReviews(false));
+      setIsLoading(true);
+      Promise.all([
+        getReportedReviews(),
+        getDbMessageCounts()
+      ]).then(([reviews, counts]) => {
+        setReportedReviews(reviews);
+        setMessageCounts(counts);
+      }).catch(console.error)
+       .finally(() => setIsLoading(false));
     }
   }, [user, loading, router]);
   
@@ -102,7 +123,7 @@ export default function AdminDashboardPage() {
   };
 
 
-  if (loading) {
+  if (loading || isLoading) {
     return (
       <PageWrapper className="flex items-center justify-center min-h-[calc(100vh-theme(spacing.32))]">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
@@ -123,17 +144,37 @@ export default function AdminDashboardPage() {
 
   return (
     <PageWrapper>
-      <PageHeader title="Admin Dashboard" description="Moderate reported reviews." />
+      <PageHeader title="Admin Dashboard" description="Oversee and moderate platform activity." />
+
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mb-8">
+        <StatCard 
+            title="Reviews for Moderation" 
+            value={reportedReviews.length} 
+            icon={<MessageSquareWarning className="h-4 w-4 text-muted-foreground" />} 
+        />
+        <StatCard 
+            title="Unread Messages" 
+            value={messageCounts.unread} 
+            icon={<Inbox className="h-4 w-4 text-muted-foreground" />}
+            action={<Button asChild size="sm" variant="link" className="p-0 h-auto"><Link href="/admin/messages">View Messages</Link></Button>}
+        />
+        {/* Placeholder for future stats */}
+        <StatCard 
+            title="Total Users" 
+            value="N/A" 
+            icon={<Users className="h-4 w-4 text-muted-foreground" />} 
+        />
+      </div>
 
       <Card>
         <CardHeader>
           <CardTitle>Review Moderation Queue</CardTitle>
           <CardDescription>
-            {reportedReviews.length} review(s) awaiting moderation.
+            {reportedReviews.length > 0 ? `${reportedReviews.length} review(s) awaiting moderation.` : "The queue is empty."}
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {isLoadingReviews ? (
+          {isLoading ? (
             <div className="flex justify-center items-center h-48">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
