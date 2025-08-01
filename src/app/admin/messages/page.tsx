@@ -32,6 +32,8 @@ export default function MessagesPage() {
   const [isLoadingMessages, setIsLoadingMessages] = useState(true);
   const [isPending, startTransition] = useTransition();
 
+  const isAuthorized = !loading && user?.email === 'hellos@gmail.com';
+
   const fetchMessages = () => {
       setIsLoadingMessages(true);
       getMessages()
@@ -43,10 +45,12 @@ export default function MessagesPage() {
   useEffect(() => {
     if (!loading && !user) {
       router.push('/login?redirect=/admin/messages');
-    } else if (user) {
+    } else if (user && user.email !== 'hellos@gmail.com') {
+      router.push('/'); // Redirect non-admins to homepage
+    } else if (isAuthorized) {
       fetchMessages();
     }
-  }, [user, loading, router]);
+  }, [user, loading, router, isAuthorized]);
   
   const handleMarkAsRead = (message: ContactMessage) => {
     if (message.is_read) return;
@@ -70,7 +74,7 @@ export default function MessagesPage() {
     });
   };
 
-  if (loading || isLoadingMessages) {
+  if (loading || isLoadingMessages || !isAuthorized) {
     return (
       <PageWrapper className="flex items-center justify-center min-h-[calc(100vh-theme(spacing.32))]">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
@@ -79,11 +83,12 @@ export default function MessagesPage() {
   }
 
   if (!user) {
+    // This case might be brief due to the redirect, but it's good practice.
     return (
       <PageWrapper className="flex flex-col items-center justify-center min-h-[calc(100vh-theme(spacing.32))] text-center">
         <ShieldAlert className="h-16 w-16 text-destructive mb-4" />
         <h2 className="text-2xl font-semibold mb-2">Access Denied</h2>
-        <p className="text-muted-foreground mb-4">You need to be logged in to view this page.</p>
+        <p className="text-muted-foreground mb-4">You must be logged in to view this page.</p>
         <Button asChild><Link href="/login?redirect=/admin/messages">Login</Link></Button>
       </PageWrapper>
     );

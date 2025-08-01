@@ -20,6 +20,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useEffect, useState } from 'react';
 import { getMessageCounts } from '@/actions/messages';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const NavItem = ({ item }: { item: NavItemType }) => (
   <Button asChild variant="ghost" className="text-foreground hover:bg-primary/10 hover:text-primary transition-colors px-3 py-2 rounded-md text-sm font-medium">
@@ -31,11 +32,13 @@ const NavItem = ({ item }: { item: NavItemType }) => (
 );
 
 export function Navbar() {
-  const { user, logout } = useAuth();
+  const { user, logout, loading } = useAuth();
   const [unreadMessages, setUnreadMessages] = useState(0);
 
+  const isAdmin = user?.email === 'hellos@gmail.com';
+
   useEffect(() => {
-    if (user) {
+    if (isAdmin) {
       const interval = setInterval(() => {
         getMessageCounts().then(counts => setUnreadMessages(counts.unread));
       }, 30000); // Poll every 30 seconds
@@ -45,7 +48,7 @@ export function Navbar() {
 
       return () => clearInterval(interval);
     }
-  }, [user]);
+  }, [isAdmin]);
 
   const UserMenu = () => (
     <DropdownMenu>
@@ -73,23 +76,27 @@ export function Navbar() {
             <span>My Account</span>
           </Link>
         </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link href="/admin/dashboard">
-            <ShieldCheck className="mr-2 h-4 w-4" />
-            <span>Admin Dashboard</span>
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link href="/admin/messages" className="relative">
-            <Inbox className="mr-2 h-4 w-4" />
-            <span>View Messages</span>
-            {unreadMessages > 0 && (
-              <span className="absolute right-2 top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-xs text-destructive-foreground">
-                {unreadMessages}
-              </span>
-            )}
-          </Link>
-        </DropdownMenuItem>
+        {isAdmin && (
+          <>
+            <DropdownMenuItem asChild>
+              <Link href="/admin/dashboard">
+                <ShieldCheck className="mr-2 h-4 w-4" />
+                <span>Admin Dashboard</span>
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href="/admin/messages" className="relative">
+                <Inbox className="mr-2 h-4 w-4" />
+                <span>View Messages</span>
+                {unreadMessages > 0 && (
+                  <span className="absolute right-2 top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-xs text-destructive-foreground">
+                    {unreadMessages}
+                  </span>
+                )}
+              </Link>
+            </DropdownMenuItem>
+          </>
+        )}
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={logout}>
           {/* <LogOut className="mr-2 h-4 w-4" /> */}
@@ -146,24 +153,33 @@ export function Navbar() {
                   </Button>
                 ))}
                 <hr className="my-4" />
-                {user ? (
+                {loading ? (
+                   <div className="space-y-2">
+                        <Skeleton className="h-10 w-full" />
+                        <Skeleton className="h-10 w-full" />
+                    </div>
+                ) : user ? (
                   <div className="space-y-2">
                      <Button variant="outline" className="w-full" asChild>
                         <Link href="/account">My Account</Link>
                       </Button>
-                     <Button variant="outline" className="w-full" asChild>
-                        <Link href="/admin/dashboard">Admin Dashboard</Link>
-                      </Button>
-                     <Button variant="outline" className="w-full" asChild>
-                        <Link href="/admin/messages" className="relative">
-                          View Messages
-                           {unreadMessages > 0 && (
-                            <span className="absolute right-4 top-1/2 -translate-y-1/2 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-xs text-destructive-foreground">
-                                {unreadMessages}
-                            </span>
-                            )}
-                        </Link>
-                      </Button>
+                     {isAdmin && (
+                        <>
+                            <Button variant="outline" className="w-full" asChild>
+                                <Link href="/admin/dashboard">Admin Dashboard</Link>
+                            </Button>
+                            <Button variant="outline" className="w-full" asChild>
+                                <Link href="/admin/messages" className="relative">
+                                View Messages
+                                {unreadMessages > 0 && (
+                                    <span className="absolute right-4 top-1/2 -translate-y-1/2 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-xs text-destructive-foreground">
+                                        {unreadMessages}
+                                    </span>
+                                    )}
+                                </Link>
+                            </Button>
+                        </>
+                     )}
                     <Button variant="destructive" className="w-full" onClick={logout}>
                       Logout
                     </Button>

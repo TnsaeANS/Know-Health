@@ -102,10 +102,14 @@ export default function AdminDashboardPage() {
   const [messageCounts, setMessageCounts] = useState<{unread: number, total: number}>({unread: 0, total: 0});
   const [isLoading, setIsLoading] = useState(true);
 
+  const isAuthorized = !loading && user?.email === 'hellos@gmail.com';
+
   useEffect(() => {
     if (!loading && !user) {
       router.push('/login?redirect=/admin/dashboard');
-    } else if (user) {
+    } else if (user && user.email !== 'hellos@gmail.com') {
+      router.push('/'); // Redirect non-admins to homepage
+    } else if (isAuthorized) {
       setIsLoading(true);
       Promise.all([
         getReportedReviews(),
@@ -116,14 +120,14 @@ export default function AdminDashboardPage() {
       }).catch(console.error)
        .finally(() => setIsLoading(false));
     }
-  }, [user, loading, router]);
+  }, [user, loading, router, isAuthorized]);
   
   const handleModeration = (reviewId: string) => {
     setReportedReviews(prev => prev.filter(r => r.id !== reviewId));
   };
 
 
-  if (loading || isLoading) {
+  if (loading || (!isAuthorized && !user)) {
     return (
       <PageWrapper className="flex items-center justify-center min-h-[calc(100vh-theme(spacing.32))]">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
@@ -131,13 +135,13 @@ export default function AdminDashboardPage() {
     );
   }
 
-  if (!user) {
+  if (!isAuthorized) {
     return (
       <PageWrapper className="flex flex-col items-center justify-center min-h-[calc(100vh-theme(spacing.32))] text-center">
         <ShieldAlert className="h-16 w-16 text-destructive mb-4" />
         <h2 className="text-2xl font-semibold mb-2">Access Denied</h2>
-        <p className="text-muted-foreground mb-4">You need to be logged in to view this page.</p>
-        <Button asChild><Link href="/login?redirect=/admin/dashboard">Login</Link></Button>
+        <p className="text-muted-foreground mb-4">You do not have permission to view this page.</p>
+        <Button asChild><Link href="/">Go to Homepage</Link></Button>
       </PageWrapper>
     );
   }
