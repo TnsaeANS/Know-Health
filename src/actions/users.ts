@@ -3,6 +3,7 @@
 
 import { pool } from '@/lib/db';
 import { type Review } from '@/lib/types';
+import { revalidatePath } from 'next/cache';
 
 const mapDbRowToReview = (row: any): Review => {
   return {
@@ -34,5 +35,26 @@ export async function getReviewsByUserId(userId: string): Promise<Review[]> {
   } catch (error) {
     console.error('Failed to fetch reviews by user ID:', error);
     return [];
+  }
+}
+
+export type SignupResult = {
+  success: boolean;
+  error?: string;
+};
+
+export async function addUserToDb(id: string, name: string, email: string): Promise<SignupResult> {
+  if (!pool) {
+    return { success: false, error: 'Database is not configured.' };
+  }
+  try {
+    await pool.query('INSERT INTO users (id, name, email) VALUES ($1, $2, $3)', [id, name, email]);
+    revalidatePath('/admin/dashboard'); // Revalidate dashboard to update user count
+    return { success: true };
+  } catch (error: any) {
+    console.error('Failed to add user to DB:', error);
+    // It's possible the user was created in Firebase but failed to be added here.
+    // In a production app, you might want a more robust retry or cleanup mechanism.
+    return { success: false, error: error.message };
   }
 }

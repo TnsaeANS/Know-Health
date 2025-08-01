@@ -264,6 +264,29 @@ export async function getTotalFacilitiesCount(): Promise<number> {
     }
 }
 
+export async function getTotalProvidersCount(): Promise<number> {
+    if (!pool) return 0;
+    try {
+        const result = await pool.query("SELECT COUNT(*) FROM providers");
+        return parseInt(result.rows[0].count, 10);
+    } catch (error) {
+        console.error('Failed to fetch total providers count:', error);
+        return 0;
+    }
+}
+
+export async function getTotalUsersCount(): Promise<number> {
+    if (!pool) return 0;
+    try {
+        // This counts users who have been successfully added to our DB.
+        const result = await pool.query("SELECT COUNT(*) FROM users");
+        return parseInt(result.rows[0].count, 10);
+    } catch (error) {
+        console.error('Failed to fetch total users count:', error);
+        return 0;
+    }
+}
+
 export async function getMessageCounts(): Promise<{ unread: number; total: number }> {
     if (!pool) {
         return { unread: 0, total: 0 };

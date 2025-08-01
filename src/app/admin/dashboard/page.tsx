@@ -9,8 +9,8 @@ import { PageWrapper } from '@/components/ui/PageWrapper';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, ShieldAlert, Inbox, Check, Trash2, Quote, Users, MessageSquareWarning, Hospital, Star } from 'lucide-react';
-import { getReportedReviews, getMessageCounts as getDbMessageCounts, getTotalReviewsCount, getTotalFacilitiesCount } from '@/lib/data';
+import { Loader2, ShieldAlert, Inbox, Check, Trash2, Quote, Users, MessageSquareWarning, Hospital, Star, Stethoscope, UserPlus } from 'lucide-react';
+import { getReportedReviews, getMessageCounts as getDbMessageCounts, getTotalReviewsCount, getTotalFacilitiesCount, getTotalProvidersCount, getTotalUsersCount } from '@/lib/data';
 import type { ReportedReview } from '@/lib/types';
 import { ReviewCard } from '@/components/reviews/ReviewCard';
 import { approveReviewAction, deleteReportedReviewAction, type ModerationResult } from '@/actions/report';
@@ -103,6 +103,8 @@ export default function AdminDashboardPage() {
       unreadMessages: 0,
       totalReviews: 0,
       totalFacilities: 0,
+      totalProviders: 0,
+      totalUsers: 0,
   });
   const [isLoading, setIsLoading] = useState(true);
 
@@ -120,12 +122,16 @@ export default function AdminDashboardPage() {
         getDbMessageCounts(),
         getTotalReviewsCount(),
         getTotalFacilitiesCount(),
-      ]).then(([reviews, msgCounts, reviewsCount, facilitiesCount]) => {
+        getTotalProvidersCount(),
+        getTotalUsersCount(),
+      ]).then(([reviews, msgCounts, reviewsCount, facilitiesCount, providersCount, usersCount]) => {
         setReportedReviews(reviews);
         setStats({
             unreadMessages: msgCounts.unread,
             totalReviews: reviewsCount,
             totalFacilities: facilitiesCount,
+            totalProviders: providersCount,
+            totalUsers: usersCount,
         });
       }).catch(console.error)
        .finally(() => setIsLoading(false));
@@ -160,7 +166,7 @@ export default function AdminDashboardPage() {
     <PageWrapper>
       <PageHeader title="Admin Dashboard" description="Oversee and moderate platform activity." />
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mb-8">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 mb-8">
         <StatCard 
             title="Reviews for Moderation" 
             value={reportedReviews.length} 
@@ -173,9 +179,19 @@ export default function AdminDashboardPage() {
             action={<Button asChild size="sm" variant="link" className="p-0 h-auto"><Link href="/admin/messages">View Messages</Link></Button>}
         />
         <StatCard 
+            title="Total Users" 
+            value={stats.totalUsers} 
+            icon={<UserPlus className="h-4 w-4 text-muted-foreground" />} 
+        />
+        <StatCard 
             title="Total Reviews" 
             value={stats.totalReviews} 
             icon={<Star className="h-4 w-4 text-muted-foreground" />} 
+        />
+        <StatCard 
+            title="Total Providers" 
+            value={stats.totalProviders} 
+            icon={<Stethoscope className="h-4 w-4 text-muted-foreground" />} 
         />
         <StatCard 
             title="Total Facilities" 
