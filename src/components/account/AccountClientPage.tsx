@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Loader2, Edit3, ShieldAlert } from 'lucide-react';
 import { ReviewCard } from '@/components/reviews/ReviewCard';
 import type { Review } from '@/lib/types';
+import { getReviewsByUserId } from '@/actions/users';
 
 interface AccountClientPageProps {
     initialReviews: Review[];
@@ -20,6 +21,16 @@ export default function AccountClientPage({ initialReviews }: AccountClientPageP
   const { user, loading, logout } = useAuth();
   const router = useRouter();
   const [userReviews, setUserReviews] = useState<Review[]>(initialReviews);
+  const [isFetchingReviews, setIsFetchingReviews] = useState(false);
+
+  const fetchUserReviews = useCallback(async () => {
+    if (user) {
+        setIsFetchingReviews(true);
+        const reviews = await getReviewsByUserId(user.id);
+        setUserReviews(reviews);
+        setIsFetchingReviews(false);
+    }
+  }, [user]);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -27,6 +38,13 @@ export default function AccountClientPage({ initialReviews }: AccountClientPageP
     }
   }, [user, loading, router]);
   
+  useEffect(() => {
+    // This effect runs when the component mounts and when the user changes.
+    // It's a good place for an initial fetch if initialReviews might be stale.
+    fetchUserReviews();
+  }, [fetchUserReviews]);
+
+
   const handleReviewDeleted = useCallback((reviewId: string) => {
     setUserReviews(prev => prev.filter(r => r.id !== reviewId));
   }, []);
@@ -84,7 +102,11 @@ export default function AccountClientPage({ initialReviews }: AccountClientPageP
               <CardDescription>Reviews you have submitted.</CardDescription>
             </CardHeader>
             <CardContent>
-              {userReviews.length > 0 ? (
+              {isFetchingReviews ? (
+                <div className="flex justify-center items-center h-48">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                </div>
+              ) : userReviews.length > 0 ? (
                 <div className="space-y-4">
                   {userReviews.map(review => 
                     <ReviewCard 
