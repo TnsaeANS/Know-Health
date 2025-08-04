@@ -7,7 +7,7 @@ import type { Provider, Facility, Review } from '@/lib/types';
 
 // Helper function to calculate average rating for a provider
 const calculateProviderAverage = (reviews: Review[]): number => {
-  if (!reviews || reviews.length === 0) return 0;
+  if (!reviews  reviews.length === 0) return 0;
   let totalScore = 0;
   let ratingCount = 0;
   reviews.forEach(review => {
@@ -24,7 +24,7 @@ const calculateProviderAverage = (reviews: Review[]): number => {
 
 // Helper function to calculate average rating for a facility
 const calculateFacilityAverage = (reviews: Review[]): number => {
-    if (!reviews || reviews.length === 0) return 0;
+    if (!reviews  reviews.length === 0) return 0;
     let totalScore = 0;
     let ratingCount = 0;
     reviews.forEach(review => {
