@@ -93,10 +93,7 @@ export const getProviders = async (): Promise<Provider[]> => {
 
     const providersWithReviews = providersResult.rows.map(row => {
       const provider = mapDbRowToProvider(row);
-      provider.reviews = (reviewsByProvider.get(provider.id) || []).map(review => {
-        const { facilityQuality, ...providerReview } = review;
-        return providerReview as Review;
-      });
+      provider.reviews = reviewsByProvider.get(provider.id) || [];
       return provider;
     });
 
@@ -128,10 +125,7 @@ export const getFacilities = async (): Promise<Facility[]> => {
   
     const facilitiesWithReviews = facilitiesResult.rows.map(row => {
       const facility = mapDbRowToFacility(row);
-      facility.reviews = (reviewsByFacility.get(facility.id) || []).map(review => {
-        const { bedsideManner, medicalAdherence, specialtyCare, ...facilityReview } = review;
-        return facilityReview as Review;
-      });
+      facility.reviews = reviewsByFacility.get(facility.id) || [];
       return facility;
     });
   
@@ -161,10 +155,7 @@ export const getProviderById = async (id: string): Promise<Provider | undefined>
       [id]
     );
     
-    provider.reviews = reviews.map(review => {
-        const { facilityQuality, ...providerReview } = review;
-        return providerReview as Review;
-    });
+    provider.reviews = reviews;
 
     return provider;
   } catch (error) {
@@ -192,10 +183,7 @@ export const getFacilityById = async (id: string): Promise<Facility | undefined>
       [id]
     );
 
-    facility.reviews = reviews.map(review => {
-      const { bedsideManner, medicalAdherence, specialtyCare, ...facilityReview } = review;
-      return facilityReview as Review;
-    });
+    facility.reviews = reviews;
 
     return facility;
   } catch (error) {

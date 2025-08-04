@@ -6,8 +6,12 @@ import { PageHeader } from '@/components/shared/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';
 import EditProviderFormClient from '@/components/providers/EditProviderFormClient';
 
+type EditProviderPageProps = {
+  params: { id: string };
+};
+
 // This is now a Server Component responsible for data fetching
-export default async function EditProviderPage({ params }: { params: { id: string } }) {
+export default async function EditProviderPage({ params }: EditProviderPageProps) {
     const provider = await getProviderById(params.id);
 
     if (!provider) {

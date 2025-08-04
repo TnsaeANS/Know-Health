@@ -5,16 +5,16 @@ import { PageWrapper } from '@/components/ui/PageWrapper';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';
 import EditFacilityFormClient from '@/components/facilities/EditFacilityFormClient';
+export default async function EditFacilityPage({
+  params,
+}: {
+  params: { id: string };
+}) {
+  const facility = await getFacilityById(params.id);
 
-
-// This is now a Server Component responsible for data fetching
-export default async function EditFacilityPage({ params }: { params: { id: string } }) {
-    const facility = await getFacilityById(params.id);
-
-    if (!facility) {
-        notFound();
-    }
-
+  if (!facility) {
+    notFound();
+  }
     return (
         <PageWrapper>
             <PageHeader
