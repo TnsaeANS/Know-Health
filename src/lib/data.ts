@@ -224,6 +224,8 @@ export async function getReportedReviews(): Promise<ReportedReview[]> {
       review.reportId = row.report_id;
       review.reportReason = row.report_reason;
       review.reporterUserId = row.reporter_user_id;
+      // Ensure the ID is a string, consistent with the Review type
+      review.id = String(row.id);
       return review;
     });
   } catch (error) {
