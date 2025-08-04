@@ -7,51 +7,71 @@ import type { Provider, Facility, Review } from '@/lib/types';
 
 // Helper function to calculate average rating for a provider
 const calculateProviderAverage = (reviews: Review[]): number => {
-  if (!reviews  reviews.length === 0) return 0;
+  if (!reviews || reviews.length === 0) return 0;
+  
   let totalScore = 0;
   let ratingCount = 0;
+  
   reviews.forEach(review => {
-    const ratings = [review.bedsideManner, review.medicalAdherence, review.specialtyCare, review.waitTime];
-    ratings.forEach(rating => {
-      if (typeof rating === 'number') {
-        totalScore += rating;
-        ratingCount++;
-      }
-    });
+    const ratings = [
+      review.bedsideManner,
+      review.medicalAdherence, 
+      review.specialtyCare,
+      review.waitTime
+    ].filter((rating): rating is number => typeof rating === 'number');
+    
+    if (ratings.length > 0) {
+      totalScore += ratings.reduce((sum, rating) => sum + rating, 0);
+      ratingCount += ratings.length;
+    }
   });
-  return ratingCount > 0 ? totalScore / ratingCount : 0;
+  
+  return ratingCount > 0 ? Math.round((totalScore / ratingCount) * 10) / 10 : 0;
 };
 
 // Helper function to calculate average rating for a facility
 const calculateFacilityAverage = (reviews: Review[]): number => {
-    if (!reviews  reviews.length === 0) return 0;
-    let totalScore = 0;
-    let ratingCount = 0;
-    reviews.forEach(review => {
-        const ratings = [review.facilityQuality, review.waitTime];
-        ratings.forEach(rating => {
-            if (typeof rating === 'number') {
-                totalScore += rating;
-                ratingCount++;
-            }
-        });
-    });
-    return ratingCount > 0 ? totalScore / ratingCount : 0;
+  if (!reviews || reviews.length === 0) return 0;
+  
+  let totalScore = 0;
+  let ratingCount = 0;
+  
+  reviews.forEach(review => {
+    const ratings = [
+      review.facilityQuality,
+      review.waitTime
+    ].filter((rating): rating is number => typeof rating === 'number');
+    
+    if (ratings.length > 0) {
+      totalScore += ratings.reduce((sum, rating) => sum + rating, 0);
+      ratingCount += ratings.length;
+    }
+  });
+  
+  return ratingCount > 0 ? Math.round((totalScore / ratingCount) * 10) / 10 : 0;
 };
 
 export async function FeaturedSection() {
-  const allProviders = await getProviders();
-  const allFacilities = await getFacilities();
+  const [allProviders, allFacilities] = await Promise.all([
+    getProviders(),
+    getFacilities()
+  ]);
 
   // Sort providers by average rating and take the top 3
   const featuredProviders = allProviders
-    .map(provider => ({ ...provider, avgRating: calculateProviderAverage(provider.reviews) }))
+    .map(provider => ({ 
+      ...provider, 
+      avgRating: calculateProviderAverage(provider.reviews) 
+    }))
     .sort((a, b) => b.avgRating - a.avgRating)
     .slice(0, 3);
 
   // Sort facilities by average rating and take the top 3
   const featuredFacilities = allFacilities
-    .map(facility => ({ ...facility, avgRating: calculateFacilityAverage(facility.reviews) }))
+    .map(facility => ({ 
+      ...facility, 
+      avgRating: calculateFacilityAverage(facility.reviews) 
+    }))
     .sort((a, b) => b.avgRating - a.avgRating)
     .slice(0, 3);
 
