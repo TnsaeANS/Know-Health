@@ -13,10 +13,9 @@ import { Button } from '@/components/ui/button';
 export default async function SearchPage({
   searchParams,
 }: {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+  searchParams: { [key: string]: string | string[] | undefined };
 }) {
-  const resolvedSearchParams = await searchParams;
-  const query = typeof resolvedSearchParams.q === 'string' ? resolvedSearchParams.q.trim() : '';
+  const query = typeof searchParams.q === 'string' ? searchParams.q.trim() : '';
 
   if (!query) {
     return (

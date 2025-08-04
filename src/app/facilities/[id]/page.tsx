@@ -13,12 +13,11 @@ import { FACILITY_TYPE_ICONS } from '@/lib/constants';
 
 
 export default async function FacilityProfilePage({
-  params: paramsPromise,
+  params,
 }: {
-  params: Promise<{ id: string }>;
+  params: { id: string };
 }) {
-  // Await the params promise
-  const { id } = await paramsPromise;
+  const { id } = params;
   
   const facility = await getFacilityById(id);
   if (!facility) {

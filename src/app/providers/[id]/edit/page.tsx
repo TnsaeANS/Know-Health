@@ -1,3 +1,4 @@
+
 import { getProviderById } from '@/lib/data';
 import { notFound } from 'next/navigation';
 import { PageWrapper } from '@/components/ui/PageWrapper';
@@ -5,20 +6,12 @@ import { PageHeader } from '@/components/shared/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';
 import EditProviderFormClient from '@/components/providers/EditProviderFormClient';
 
-// // Correct type for the props - do NOT use a Promise or any imported PageProps here!
-// type EditProviderPageProps = {
-//   params: {
-//     id: string;
-//   };
-// };
-
 export default async function EditProviderPage({
-  params: paramsPromise, // Destructure as paramsPromise
+  params,
 }: {
-  params: Promise<{ id: string }>; // The key fix: treat params as a Promise
+  params: { id: string };
 }) {
-  // Await the params promise
-  const { id } = await paramsPromise;
+  const { id } = params;
 
   const provider = await getProviderById(id);
 

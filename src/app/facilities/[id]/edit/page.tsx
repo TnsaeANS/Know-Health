@@ -1,3 +1,4 @@
+
 import { getFacilityById } from '@/lib/data';
 import { notFound } from 'next/navigation';
 import { PageWrapper } from '@/components/ui/PageWrapper';
@@ -5,12 +6,12 @@ import { PageHeader } from '@/components/shared/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';
 import EditFacilityFormClient from '@/components/facilities/EditFacilityFormClient';
 
-export default async function FacilityPage({
+export default async function EditFacilityPage({
   params,
 }: {
-  params: Promise<{ id: string }>; // ✅ The key fix: treat params as a Promise
+  params: { id: string };
 }) {
-  const { id } = await params;
+  const { id } = params;
 
   const facility = await getFacilityById(id);
   if (!facility) {
@@ -20,8 +21,8 @@ export default async function FacilityPage({
   return (
     <PageWrapper>
       <PageHeader
-        title={`View ${facility.name}`}
-        description="Details for this healthcare facility."
+        title={`Edit ${facility.name}`}
+        description="Update the details for this healthcare facility."
       />
       <Card className="shadow-lg">
         <CardContent className="p-6">

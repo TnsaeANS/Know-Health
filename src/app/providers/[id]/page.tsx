@@ -13,15 +13,11 @@ import { SPECIALTY_ICONS } from '@/lib/constants';
 // These pages are dynamic and should not be statically generated.
 
 export default async function ProviderProfilePage({
-  params: paramsPromise,
-  searchParams: searchParamsPromise,
+  params,
 }: {
-  params: Promise<{ id: string }>;
-  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
+  params: { id: string };
 }) {
-  // Await both promises
-  const { id } = await paramsPromise;
-  const searchParams = searchParamsPromise ? await searchParamsPromise : undefined;
+  const { id } = params;
   
   const provider = await getProviderById(id);
 
