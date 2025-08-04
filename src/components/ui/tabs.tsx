@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import * as TabsPrimitive from "@radix-ui/react-tabs"
-import { useSearchParams } from "next/navigation";
+import { Check, ChevronDown, ChevronUp } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
@@ -10,13 +10,9 @@ const Tabs = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof TabsPrimitive.Root>
 >(({ defaultValue, ...props }, ref) => {
-  const searchParams = useSearchParams();
-  const tab = searchParams.get("tab");
-  const [activeTab, setActiveTab] = React.useState(tab || defaultValue);
+  const [activeTab, setActiveTab] = React.useState(defaultValue);
 
   React.useEffect(() => {
-    // This part handles updating the tab if the URL hash changes
-    // after the component has already mounted.
     const handleHashChange = () => {
       const hash = window.location.hash;
       if (hash === '#leave-review') {
@@ -24,10 +20,8 @@ const Tabs = React.forwardRef<
       }
     };
 
-    // Check initial hash
-    if (window.location.hash === '#leave-review') {
-      setActiveTab('reviews');
-    }
+    // Check initial hash on mount
+    handleHashChange();
     
     window.addEventListener('hashchange', handleHashChange, false);
     return () => {
