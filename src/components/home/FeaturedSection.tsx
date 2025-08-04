@@ -1,57 +1,105 @@
-import { getProviders, getFacilities } from '@/lib/data';
-import { ProviderCard } from '@/components/providers/ProviderCard';
-import { FacilityCard } from '@/components/facilities/FacilityCard';
-import { Button } from '@/components/ui/button';
-import Link from 'next/link';
+"use client";
 
-export async function FeaturedSection() {
-  const allProviders = await getProviders();
-  const allFacilities = await getFacilities();
+import { useEffect, useState } from "react";
+import { getProviders, getFacilities } from "@/lib/data";
+import { ProviderCard } from "@/components/providers/ProviderCard";
+import { FacilityCard } from "@/components/facilities/FacilityCard";
+import Link from "next/link";
+import {
+  Container,
+  Title,
+  Text,
+  SimpleGrid,
+  Group,
+  Anchor,
+  Divider,
+  Paper,
+  Stack,
+  Loader,
+  Center,
+} from "@mantine/core";
 
-  // A real app might have a more sophisticated "featured" logic, but for now we'll take the first two.
-  const featuredProviders = allProviders.slice(0, 2);
-  const featuredFacilities = allFacilities.slice(0, 2);
+export function FeaturedSection() {
+  const [providers, setProviders] = useState<any[]>([]);
+  const [facilities, setFacilities] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const [allProviders, allFacilities] = await Promise.all([
+          getProviders(),
+          getFacilities(),
+        ]);
+        setProviders(allProviders.slice(0, 2));
+        setFacilities(allFacilities.slice(0, 2));
+      } catch (error) {
+        console.error("Error fetching featured data:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchData();
+  }, []);
+
+  if (loading) {
+    return (
+      <Center py="xl">
+        <Loader size="lg" />
+      </Center>
+    );
+  }
 
   return (
-    <section className="py-12 md:py-16 bg-secondary/50 rounded-lg my-12">
-      <div className="container mx-auto px-4">
-        <div className="mb-12 text-center">
-          <h2 className="font-headline text-3xl md:text-4xl font-semibold text-foreground mb-4">
+    <Paper py="xl" radius="md" shadow="sm" withBorder mt="xl" mb="xl">
+      <Container size="lg">
+        {/* Section Header */}
+        <Stack align="center" gap="sm" mb="xl">
+          <Title order={2} fw={700} size="h2" ta="center">
             Featured Healthcare Options
-          </h2>
-          <p className="text-muted-foreground text-lg max-w-xl mx-auto">
-            Discover some of the top-rated doctors and well-equipped facilities in our network.
-          </p>
-        </div>
+          </Title>
+          <Text size="lg" c="dimmed" ta="center" maw={600}>
+            Discover some of the top-rated doctors and well-equipped facilities
+            in our network.
+          </Text>
+          <Divider w={80} size="sm" />
+        </Stack>
 
-        <div className="mb-12">
-          <div className="flex justify-between items-center mb-6">
-            <h3 className="font-headline text-2xl font-medium text-foreground">Top Doctors</h3>
-            <Button variant="link" asChild>
-              <Link href="/providers">View All Doctors &rarr;</Link>
-            </Button>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {featuredProviders.map((provider) => (
+        {/* Top Doctors */}
+        <Stack gap="md" mb="xl">
+          <Group justify="space-between" mb="md">
+            <Title order={3} size="h3" fw={600}>
+              Top Doctors
+            </Title>
+            <Anchor component={Link} href="/providers" underline="hover">
+              View All Doctors →
+            </Anchor>
+          </Group>
+          <SimpleGrid cols={{ base: 1, md: 2 }} spacing="lg">
+            {providers.map((provider) => (
               <ProviderCard key={provider.id} provider={provider} />
             ))}
-          </div>
-        </div>
+          </SimpleGrid>
+        </Stack>
 
-        <div>
-          <div className="flex justify-between items-center mb-6">
-            <h3 className="font-headline text-2xl font-medium text-foreground">Leading Facilities</h3>
-            <Button variant="link" asChild>
-              <Link href="/facilities">View All Facilities &rarr;</Link>
-            </Button>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {featuredFacilities.map((facility) => (
+        {/* Facilities */}
+        <Stack gap="md">
+          <Group justify="space-between" mb="md">
+            <Title order={3} size="h3" fw={600}>
+              Leading Facilities
+            </Title>
+            <Anchor component={Link} href="/facilities" underline="hover">
+              View All Facilities →
+            </Anchor>
+          </Group>
+          <SimpleGrid cols={{ base: 1, md: 2 }} spacing="lg">
+            {facilities.map((facility) => (
               <FacilityCard key={facility.id} facility={facility} />
             ))}
-          </div>
-        </div>
-      </div>
-    </section>
+          </SimpleGrid>
+        </Stack>
+      </Container>
+    </Paper>
   );
 }
