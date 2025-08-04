@@ -53,7 +53,10 @@ export function ReviewCard({ review, onReviewDeleted, onReviewUpdated }: ReviewC
   const [dialogKey, setDialogKey] = useState(`dialog-${review.id}`);
   const { user } = useAuth();
   const { toast } = useToast();
-  const timeAgo = review.date ? formatDistanceToNow(new Date(review.date), { addSuffix: true }) : '';
+
+  const timeAgo = review.date && new Date(review.date).toString() !== 'Invalid Date' 
+    ? formatDistanceToNow(new Date(review.date), { addSuffix: true }) 
+    : 'just now';
   
   const isAuthor = user?.id === review.userId;
   const isUnderReview = review.status === 'under_review';
