@@ -6,7 +6,7 @@ import { NAV_LINKS } from '@/lib/constants';
 import Logo from './Logo';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { Menu, UserCircle, Inbox } from 'lucide-react';
+import { Menu, UserCircle, Inbox, ShieldCheck, Loader2 } from 'lucide-react';
 import type { NavItem as NavItemType } from '@/lib/types';
 import { useAuth } from '@/context/AuthContext';
 import {
@@ -18,6 +18,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useEffect, useState } from 'react';
+import { getMessageCounts } from '@/actions/messages';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useRouter } from 'next/navigation';
 
 const NavItem = ({ item }: { item: NavItemType }) => (
   <Button asChild variant="ghost" className="text-foreground hover:bg-primary/10 hover:text-primary transition-colors px-3 py-2 rounded-md text-sm font-medium">
@@ -29,14 +33,39 @@ const NavItem = ({ item }: { item: NavItemType }) => (
 );
 
 export function Navbar() {
-  const { user, logout } = useAuth();
+  const { user, logout, loading } = useAuth();
+  const router = useRouter();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [unreadMessages, setUnreadMessages] = useState(0);
+
+  const isAdmin = user?.email === 'hellos@gmail.com';
+
+  useEffect(() => {
+    if (isAdmin) {
+      const interval = setInterval(() => {
+        getMessageCounts().then(counts => setUnreadMessages(counts.unread));
+      }, 30000); // Poll every 30 seconds
+
+      // Initial fetch
+      getMessageCounts().then(counts => setUnreadMessages(counts.unread));
+
+      return () => clearInterval(interval);
+    }
+  }, [isAdmin]);
+
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    await logout();
+    router.push('/');
+    setIsLoggingOut(false);
+  };
 
   const UserMenu = () => (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-10 w-10 rounded-full">
           <Avatar className="h-9 w-9">
-            <AvatarImage src={user?.avatarUrl || "https://placehold.co/40x40.png"} alt={user?.name} data-ai-hint="user avatar" />
+            <AvatarImage src={user?.avatarUrl || "https://placehold.co/40x40.png"} alt={user?.name || ''} data-ai-hint="user avatar" />
             <AvatarFallback>{user?.name?.substring(0,2).toUpperCase() || 'U'}</AvatarFallback>
           </Avatar>
         </Button>
@@ -57,15 +86,30 @@ export function Navbar() {
             <span>My Account</span>
           </Link>
         </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link href="/admin/messages">
-            <Inbox className="mr-2 h-4 w-4" />
-            <span>View Messages</span>
-          </Link>
-        </DropdownMenuItem>
+        {isAdmin && (
+          <>
+            <DropdownMenuItem asChild>
+              <Link href="/admin/dashboard">
+                <ShieldCheck className="mr-2 h-4 w-4" />
+                <span>Admin Dashboard</span>
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href="/admin/messages" className="relative">
+                <Inbox className="mr-2 h-4 w-4" />
+                <span>View Messages</span>
+                {unreadMessages > 0 && (
+                  <span className="absolute right-2 top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-xs text-destructive-foreground">
+                    {unreadMessages}
+                  </span>
+                )}
+              </Link>
+            </DropdownMenuItem>
+          </>
+        )}
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={logout}>
-          {/* <LogOut className="mr-2 h-4 w-4" /> */}
+        <DropdownMenuItem onClick={handleLogout} disabled={isLoggingOut}>
+          {isLoggingOut && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           <span>Log out</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
@@ -83,7 +127,9 @@ export function Navbar() {
           ))}
         </nav>
         <div className="hidden md:flex items-center space-x-2">
-          {user ? (
+          {loading ? (
+             <Skeleton className="h-10 w-24" />
+          ) : user ? (
             <UserMenu />
           ) : (
             <>
@@ -119,15 +165,35 @@ export function Navbar() {
                   </Button>
                 ))}
                 <hr className="my-4" />
-                {user ? (
+                {loading ? (
+                   <div className="space-y-2">
+                        <Skeleton className="h-10 w-full" />
+                        <Skeleton className="h-10 w-full" />
+                    </div>
+                ) : user ? (
                   <div className="space-y-2">
                      <Button variant="outline" className="w-full" asChild>
                         <Link href="/account">My Account</Link>
                       </Button>
-                     <Button variant="outline" className="w-full" asChild>
-                        <Link href="/admin/messages">View Messages</Link>
-                      </Button>
-                    <Button variant="destructive" className="w-full" onClick={logout}>
+                     {isAdmin && (
+                        <>
+                            <Button variant="outline" className="w-full" asChild>
+                                <Link href="/admin/dashboard">Admin Dashboard</Link>
+                            </Button>
+                            <Button variant="outline" className="w-full" asChild>
+                                <Link href="/admin/messages" className="relative">
+                                View Messages
+                                {unreadMessages > 0 && (
+                                    <span className="absolute right-4 top-1/2 -translate-y-1/2 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-xs text-destructive-foreground">
+                                        {unreadMessages}
+                                    </span>
+                                    )}
+                                </Link>
+                            </Button>
+                        </>
+                     )}
+                    <Button variant="destructive" className="w-full" onClick={handleLogout} disabled={isLoggingOut}>
+                       {isLoggingOut && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                       Logout
                     </Button>
                   </div>

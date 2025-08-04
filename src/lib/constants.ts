@@ -8,7 +8,6 @@ export const NAV_LINKS: NavItem[] = [
   { label: 'Home', href: '/', icon: Home },
   { label: 'Find Doctors', href: '/providers', icon: Stethoscope },
   { label: 'Find Facilities', href: '/facilities', icon: Hospital },
-  { label: 'About Us', href: '/about', icon: Info },
   { label: 'Contact Us', href: '/contact', icon: MessageSquare },
 ];
 

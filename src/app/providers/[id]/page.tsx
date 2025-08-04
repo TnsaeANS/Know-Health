@@ -11,15 +11,20 @@ import ProviderDetailsClient from '@/components/providers/ProviderDetailsClient'
 import { SPECIALTY_ICONS } from '@/lib/constants';
 
 // These pages are dynamic and should not be statically generated.
-
-export default async function ProviderProfilePage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+export default async function ProviderProfilePage({
+  params: paramsPromise, // Destructure as Promise
+}: {
+  params: Promise<{ id: string }>; // Type as Promise
+}) {
+  // Await the params promise
+  const { id } = await paramsPromise;
+  
   const provider = await getProviderById(id);
 
   if (!provider) {
     notFound();
   }
-  
+
   const SpecialtyIcon = SPECIALTY_ICONS[provider.specialty.toLowerCase()] || Stethoscope;
 
   return (
@@ -77,7 +82,7 @@ export default async function ProviderProfilePage({ params }: { params: Promise<
 
         {/* Right Column: Tabs for Details */}
         <div className="md:col-span-2">
-          <Tabs defaultValue="overview" className="w-full">
+          <Tabs defaultValue="overview" className="w-full" key={id}>
             <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 mb-6">
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="reviews">Reviews</TabsTrigger>

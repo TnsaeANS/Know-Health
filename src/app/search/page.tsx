@@ -11,12 +11,13 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 
 export default async function SearchPage({
-  searchParams,
+  searchParams: searchParamsPromise, // Destructure as Promise
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  const resolvedSearchParams = await searchParams;
-  const query = typeof resolvedSearchParams.q === 'string' ? resolvedSearchParams.q.trim() : '';
+  // Await the searchParams promise
+  const searchParams = await searchParamsPromise;
+  const query = typeof searchParams.q === 'string' ? searchParams.q.trim() : '';
 
   if (!query) {
     return (

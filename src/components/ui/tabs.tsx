@@ -2,10 +2,45 @@
 
 import * as React from "react"
 import * as TabsPrimitive from "@radix-ui/react-tabs"
+import { Check, ChevronDown, ChevronUp } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
-const Tabs = TabsPrimitive.Root
+const Tabs = React.forwardRef<
+  React.ElementRef<typeof TabsPrimitive.Root>,
+  React.ComponentPropsWithoutRef<typeof TabsPrimitive.Root>
+>(({ defaultValue, ...props }, ref) => {
+  const [activeTab, setActiveTab] = React.useState(defaultValue);
+
+  React.useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash;
+      if (hash === '#leave-review') {
+        setActiveTab('reviews');
+      }
+    };
+
+    // Check initial hash on mount
+    handleHashChange();
+    
+    window.addEventListener('hashchange', handleHashChange, false);
+    return () => {
+      window.removeEventListener('hashchange', handleHashChange, false);
+    };
+  }, []);
+
+  return (
+    <TabsPrimitive.Root
+      ref={ref}
+      value={activeTab}
+      onValueChange={setActiveTab}
+      defaultValue={defaultValue}
+      {...props}
+    />
+  )
+})
+Tabs.displayName = TabsPrimitive.Root.displayName
+
 
 const TabsList = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.List>,

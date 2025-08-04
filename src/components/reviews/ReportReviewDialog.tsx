@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useActionState, useEffect, useState } from 'react';
@@ -46,8 +47,7 @@ export default function ReportReviewDialog({ open, onOpenChange, reviewId, revie
   const [state, formAction] = useActionState(submitReportAction, initialState);
   const { toast } = useToast();
   const { user } = useAuth();
-  const [reason, setReason] = useState('');
-
+  
   useEffect(() => {
     if (state.message) {
       if (state.success) {
@@ -70,14 +70,6 @@ export default function ReportReviewDialog({ open, onOpenChange, reviewId, revie
   if (!user) {
     return null;
   }
-  
-  const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const formData = new FormData(event.currentTarget);
-    formData.set('reason', reason); // Ensure reason from state is used
-    formAction(formData);
-  };
-
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -106,7 +98,7 @@ export default function ReportReviewDialog({ open, onOpenChange, reviewId, revie
             </p>
         )}
 
-        <form onSubmit={handleFormSubmit} className="space-y-4">
+        <form action={formAction} className="space-y-4">
           <input type="hidden" name="reviewId" value={reviewId} />
           {user && <input type="hidden" name="userId" value={user.id} />}
           
@@ -117,8 +109,6 @@ export default function ReportReviewDialog({ open, onOpenChange, reviewId, revie
               name="reason"
               placeholder="Please describe why you are reporting this review (e.g., inappropriate content, spam, harassment)..."
               rows={4}
-              value={reason}
-              onChange={(e) => setReason(e.target.value)}
               required
               className={state.issues?.find(issue => issue.startsWith('reason:')) ? 'border-destructive' : ''}
             />

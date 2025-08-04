@@ -1,27 +1,8 @@
 
 'use server';
 
-import type { Provider, Facility, Review } from './types';
+import type { Provider, Facility, Review, ReportedReview, ContactMessage } from './types';
 import { pool } from './db';
-
-function deepCopy<T>(obj: T): T {
-  if (obj === null || typeof obj !== 'object') {
-    return obj;
-  }
-  if (obj instanceof Date) {
-    return new Date(obj.getTime()) as any;
-  }
-  if (Array.isArray(obj)) {
-    return obj.map(item => deepCopy(item)) as any;
-  }
-  const copiedObject = {} as { [key: string]: any };
-  for (const key in obj) {
-    if (Object.prototype.hasOwnProperty.call(obj, key)) {
-      copiedObject[key] = deepCopy(obj[key]);
-    }
-  }
-  return copiedObject as T;
-}
 
 const mapDbRowToReview = (row: any): Review => {
   return {
@@ -30,6 +11,9 @@ const mapDbRowToReview = (row: any): Review => {
     userName: row.user_name,
     comment: row.comment || "",
     date: new Date(row.date).toISOString(),
+    status: row.status || 'published',
+    providerId: row.provider_id ?? undefined,
+    facilityId: row.facility_id ?? undefined,
     bedsideManner: row.bedside_manner ?? undefined,
     medicalAdherence: row.medical_adherence ?? undefined,
     specialtyCare: row.specialty_care ?? undefined,
@@ -53,6 +37,7 @@ const mapDbRowToProvider = (row: any): Provider => ({
   reviews: [], 
   location: row.location,
   qualifications: row.qualifications || [],
+  submitted_by_user_id: row.submitted_by_user_id,
 });
 
 const mapDbRowToFacility = (row: any): Facility => ({
@@ -71,6 +56,7 @@ const mapDbRowToFacility = (row: any): Facility => ({
     location: row.location,
     amenities: row.amenities || [],
     affiliatedProviderIds: row.affiliated_provider_ids || [],
+    submitted_by_user_id: row.submitted_by_user_id,
 });
 
 async function fetchReviewsFromDB(query: string, params: string[]): Promise<Review[]> {
@@ -94,7 +80,8 @@ export const getProviders = async (): Promise<Provider[]> => {
   try {
     const providersResult = await pool.query('SELECT * FROM providers ORDER BY name');
     
-    const allReviewsResult = await pool.query('SELECT * FROM reviews WHERE provider_id IS NOT NULL');
+    // Only fetch published reviews
+    const allReviewsResult = await pool.query("SELECT * FROM reviews WHERE provider_id IS NOT NULL AND status = 'published'");
     const reviewsByProvider = new Map<string, Review[]>();
 
     for (const row of allReviewsResult.rows) {
@@ -106,10 +93,7 @@ export const getProviders = async (): Promise<Provider[]> => {
 
     const providersWithReviews = providersResult.rows.map(row => {
       const provider = mapDbRowToProvider(row);
-      provider.reviews = (reviewsByProvider.get(provider.id) || []).map(review => {
-        const { facilityQuality, ...providerReview } = review;
-        return providerReview as Review;
-      });
+      provider.reviews = reviewsByProvider.get(provider.id) || [];
       return provider;
     });
 
@@ -128,7 +112,8 @@ export const getFacilities = async (): Promise<Facility[]> => {
   try {
     const facilitiesResult = await pool.query('SELECT * FROM facilities ORDER BY name');
       
-    const allReviewsResult = await pool.query('SELECT * FROM reviews WHERE facility_id IS NOT NULL');
+    // Only fetch published reviews
+    const allReviewsResult = await pool.query("SELECT * FROM reviews WHERE facility_id IS NOT NULL AND status = 'published'");
     const reviewsByFacility = new Map<string, Review[]>();
   
     for (const row of allReviewsResult.rows) {
@@ -140,10 +125,7 @@ export const getFacilities = async (): Promise<Facility[]> => {
   
     const facilitiesWithReviews = facilitiesResult.rows.map(row => {
       const facility = mapDbRowToFacility(row);
-      facility.reviews = (reviewsByFacility.get(facility.id) || []).map(review => {
-        const { bedsideManner, medicalAdherence, specialtyCare, ...facilityReview } = review;
-        return facilityReview as Review;
-      });
+      facility.reviews = reviewsByFacility.get(facility.id) || [];
       return facility;
     });
   
@@ -167,15 +149,13 @@ export const getProviderById = async (id: string): Promise<Provider | undefined>
     }
     const provider = mapDbRowToProvider(result.rows[0]);
 
+    // Only fetch published reviews
     const reviews = await fetchReviewsFromDB(
-      'SELECT * FROM reviews WHERE provider_id = $1 ORDER BY date DESC',
+      "SELECT * FROM reviews WHERE provider_id = $1 AND status = 'published' ORDER BY date DESC",
       [id]
     );
     
-    provider.reviews = reviews.map(review => {
-        const { facilityQuality, ...providerReview } = review;
-        return providerReview as Review;
-    });
+    provider.reviews = reviews;
 
     return provider;
   } catch (error) {
@@ -197,15 +177,13 @@ export const getFacilityById = async (id: string): Promise<Facility | undefined>
     }
     const facility = mapDbRowToFacility(result.rows[0]);
     
+    // Only fetch published reviews
     const reviews = await fetchReviewsFromDB(
-      'SELECT * FROM reviews WHERE facility_id = $1 ORDER BY date DESC',
+      "SELECT * FROM reviews WHERE facility_id = $1 AND status = 'published' ORDER BY date DESC",
       [id]
     );
 
-    facility.reviews = reviews.map(review => {
-      const { bedsideManner, medicalAdherence, specialtyCare, ...facilityReview } = review;
-      return facilityReview as Review;
-    });
+    facility.reviews = reviews;
 
     return facility;
   } catch (error) {
@@ -213,3 +191,132 @@ export const getFacilityById = async (id: string): Promise<Facility | undefined>
     throw new Error('Could not fetch facility details from the database.');
   }
 };
+
+export async function getReportedReviews(): Promise<ReportedReview[]> {
+  if (!pool) {
+    console.warn('Database not configured. Cannot fetch reported reviews.');
+    return [];
+  }
+  
+  try {
+    // Join reviews with the latest unresolved report for that review
+    const query = `
+      SELECT
+        r.*,
+        rep.id as report_id,
+        rep.reason as report_reason,
+        rep.reporter_user_id
+      FROM reviews r
+      JOIN (
+        SELECT review_id, MAX(created_at) as max_created_at
+        FROM reports
+        WHERE is_resolved = false
+        GROUP BY review_id
+      ) latest_reports ON r.id = latest_reports.review_id
+      JOIN reports rep ON r.id = rep.review_id AND rep.created_at = latest_reports.max_created_at
+      WHERE r.status = 'under_review'
+      ORDER BY rep.created_at ASC;
+    `;
+    const result = await pool.query(query);
+    
+    return result.rows.map(row => {
+      const review = mapDbRowToReview(row) as ReportedReview;
+      review.reportId = row.report_id;
+      review.reportReason = row.report_reason;
+      review.reporterUserId = row.reporter_user_id;
+      // Ensure the ID is a string, consistent with the Review type
+      review.id = String(row.id);
+      return review;
+    });
+  } catch (error) {
+    console.error('Failed to fetch reported reviews:', error);
+    return [];
+  }
+}
+
+export async function getTotalReviewsCount(): Promise<number> {
+    if (!pool) return 0;
+    try {
+        const result = await pool.query("SELECT COUNT(*) FROM reviews");
+        return parseInt(result.rows[0].count, 10);
+    } catch (error) {
+        console.error('Failed to fetch total reviews count:', error);
+        return 0;
+    }
+}
+
+export async function getTotalFacilitiesCount(): Promise<number> {
+    if (!pool) return 0;
+    try {
+        const result = await pool.query("SELECT COUNT(*) FROM facilities");
+        return parseInt(result.rows[0].count, 10);
+    } catch (error) {
+        console.error('Failed to fetch total facilities count:', error);
+        return 0;
+    }
+}
+
+export async function getTotalProvidersCount(): Promise<number> {
+    if (!pool) return 0;
+    try {
+        const result = await pool.query("SELECT COUNT(*) FROM providers");
+        return parseInt(result.rows[0].count, 10);
+    } catch (error) {
+        console.error('Failed to fetch total providers count:', error);
+        return 0;
+    }
+}
+
+export async function getTotalUsersCount(): Promise<number> {
+    if (!pool) return 0;
+    try {
+        // This counts users who have been successfully added to our DB.
+        const result = await pool.query("SELECT COUNT(*) FROM users");
+        return parseInt(result.rows[0].count, 10);
+    } catch (error) {
+        console.error('Failed to fetch total users count:', error);
+        return 0;
+    }
+}
+
+export async function getMessageCounts(): Promise<{ unread: number; total: number }> {
+    if (!pool) {
+        return { unread: 0, total: 0 };
+    }
+    try {
+        const result = await pool.query(
+            "SELECT COUNT(*) as total, COUNT(*) FILTER (WHERE is_read = false) as unread FROM messages"
+        );
+        const { total = '0', unread = '0' } = result.rows[0] || {};
+        return {
+            total: parseInt(total, 10),
+            unread: parseInt(unread, 10),
+        };
+    } catch (error) {
+        console.error('Failed to get message counts:', error);
+        return { unread: 0, total: 0 };
+    }
+}
+
+
+export async function getProvidersByUserId(userId: string): Promise<Provider[]> {
+    if (!pool) return [];
+    try {
+        const result = await pool.query("SELECT * FROM providers WHERE submitted_by_user_id = $1 ORDER BY name", [userId]);
+        return result.rows.map(mapDbRowToProvider);
+    } catch (error) {
+        console.error('Failed to fetch providers by user ID:', error);
+        return [];
+    }
+}
+
+export async function getFacilitiesByUserId(userId: string): Promise<Facility[]> {
+    if (!pool) return [];
+    try {
+        const result = await pool.query("SELECT * FROM facilities WHERE submitted_by_user_id = $1 ORDER BY name", [userId]);
+        return result.rows.map(mapDbRowToFacility);
+    } catch (error) {
+        console.error('Failed to fetch facilities by user ID:', error);
+        return [];
+    }
+}

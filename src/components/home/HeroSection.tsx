@@ -1,8 +1,9 @@
+
 "use client";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
+import { Search, Loader2 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { useState, type FormEvent } from "react";
@@ -10,11 +11,13 @@ import { useRouter } from "next/navigation";
 
 export function HeroSection() {
   const [query, setQuery] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   const handleSearch = (e: FormEvent) => {
     e.preventDefault();
     if (query.trim()) {
+      setIsLoading(true);
       router.push(`/search?q=${encodeURIComponent(query)}`);
     }
   };
@@ -47,9 +50,14 @@ export function HeroSection() {
               aria-label="Search healthcare"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
+              disabled={isLoading}
             />
-            <Button type="submit" size="lg" className="h-12 bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm">
-              <Search className="mr-2 h-5 w-5" />
+            <Button type="submit" size="lg" className="h-12 bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm" disabled={isLoading || !query.trim()}>
+              {isLoading ? (
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+              ) : (
+                <Search className="mr-2 h-5 w-5" />
+              )}
               Search
             </Button>
           </form>

@@ -14,6 +14,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
+import { addUserToDb } from '@/actions/users';
 
 const signupSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters' }),
@@ -41,10 +42,22 @@ export function SignupForm() {
   const onSubmit: SubmitHandler<SignupFormInputs> = async (data) => {
     setIsLoading(true);
     const result = await signup(data.name, data.email, data.password);
-    setIsLoading(false);
     
-    if (result.success) {
-      toast({ title: 'Signup Successful', description: 'Welcome to Know Health!' });
+    if (result.success && result.user) {
+      // Also add user to our own DB
+      const dbResult = await addUserToDb(result.user.id, result.user.name, result.user.email);
+      if (!dbResult.success) {
+        // This is a situation to handle gracefully. The user is created in Firebase
+        // but not in our DB. For now, we'll just log it and show a generic success.
+        console.error("Critical error: User created in Firebase but failed to save to application DB.", dbResult.error);
+        toast({
+          title: 'Account Created with a Glitch',
+          description: "Your account was created, but we couldn't save all details. Please contact support if you experience issues.",
+          variant: 'destructive'
+        });
+      } else {
+        toast({ title: 'Signup Successful', description: 'Welcome to Know Health!' });
+      }
       router.push('/account');
     } else {
       let description = 'An unexpected error occurred. Please try again.';
@@ -71,6 +84,7 @@ export function SignupForm() {
         variant: 'destructive',
       });
     }
+    setIsLoading(false);
   };
 
   return (

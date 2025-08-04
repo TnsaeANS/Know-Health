@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Star, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { submitReviewAction, type ReviewFormState } from '@/actions/reviews';
+import { submitReviewAction, updateReviewAction, type ReviewFormState } from '@/actions/reviews';
 import { useAuth } from '@/context/AuthContext';
 import type { Review } from '@/lib/types';
 import { ReviewCard } from './ReviewCard';
@@ -19,12 +19,12 @@ const initialState: ReviewFormState = {
   success: false,
 };
 
-function SubmitButton() {
+function SubmitButton({ isEditing }: { isEditing: boolean }) {
   const { pending } = useFormStatus();
   return (
-    <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground mt-6" disabled={pending}>
+    <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground mt-2" disabled={pending}>
       {pending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-      Submit Review
+      {isEditing ? 'Update Review' : 'Submit Review'}
     </Button>
   );
 }
@@ -85,54 +85,64 @@ interface ReviewFormProps {
   entityType: 'provider' | 'facility';
   onReviewSubmitted?: (newReview: Review) => void;
   reviews?: Review[];
+  existingReview?: Review;
+  onCancel?: () => void;
 }
 
-export function ReviewForm({ entityId, entityType, onReviewSubmitted, reviews }: ReviewFormProps) {
-  const [state, formAction] = useActionState(submitReviewAction, initialState);
+export function ReviewForm({ entityId, entityType, onReviewSubmitted, reviews, existingReview, onCancel }: ReviewFormProps) {
+  const isEditing = !!existingReview;
+  const formAction = isEditing ? updateReviewAction : submitReviewAction;
+  const [state, dispatchFormAction] = useActionState(formAction, initialState);
   const { toast } = useToast();
   const { user } = useAuth();
 
   const [ratings, setRatings] = useState({
-    bedsideManner: 0,
-    medicalAdherence: 0,
-    specialtyCare: 0,
-    facilityQuality: 0,
-    waitTime: 0,
+    bedsideManner: existingReview?.bedsideManner ?? 0,
+    medicalAdherence: existingReview?.medicalAdherence ?? 0,
+    specialtyCare: existingReview?.specialtyCare ?? 0,
+    facilityQuality: existingReview?.facilityQuality ?? 0,
+    waitTime: existingReview?.waitTime ?? 0,
   });
-  const [comment, setComment] = useState('');
+  const [comment, setComment] = useState(existingReview?.comment ?? '');
 
   const handleRatingChange = (criterionKey: keyof typeof ratings, value: number) => {
     setRatings(prev => ({ ...prev, [criterionKey]: value }));
   };
   
-  const userReview = reviews?.find(review => review.userId === user?.id);
+  const userHasAlreadyReviewed = !isEditing && reviews?.some(review => review.userId === user?.id);
 
   useEffect(() => {
     if (state.message) {
       if (state.success) {
         toast({
-          title: 'Review Submitted!',
+          title: isEditing ? 'Review Updated!' : 'Review Submitted!',
           description: state.message,
         });
 
         if (onReviewSubmitted && user) {
-          const newReview: Review = {
-            id: `optimistic-${Date.now()}`,
+          const newOrUpdatedReview: Review = {
+            id: existingReview?.id || `optimistic-${Date.now()}`,
             userId: user.id,
             userName: user.name,
             comment: comment,
             date: new Date().toISOString(),
+            status: 'under_review',
             bedsideManner: ratings.bedsideManner > 0 ? ratings.bedsideManner : undefined,
             medicalAdherence: ratings.medicalAdherence > 0 ? ratings.medicalAdherence : undefined,
             specialtyCare: ratings.specialtyCare > 0 ? ratings.specialtyCare : undefined,
             facilityQuality: ratings.facilityQuality > 0 ? ratings.facilityQuality : undefined,
             waitTime: ratings.waitTime > 0 ? ratings.waitTime : undefined,
+            providerId: entityType === 'provider' ? entityId : undefined,
+            facilityId: entityType === 'facility' ? entityId : undefined,
           };
-          onReviewSubmitted(newReview);
+          onReviewSubmitted(newOrUpdatedReview);
         }
 
-        setRatings({ bedsideManner: 0, medicalAdherence: 0, specialtyCare: 0, facilityQuality: 0, waitTime: 0 });
-        setComment('');
+        if (!isEditing) {
+            setRatings({ bedsideManner: 0, medicalAdherence: 0, specialtyCare: 0, facilityQuality: 0, waitTime: 0 });
+            setComment('');
+        }
+
       } else {
         const description = state.issues ? state.issues.join('\n') : state.message;
         toast({
@@ -142,17 +152,18 @@ export function ReviewForm({ entityId, entityType, onReviewSubmitted, reviews }:
         });
       }
     }
-  }, [state, toast, onReviewSubmitted, user, comment, ratings]);
+  }, [state, toast, onReviewSubmitted, user, comment, ratings, isEditing, existingReview, entityId, entityType]);
   
-  if (userReview) {
+  if (userHasAlreadyReviewed) {
+    const userReview = reviews?.find(review => review.userId === user?.id);
     return (
-      <Card className="mt-8 shadow-lg">
+      <Card className="mt-8 shadow-lg" id="leave-review">
         <CardHeader>
           <CardTitle className="font-headline text-xl">Thank You for Your Feedback!</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground mb-4">You have already submitted a review for this {entityType}.</p>
-          <ReviewCard review={userReview} />
+          {userReview && <ReviewCard review={userReview} />}
         </CardContent>
       </Card>
     )
@@ -160,7 +171,7 @@ export function ReviewForm({ entityId, entityType, onReviewSubmitted, reviews }:
 
   if (!user) {
     return (
-      <Card className="mt-8 shadow-lg">
+      <Card className="mt-8 shadow-lg" id="leave-review">
         <CardHeader>
           <CardTitle className="font-headline text-xl">Leave a Review</CardTitle>
         </CardHeader>
@@ -214,16 +225,18 @@ export function ReviewForm({ entityId, entityType, onReviewSubmitted, reviews }:
   ];
 
   return (
-    <Card className="mt-8 shadow-lg">
+    <Card className="mt-8 shadow-lg" id="leave-review">
       <CardHeader>
-        <CardTitle className="font-headline text-xl">Leave a Review</CardTitle>
-        <CardDescription>Share your experience to help others. Rate the criteria below and optionally leave a comment.</CardDescription>
+        <CardTitle className="font-headline text-xl">{isEditing ? 'Edit Your Review' : 'Leave a Review'}</CardTitle>
+        {!isEditing && <CardDescription>Share your experience to help others. Rate the criteria below and optionally leave a comment.</CardDescription>}
       </CardHeader>
       <CardContent>
-        <form action={formAction} className="space-y-6">
+        <form action={dispatchFormAction} className="space-y-6">
           <input type="hidden" name={entityType === 'provider' ? 'providerId' : 'facilityId'} value={entityId} />
           <input type="hidden" name="userId" value={user.id} />
           <input type="hidden" name="userName" value={user.name} />
+          {isEditing && <input type="hidden" name="reviewId" value={existingReview.id} />}
+
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {entityType === 'provider' && (
@@ -288,7 +301,14 @@ export function ReviewForm({ entityId, entityType, onReviewSubmitted, reviews }:
             />
              {getErrorForField('comment') && <p className="text-sm text-destructive">{getErrorForField('comment')}</p>}
           </div>
-          <SubmitButton />
+          <div className="flex flex-col sm:flex-row gap-2">
+            {isEditing && onCancel && (
+                <Button type="button" variant="outline" className="w-full mt-2" onClick={onCancel}>
+                    Cancel
+                </Button>
+            )}
+            <SubmitButton isEditing={isEditing} />
+          </div>
         </form>
       </CardContent>
     </Card>

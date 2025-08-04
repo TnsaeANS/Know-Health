@@ -20,14 +20,28 @@ export interface Review {
   userName:string;
   comment: string;
   date: string; // ISO date string
+  status: 'published' | 'under_review' | 'hidden';
+  
+  // Entity IDs
+  providerId?: string;
+  facilityId?: string;
+  
   // Provider-specific ratings
   bedsideManner?: number; // 1-5
   medicalAdherence?: number; // 1-5
   specialtyCare?: number; // 1-5
+  
   // Facility-specific ratings
   facilityQuality?: number; // 1-5
+
   // Common ratings
   waitTime?: number; // 1-5
+}
+
+export interface ReportedReview extends Review {
+  reportReason: string;
+  reportId: number;
+  reporterUserId: string;
 }
 
 export interface Provider {
@@ -45,6 +59,7 @@ export interface Provider {
   reviews: Review[];
   location: string;
   qualifications?: string[];
+  submitted_by_user_id?: string;
 }
 
 export interface Facility {
@@ -63,6 +78,7 @@ export interface Facility {
   location: string;
   amenities?: string[];
   affiliatedProviderIds?: string[];
+  submitted_by_user_id?: string;
 }
 
 export interface FilterOption {

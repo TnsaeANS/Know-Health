@@ -14,11 +14,25 @@ import {
   type User as FirebaseUser
 } from 'firebase/auth';
 
+type AuthSuccess = {
+  success: true;
+  user?: User;
+  error?: undefined;
+}
+
+type AuthFailure = {
+  success: false;
+  user?: undefined;
+  error: string;
+}
+
+type AuthResult = AuthSuccess | AuthFailure;
+
 interface AuthContextType {
   user: User | null;
-  login: (email: string, pass: string) => Promise<{ success: boolean; error?: string; }>;
+  login: (email: string, pass: string) => Promise<AuthResult>;
   logout: () => void;
-  signup: (name: string, email: string, pass: string) => Promise<{ success: boolean; error?: string; }>;
+  signup: (name: string, email: string, pass: string) => Promise<AuthResult>;
   loading: boolean;
 }
 
@@ -52,7 +66,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => unsubscribe();
   }, []);
 
-  const login = async (email: string, pass: string): Promise<{ success: boolean; error?: string; }> => {
+  const login = async (email: string, pass: string): Promise<AuthResult> => {
     // Check for initialization error first
     if (firebaseInitializationError) {
       return { success: false, error: firebaseInitializationError };
@@ -81,7 +95,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const signup = async (name: string, email: string, pass: string): Promise<{ success: boolean; error?: string; }> => {
+  const signup = async (name: string, email: string, pass: string): Promise<AuthResult> => {
     // Check for initialization error first
     if (firebaseInitializationError) {
       return { success: false, error: firebaseInitializationError };
@@ -93,19 +107,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
       const firebaseUser = userCredential.user;
-      if (firebaseUser) {
-        await updateProfile(firebaseUser, {
-          displayName: name,
-        });
-        const appUser: User = {
-          id: firebaseUser.uid,
-          name: name,
-          email: firebaseUser.email || '',
-          avatarUrl: firebaseUser.photoURL || undefined,
-        };
-        setUser(appUser);
-      }
-      return { success: true };
+      
+      await updateProfile(firebaseUser, {
+        displayName: name,
+      });
+
+      // We need to return the created user details so they can be saved to our own DB
+      const appUser: User = {
+        id: firebaseUser.uid,
+        name: name,
+        email: firebaseUser.email || '',
+        avatarUrl: firebaseUser.photoURL || undefined,
+      };
+      
+      setUser(appUser); // Update the context state
+      return { success: true, user: appUser };
+
     } catch (error: any)
     {
       console.error("Firebase signup error:", error.code);

@@ -23,6 +23,9 @@ export async function submitContactForm(
   prevState: ContactFormState,
   data: FormData
 ): Promise<ContactFormState> {
+  // Simulate network delay
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  
   if (!pool) {
     return { message: 'Database is not configured. Could not send message.', success: false };
   }
