@@ -11,11 +11,15 @@ import FacilityDetailsClient from '@/components/facilities/FacilityDetailsClient
 import { ProviderCard } from '@/components/providers/ProviderCard';
 import { FACILITY_TYPE_ICONS } from '@/lib/constants';
 
-// These pages are dynamic and should not be statically generated.
 
-export default async function FacilityProfilePage({ params, searchParams }: { params: { id: string }, searchParams?: { [key: string]: string | string[] | undefined } }) {
-  const { id } = params;
-
+export default async function FacilityProfilePage({
+  params: paramsPromise,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  // Await the params promise
+  const { id } = await paramsPromise;
+  
   const facility = await getFacilityById(id);
   if (!facility) {
     notFound();
@@ -27,6 +31,7 @@ export default async function FacilityProfilePage({ params, searchParams }: { pa
   const affiliatedProviders = facility.affiliatedProviderIds
     ? allProviders.filter(provider => facility.affiliatedProviderIds!.includes(provider.id))
     : [];
+
 
   return (
     <PageWrapper>
@@ -84,11 +89,11 @@ export default async function FacilityProfilePage({ params, searchParams }: { pa
         {/* Right Column: Tabs for Details */}
         <div className="md:col-span-2">
           <Tabs defaultValue="overview" className="w-full" key={id}>
-            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-4 mb-6"> {/* Adjusted grid-cols */}
+            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-4 mb-6">
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="reviews">Reviews</TabsTrigger>
               <TabsTrigger value="services">Services & More</TabsTrigger>
-              <TabsTrigger value="doctors">Affiliated Doctors</TabsTrigger> {/* Added new tab */}
+              <TabsTrigger value="doctors">Affiliated Doctors</TabsTrigger>
             </TabsList>
 
             <TabsContent value="overview">
@@ -103,7 +108,6 @@ export default async function FacilityProfilePage({ params, searchParams }: { pa
             </TabsContent>
 
             <TabsContent value="reviews">
-              {/* Review form is now rendered first within FacilityDetailsClient */}
               <FacilityDetailsClient facilityId={facility.id} initialReviews={facility.reviews} />
             </TabsContent>
             
@@ -149,7 +153,7 @@ export default async function FacilityProfilePage({ params, searchParams }: { pa
               </Card>
             </TabsContent>
 
-            <TabsContent value="doctors"> {/* Content for new tab */}
+            <TabsContent value="doctors">
               <Card className="shadow-lg">
                 <CardHeader>
                   <CardTitle className="font-headline text-xl flex items-center">

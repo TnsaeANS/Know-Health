@@ -126,6 +126,7 @@ export function ReviewForm({ entityId, entityType, onReviewSubmitted, reviews, e
             userName: user.name,
             comment: comment,
             date: new Date().toISOString(),
+            status: 'under_review',
             bedsideManner: ratings.bedsideManner > 0 ? ratings.bedsideManner : undefined,
             medicalAdherence: ratings.medicalAdherence > 0 ? ratings.medicalAdherence : undefined,
             specialtyCare: ratings.specialtyCare > 0 ? ratings.specialtyCare : undefined,
