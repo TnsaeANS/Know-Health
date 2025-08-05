@@ -19,6 +19,7 @@ const facilityFormSchema = z.object({
   contactAddress: z.string().min(5, { message: 'Address must be at least 5 characters' }),
   mapUrl: z.string().url({ message: 'Please enter a valid URL' }).optional().or(z.literal('')),
   submittedByUserId: z.string().min(1, { message: 'User ID is required' }),
+  imageUrl: z.string().url().optional(),
 });
 
 export type FacilityFormState = {
@@ -52,6 +53,7 @@ export async function submitFacilityAction(
     contactAddress: data.get('contactAddress'),
     mapUrl: data.get('mapUrl'),
     submittedByUserId: data.get('submittedByUserId'),
+    imageUrl: data.get("imageUrl")?.toString() || undefined,
   };
 
   const parsed = facilityFormSchema.safeParse(formData);
@@ -65,7 +67,7 @@ export async function submitFacilityAction(
     };
   }
 
-  const { id, name, type, location, description, servicesOffered, amenities, contactPhone, contactEmail, contactAddress, mapUrl, submittedByUserId } = parsed.data;
+  const { id, name, type, location, description, servicesOffered, amenities, contactPhone, contactEmail, contactAddress, mapUrl, submittedByUserId, imageUrl } = parsed.data;
 
   const client = await pool.connect();
 
@@ -80,10 +82,11 @@ export async function submitFacilityAction(
       const updateQuery = `
         UPDATE facilities SET
           name = $1, type = $2, location = $3, description = $4, services_offered = $5,
-          amenities = $6, contact_phone = $7, contact_email = $8, contact_address = $9
-        WHERE id = $10 AND submitted_by_user_id = $11
+          amenities = $6, contact_phone = $7, contact_email = $8, contact_address = $9,
+          photo_url = $10, map_url = $11
+        WHERE id = $12 AND submitted_by_user_id = $13
       `;
-      await client.query(updateQuery, [name, type, location, description, servicesOffered, amenities, contactPhone, contactEmail, contactAddress, id, submittedByUserId]);
+      await client.query(updateQuery, [name, type, location, description, servicesOffered, amenities, contactPhone, contactEmail, contactAddress, imageUrl, mapUrl, id, submittedByUserId]);
 
       revalidatePath('/facilities');
       revalidatePath(`/facilities/${id}`);
@@ -98,16 +101,16 @@ export async function submitFacilityAction(
     } else {
       // INSERT new facility
       const newId = `facility-${randomUUID()}`;
-      const photoUrl = `https://placehold.co/400x300.png`;
+      const photoUrl = imageUrl || `https://placehold.co/400x300.png`;
 
       const insertQuery = `
         INSERT INTO facilities (
-          id, name, type, location, description, services_offered, amenities, contact_phone, contact_email, contact_address, photo_url, submitted_by_user_id
+          id, name, type, location, description, services_offered, amenities, contact_phone, contact_email, contact_address, photo_url, map_url, submitted_by_user_id
         )
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
       `;
       await client.query(insertQuery, [
-        newId, name, type, location, description, servicesOffered, amenities, contactPhone, contactEmail, contactAddress, photoUrl, submittedByUserId
+        newId, name, type, location, description, servicesOffered, amenities, contactPhone, contactEmail, contactAddress, photoUrl, mapUrl, submittedByUserId
       ]);
 
       revalidatePath('/facilities');

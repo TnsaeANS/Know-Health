@@ -34,7 +34,7 @@ export function ProviderCard({ provider }: ProviderCardProps) {
       <CardHeader className="p-0">
         <div className="relative w-full h-48">
           <Image
-            src={provider.imageUrl || '/fallback-image.png'}
+            src={provider.imageUrl}
             alt={provider.name}
             fill
             className="object-cover"

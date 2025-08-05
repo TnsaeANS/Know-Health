@@ -27,8 +27,7 @@ const mapDbRowToProvider = (row: any): Provider => ({
   name: row.name,
   specialty: row.specialty,
   imageUrl: row.photo_url || `https://placehold.co/400x300.png?text=${row.name.substring(0,2)}`,
-    photoUrl: row.photo_url || `https://placehold.co/400x300.png?text=${row.name.substring(0,2)}`,
-bio: row.bio || '',
+  bio: row.bio || '',
   contact: {
     phone: row.contact_phone,
     email: row.contact_email,
@@ -47,7 +46,6 @@ const mapDbRowToFacility = (row: any): Facility => ({
     name: row.name,
     type: row.type,
     imageUrl: row.photo_url || `https://placehold.co/400x300.png?text=${row.name.substring(0,2)}`,
-    photoUrl: row.photo_url || `https://placehold.co/400x300.png?text=${row.name.substring(0,2)}`,
     description: row.description || '',
     contact: {
       phone: row.contact_phone,

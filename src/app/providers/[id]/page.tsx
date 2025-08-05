@@ -13,12 +13,11 @@ import { SPECIALTY_ICONS } from '@/lib/constants';
 export const dynamic = 'force-dynamic';
 
 export default async function ProviderProfilePage({
-  params: paramsPromise, // Destructure as Promise
+  params,
 }: {
-  params: Promise<{ id: string }>; // Type as Promise
+  params: { id: string };
 }) {
-  // Await the params promise
-  const { id } = await paramsPromise;
+  const { id } = params;
   
   const provider = await getProviderById(id);
 
@@ -39,7 +38,7 @@ export default async function ProviderProfilePage({
           <Card className="shadow-xl overflow-hidden">
             <div className="relative w-full aspect-square">
               <Image
-                src={provider.photoUrl}
+                src={provider.imageUrl}
                 alt={provider.name}
                 fill
                 className="object-cover"

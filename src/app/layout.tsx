@@ -4,8 +4,6 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/context/AuthContext";
-import { MantineProvider } from "@mantine/core";
-import "@mantine/core/styles.css"; // 👈 Required for Mantine styles
 
 export const metadata: Metadata = {
   title: "Know Health",
@@ -36,22 +34,14 @@ export default function RootLayout({
         />
       </head>
       <body className="font-body antialiased flex flex-col min-h-screen">
-        <MantineProvider
-          theme={{
-            fontFamily: "PT Sans, sans-serif",
-            headings: { fontFamily: "Playfair Display, serif" },
-            primaryColor: "teal",
-          }}
-        >
-          <AuthProvider>
+        <AuthProvider>
             <Navbar />
             <main className="flex-grow container mx-auto px-4 py-8">
               {children}
             </main>
             <Footer />
             <Toaster />
-          </AuthProvider>
-        </MantineProvider>
+        </AuthProvider>
       </body>
     </html>
   );
