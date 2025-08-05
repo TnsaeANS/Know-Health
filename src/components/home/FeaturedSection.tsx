@@ -7,7 +7,7 @@ import type { Provider, Facility, Review } from '@/lib/types';
 
 // Helper function to calculate average rating for a provider
 const calculateProviderAverage = (reviews: Review[]): number => {
-  if (!reviews  reviews.length === 0) return 0;
+  if (!reviews || reviews.length === 0) return 0;
   let totalScore = 0;
   let ratingCount = 0;
   reviews.forEach(review => {
@@ -24,7 +24,7 @@ const calculateProviderAverage = (reviews: Review[]): number => {
 
 // Helper function to calculate average rating for a facility
 const calculateFacilityAverage = (reviews: Review[]): number => {
-    if (!reviews  reviews.length === 0) return 0;
+    if (!reviews || reviews.length === 0) return 0;
     let totalScore = 0;
     let ratingCount = 0;
     reviews.forEach(review => {
@@ -56,7 +56,7 @@ export async function FeaturedSection() {
     .slice(0, 3);
 
   return (
-    <section className="py-12 md:py-16 bg-secondary/50 rounded-lg my-12">
+    <section className="py-12 md:py-16 my-12">
       <div className="container mx-auto px-4">
         <div className="mb-12 text-center">
           <h2 className="font-headline text-3xl md:text-4xl font-semibold text-foreground mb-4">
