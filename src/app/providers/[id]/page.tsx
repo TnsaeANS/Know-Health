@@ -13,11 +13,12 @@ import { SPECIALTY_ICONS } from '@/lib/constants';
 export const dynamic = 'force-dynamic';
 
 export default async function ProviderProfilePage({
-  params,
+  params: paramsPromise, // Destructure as Promise
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>; // Type as Promise
 }) {
-  const { id } = params;
+  // Await the params promise
+  const { id } = await paramsPromise;
   
   const provider = await getProviderById(id);
 
