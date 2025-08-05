@@ -7,13 +7,13 @@ import { Card, CardContent } from '@/components/ui/card';
 import EditFacilityFormClient from '@/components/facilities/EditFacilityFormClient';
 
 export default async function EditFacilityPage({
-  params: paramsPromise, // Destructure as paramsPromise
+  params: paramsPromise, // Destructure as Promise
 }: {
-  params: Promise<{ id: string }>; // Treat params as a Promise
+  params: Promise<{ id: string }>; // Type as Promise
 }) {
   // Await the params promise
   const { id } = await paramsPromise;
-
+  
   const facility = await getFacilityById(id);
   if (!facility) {
     notFound();

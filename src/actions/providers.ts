@@ -20,8 +20,9 @@ const providerFormSchema = z.object({
     .optional()
     .or(z.literal("")),
   contactAddress: z.string().optional(),
-  submittedByUserId: z.string().min(1, { message: "User ID is required" }),
-  imageUrl: z.string().url().optional(),
+  mapUrl: z.string().url({ message: 'Please enter a valid URL' }).optional().or(z.literal('')),
+  submittedByUserId: z.string().min(1, { message: 'User ID is required' }),
+  imageUrl: z.string().optional(),
 });
 
 export type ProviderFormState = {

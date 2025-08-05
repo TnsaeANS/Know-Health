@@ -1,4 +1,3 @@
-
 // This should be a server component to fetch initial data
 import { getProviderById } from '@/lib/data'; 
 import { PageWrapper } from '@/components/ui/PageWrapper';
@@ -11,6 +10,8 @@ import ProviderDetailsClient from '@/components/providers/ProviderDetailsClient'
 import { SPECIALTY_ICONS } from '@/lib/constants';
 
 // These pages are dynamic and should not be statically generated.
+export const dynamic = 'force-dynamic';
+
 export default async function ProviderProfilePage({
   params: paramsPromise, // Destructure as Promise
 }: {
@@ -25,7 +26,10 @@ export default async function ProviderProfilePage({
     notFound();
   }
 
+
   const SpecialtyIcon = SPECIALTY_ICONS[provider.specialty.toLowerCase()] || Stethoscope;
+  const defaultMapUrl = "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3940.743953258832!2d38.76178331526685!3d8.99473599354146!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x164b85cef5ab402d%3A0x84f747402c89283b!2sAddis%20Ababa!5e0!3m2!1sen!2set!4v1628527233372!5m2!1sen!2set";
+  const displayMapUrl = provider.mapUrl || defaultMapUrl;
 
   return (
     <PageWrapper>
@@ -132,9 +136,17 @@ export default async function ProviderProfilePage({
                     <h3 className="font-semibold text-md text-foreground mb-2 flex items-center">
                        <MapPin className="h-5 w-5 mr-2 text-primary" /> Location Map
                     </h3>
-                     <div className="aspect-video bg-muted rounded-md flex items-center justify-center">
-                        <p className="text-muted-foreground">Map placeholder for {provider.contact.address || provider.location}</p>
-                     </div>
+                    <div className="aspect-video bg-muted rounded-md overflow-hidden">
+                      <iframe
+                        src={displayMapUrl}
+                        width="100%"
+                        height="100%"
+                        style={{ border: 0 }}
+                        allowFullScreen={false}
+                        loading="lazy"
+                        referrerPolicy="no-referrer-when-downgrade"
+                      ></iframe>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
