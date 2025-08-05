@@ -40,15 +40,21 @@ export default async function FacilityProfilePage({
         <div className="md:col-span-1 space-y-6">
           <Card className="shadow-xl overflow-hidden">
             <div className="relative w-full aspect-[4/3]">
-              <Image
-                src={facility.photoUrl}
-                alt={facility.name}
-                fill
-                className="object-cover"
-                priority
-                data-ai-hint="hospital building modern"
-              />
-            </div>
+  {facility.photoUrl ? (
+    <Image
+      src={facility.photoUrl}
+      alt={facility.name}
+      fill
+      className="object-cover"
+      priority
+      data-ai-hint="hospital building modern"
+    />
+  ) : (
+    <div className="bg-gray-200 w-full h-full flex items-center justify-center">
+      <span>No image available</span>
+    </div>
+  )}
+</div>
             <CardContent className="p-6 text-center">
               <h1 className="font-headline text-2xl md:text-3xl font-semibold text-foreground">{facility.name}</h1>
               <div className="flex items-center justify-center text-lg text-primary my-2">

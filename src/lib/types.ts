@@ -47,7 +47,8 @@ export interface Provider {
   id: string;
   name: string;
   specialty: string;
-  imageUrl?: string; 
+  photoUrl: string; 
+  imageUrl: string;
   bio: string;
   contact: {
     phone?: string;
@@ -65,7 +66,8 @@ export interface Facility {
   id: string;
   name: string;
   type: string;
-  imageUrl?: string; 
+  photoUrl: string;
+  imageUrl: string; 
   description: string;
   contact: {
     phone?: string;
