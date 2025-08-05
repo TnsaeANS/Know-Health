@@ -13,7 +13,7 @@ export default async function EditProviderPage({
 }) {
   // Await the params promise
   const { id } = await paramsPromise;
-
+  
   const provider = await getProviderById(id);
 
   if (!provider) {

@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm, type SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
 
@@ -25,10 +25,19 @@ type LoginFormInputs = z.infer<typeof loginSchema>;
 export function LoginForm() {
   const { login } = useAuth();
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [redirectUrl, setRedirectUrl] = useState('/account');
+
+  useEffect(() => {
+    // This runs on the client and is safer than useSearchParams in this context
+    const params = new URLSearchParams(window.location.search);
+    const redirect = params.get('redirect');
+    if (redirect) {
+      setRedirectUrl(redirect);
+    }
+  }, []);
 
   const {
     register,
@@ -45,7 +54,6 @@ export function LoginForm() {
     
     if (result.success) {
       toast({ title: 'Login Successful', description: 'Welcome back!' });
-      const redirectUrl = searchParams.get('redirect') || '/account';
       router.push(redirectUrl);
     } else {
       let description = 'An unexpected error occurred. Please try again.';

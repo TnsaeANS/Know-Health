@@ -59,6 +59,7 @@ export interface Provider {
   reviews: Review[];
   location: string;
   qualifications?: string[];
+  mapUrl?: string;
   submitted_by_user_id?: string;
 }
 
@@ -77,6 +78,7 @@ export interface Facility {
   reviews: Review[];
   location: string;
   amenities?: string[];
+  mapUrl?: string;
   affiliatedProviderIds?: string[];
   submitted_by_user_id?: string;
 }

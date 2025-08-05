@@ -17,6 +17,7 @@ const facilityFormSchema = z.object({
   contactPhone: z.string().optional(),
   contactEmail: z.string().email({ message: 'Invalid email address' }).optional().or(z.literal('')),
   contactAddress: z.string().min(5, { message: 'Address must be at least 5 characters' }),
+  mapUrl: z.string().url({ message: 'Please enter a valid URL' }).optional().or(z.literal('')),
   submittedByUserId: z.string().min(1, { message: 'User ID is required' }),
 });
 
@@ -49,6 +50,7 @@ export async function submitFacilityAction(
     contactPhone: data.get('contactPhone'),
     contactEmail: data.get('contactEmail'),
     contactAddress: data.get('contactAddress'),
+    mapUrl: data.get('mapUrl'),
     submittedByUserId: data.get('submittedByUserId'),
   };
 
@@ -63,7 +65,7 @@ export async function submitFacilityAction(
     };
   }
 
-  const { id, name, type, location, description, servicesOffered, amenities, contactPhone, contactEmail, contactAddress, submittedByUserId } = parsed.data;
+  const { id, name, type, location, description, servicesOffered, amenities, contactPhone, contactEmail, contactAddress, mapUrl, submittedByUserId } = parsed.data;
 
   const client = await pool.connect();
 
