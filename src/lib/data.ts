@@ -37,7 +37,6 @@ const mapDbRowToProvider = (row: any): Provider => ({
   reviews: [], 
   location: row.location,
   qualifications: row.qualifications || [],
-  mapUrl: row.map_url || undefined,
   submitted_by_user_id: row.submitted_by_user_id,
 });
 
@@ -56,7 +55,6 @@ const mapDbRowToFacility = (row: any): Facility => ({
     reviews: [],
     location: row.location,
     amenities: row.amenities || [],
-    mapUrl: row.map_url || undefined,
     affiliatedProviderIds: row.affiliated_provider_ids || [],
     submitted_by_user_id: row.submitted_by_user_id,
 });

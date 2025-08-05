@@ -1,10 +1,10 @@
-"use client";
 
 import { PageWrapper } from '@/components/ui/PageWrapper';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { NewFacilityForm } from '@/components/facilities/NewFacilityForm';
 import { Card, CardContent } from '@/components/ui/card';
 
+// This is now a Server Component, providing the static page structure.
 export default function NewFacilityPage() {
   return (
     <PageWrapper>
@@ -14,7 +14,7 @@ export default function NewFacilityPage() {
       />
       <Card className="shadow-lg">
         <CardContent className="p-6">
-          {/* All auth logic is now handled inside NewFacilityForm */}
+          {/* All client-side logic, including auth checks, is handled inside NewFacilityForm */}
           <NewFacilityForm />
         </CardContent>
       </Card>

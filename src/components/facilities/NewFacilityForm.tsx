@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useActionState, useEffect, useState } from "react";
@@ -119,20 +120,20 @@ export function NewFacilityForm({ existingFacility }: NewFacilityFormProps) {
 
   if (authLoading) {
     return (
-      <PageWrapper className="flex items-center justify-center min-h-[400px]">
+      <div className="flex items-center justify-center min-h-[400px]">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
-      </PageWrapper>
+      </div>
     );
   }
 
   if (!user) {
     return (
-      <PageWrapper className="flex flex-col items-center justify-center min-h-[400px] text-center">
+      <div className="flex flex-col items-center justify-center min-h-[400px] text-center">
         <ShieldAlert className="h-16 w-16 text-destructive mb-4" />
         <h2 className="text-2xl font-semibold mb-2">Access Denied</h2>
         <p className="text-muted-foreground mb-4">You must be logged in to add a new facility.</p>
         <Button asChild><Link href="/login?redirect=/facilities/new">Login</Link></Button>
-      </PageWrapper>
+      </div>
     );
   }
 
@@ -251,12 +252,6 @@ export function NewFacilityForm({ existingFacility }: NewFacilityFormProps) {
       </div>
       
       <div className="space-y-2">
-        <Label htmlFor="mapUrl">Location Map URL (Optional)</Label>
-        <Input id="mapUrl" name="mapUrl" placeholder="https://www.google.com/maps/embed?..." defaultValue={existingFacility?.mapUrl} />
-        {getErrorForField('mapUrl') && <p className="text-sm text-destructive">{getErrorForField('mapUrl')}</p>}
-      </div>
-      
-      <div className="space-y-2">
         <Label htmlFor="description">Description (Optional)</Label>
         <Textarea
           id="description"
@@ -269,66 +264,64 @@ export function NewFacilityForm({ existingFacility }: NewFacilityFormProps) {
 
       <div className="space-y-2">
         <Label>Facility Image (Optional)</Label>
-        <div className="border-2 border-dashed rounded-lg p-6 flex flex-col items-center justify-center text-center hover:border-primary transition cursor-pointer">
-          <CldUploadWidget
-            uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "profile_uploads"}
-            onSuccess={(result) => {
-              if (
-                result &&
-                typeof result.info === "object" &&
-                "secure_url" in result.info
-              ) {
-                const url = result.info.secure_url as string;
-                setUploadedImage(url);
-              }
-            }}
-          >
-            {({ open }) => {
-              return (
-                <div
-                  className="w-full h-full p-4 flex flex-col items-center justify-center cursor-pointer"
-                  onClick={(e) => { e.preventDefault(); open(); }}
-                >
-                  {uploadedImage ? (
-                    <div>
-                      <img
-                        src={uploadedImage}
-                        alt="Uploaded facility"
-                        className="w-full h-auto object-cover rounded-md mx-auto shadow-md"
+        <CldUploadWidget
+          uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "profile_uploads"}
+          onSuccess={(result) => {
+            if (
+              result &&
+              typeof result.info === "object" &&
+              "secure_url" in result.info
+            ) {
+              const url = result.info.secure_url as string;
+              setUploadedImage(url);
+            }
+          }}
+        >
+          {({ open }) => {
+            return (
+              <div
+                className="border-2 border-dashed rounded-lg p-6 flex flex-col items-center justify-center text-center hover:border-primary transition cursor-pointer"
+                onClick={(e) => { e.preventDefault(); open(); }}
+              >
+                {uploadedImage ? (
+                  <div>
+                    <img
+                      src={uploadedImage}
+                      alt="Uploaded facility"
+                      className="w-full h-auto object-cover rounded-md mx-auto shadow-md"
+                    />
+                    <p className="mt-2 text-sm text-muted-foreground">
+                      Click to replace
+                    </p>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-10 w-10 text-muted-foreground"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4-4m0 0l-4 4m4-4v12"
                       />
-                      <p className="mt-2 text-sm text-muted-foreground">
-                        Click to replace
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="flex flex-col items-center">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-10 w-10 text-muted-foreground"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4-4m0 0l-4 4m4-4v12"
-                        />
-                      </svg>
-                      <p className="mt-2 text-sm">
-                        Click to upload facility image
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        PNG, JPG, or JPEG up to 5MB
-                      </p>
-                    </div>
-                  )}
-                </div>
-              );
-            }}
-          </CldUploadWidget>
-        </div>
+                    </svg>
+                    <p className="mt-2 text-sm">
+                      Click to upload facility image
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      PNG, JPG, or JPEG up to 5MB
+                    </p>
+                  </div>
+                )}
+              </div>
+            );
+          }}
+        </CldUploadWidget>
       </div>
 
       <div className="space-y-3">

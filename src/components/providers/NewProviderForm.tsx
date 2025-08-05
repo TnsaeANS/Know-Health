@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useActionState, useEffect, useState } from "react";
@@ -209,12 +210,6 @@ export function NewProviderForm({ existingProvider }: NewProviderFormProps) {
           placeholder="Bole Medhanialem, Addis Ababa"
           defaultValue={existingProvider?.contact.address}
         />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="mapUrl">Location Map URL (Optional)</Label>
-        <Input id="mapUrl" name="mapUrl" placeholder="https://www.google.com/maps/embed?..." defaultValue={existingProvider?.mapUrl} />
-        {getErrorForField('mapUrl') && <p className="text-sm text-destructive">{getErrorForField('mapUrl')}</p>}
       </div>
 
       <div className="space-y-2">
