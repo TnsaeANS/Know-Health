@@ -40,7 +40,6 @@ export async function submitFacilityAction(
     return { message: 'Database is not configured. Could not process facility.', success: false };
   }
 
-  // Correctly parse form data, especially arrays from checkboxes
   const formData = {
     id: data.get('id') || undefined,
     name: data.get('name'),
@@ -123,10 +122,10 @@ export async function submitFacilityAction(
         newFacilityId: newId,
       };
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('Database error on facility submission:', error);
     return {
-      message: 'A database error occurred. Please try again later.',
+      message: `A database error occurred: ${error.message}. Please try again later.`,
       success: false,
     };
   } finally {
@@ -157,7 +156,7 @@ export async function deleteFacilityAction(facilityId: string, userId: string): 
       return { success: true, message: 'Facility deleted successfully.' };
     } catch (error: any) {
       console.error(`Database error deleting facility ${facilityId}:`, error);
-      return { success: false, message: 'A database error occurred. Please try again.' };
+      return { success: false, message: `A database error occurred: ${error.message}` };
     } finally {
       client.release();
     }

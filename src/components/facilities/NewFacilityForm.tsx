@@ -3,6 +3,7 @@
 import { useActionState, useEffect, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { useRouter } from "next/navigation";
+import Link from 'next/link';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,10 +22,12 @@ import {
   type FacilityFormState,
 } from "@/actions/facilities";
 import { FACILITY_TYPES, LOCATIONS } from "@/lib/constants";
-import { Loader2 } from "lucide-react";
+import { Loader2, ShieldAlert } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import type { Facility } from "@/lib/types";
 import { CldUploadWidget } from "next-cloudinary";
+import { PageWrapper } from "../ui/PageWrapper";
+
 
 interface NewFacilityFormProps {
   existingFacility?: Facility;
@@ -72,12 +75,17 @@ export function NewFacilityForm({ existingFacility }: NewFacilityFormProps) {
   );
   const { toast } = useToast();
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
 
-  // Add state for the uploaded image URL
   const [uploadedImage, setUploadedImage] = useState<string | null>(
     existingFacility?.imageUrl || null
   );
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+        router.push(isEditing ? `/login?redirect=/facilities/${existingFacility?.id}/edit` : '/login?redirect=/facilities/new');
+    }
+  }, [user, authLoading, router, isEditing, existingFacility?.id]);
 
   useEffect(() => {
     if (state.message) {
@@ -109,8 +117,23 @@ export function NewFacilityForm({ existingFacility }: NewFacilityFormProps) {
     return fieldIssue ? fieldIssue.substring(fieldName.length + 1) : undefined;
   };
 
+  if (authLoading) {
+    return (
+      <PageWrapper className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+      </PageWrapper>
+    );
+  }
+
   if (!user) {
-    return <p>You must be logged in to perform this action.</p>;
+    return (
+      <PageWrapper className="flex flex-col items-center justify-center min-h-[400px] text-center">
+        <ShieldAlert className="h-16 w-16 text-destructive mb-4" />
+        <h2 className="text-2xl font-semibold mb-2">Access Denied</h2>
+        <p className="text-muted-foreground mb-4">You must be logged in to add a new facility.</p>
+        <Button asChild><Link href="/login?redirect=/facilities/new">Login</Link></Button>
+      </PageWrapper>
+    );
   }
 
   return (
@@ -119,8 +142,6 @@ export function NewFacilityForm({ existingFacility }: NewFacilityFormProps) {
         <input type="hidden" name="id" value={existingFacility.id} />
       )}
       <input type="hidden" name="submittedByUserId" value={user.id} />
-
-      {/* Hidden input to hold the image URL for form submission */}
       <input type="hidden" name="imageUrl" value={uploadedImage || ""} />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -228,7 +249,7 @@ export function NewFacilityForm({ existingFacility }: NewFacilityFormProps) {
           )}
         </div>
       </div>
-
+      
       <div className="space-y-2">
         <Label htmlFor="mapUrl">Location Map URL (Optional)</Label>
         <Input id="mapUrl" name="mapUrl" placeholder="https://www.google.com/maps/embed?..." defaultValue={existingFacility?.mapUrl} />
@@ -246,12 +267,11 @@ export function NewFacilityForm({ existingFacility }: NewFacilityFormProps) {
         />
       </div>
 
-      {/* Image upload section with preview */}
       <div className="space-y-2">
         <Label>Facility Image (Optional)</Label>
         <div className="border-2 border-dashed rounded-lg p-6 flex flex-col items-center justify-center text-center hover:border-primary transition cursor-pointer">
           <CldUploadWidget
-            uploadPreset="profile_uploads" // You might want to use a different preset for facilities
+            uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "profile_uploads"}
             onSuccess={(result) => {
               if (
                 result &&
@@ -267,7 +287,7 @@ export function NewFacilityForm({ existingFacility }: NewFacilityFormProps) {
               return (
                 <div
                   className="w-full h-full p-4 flex flex-col items-center justify-center cursor-pointer"
-                  onClick={() => open()}
+                  onClick={(e) => { e.preventDefault(); open(); }}
                 >
                   {uploadedImage ? (
                     <div>

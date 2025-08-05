@@ -60,6 +60,7 @@ export async function submitProviderAction(
     contactAddress: data.get("contactAddress"),
     submittedByUserId: data.get("submittedByUserId"),
     imageUrl: data.get("imageUrl")?.toString() || undefined,
+    mapUrl: data.get("mapUrl"),
   };
 
   const parsed = providerFormSchema.safeParse(formData);
@@ -88,6 +89,7 @@ export async function submitProviderAction(
     contactAddress,
     submittedByUserId,
     imageUrl,
+    mapUrl,
   } = parsed.data;
 
   const qualificationsArray =
@@ -99,10 +101,10 @@ export async function submitProviderAction(
   let client;
   try {
     client = await pool.connect();
-  } catch (connError) {
+  } catch (connError: any) {
     console.error("Error connecting to database:", connError);
     return {
-      message: "Failed to connect to the database. Please try again later.",
+      message: `Failed to connect to the database: ${connError.message}. Please try again later.`,
       success: false,
     };
   }
@@ -135,8 +137,9 @@ export async function submitProviderAction(
           contact_phone = $7,
           contact_email = $8,
           contact_address = $9,
-          photo_url = $10
-        WHERE id = $11 AND submitted_by_user_id = $12
+          photo_url = $10,
+          map_url = $11
+        WHERE id = $12 AND submitted_by_user_id = $13
       `;
 
       await client.query(updateQuery, [
@@ -150,6 +153,7 @@ export async function submitProviderAction(
         contactEmail,
         contactAddress,
         imageUrl,
+        mapUrl,
         id,
         submittedByUserId,
       ]);
@@ -170,9 +174,9 @@ export async function submitProviderAction(
 
       const insertQuery = `
         INSERT INTO providers (
-          id, name, specialty, location, bio, languages_spoken, qualifications, contact_phone, contact_email, contact_address, photo_url, submitted_by_user_id
+          id, name, specialty, location, bio, languages_spoken, qualifications, contact_phone, contact_email, contact_address, photo_url, map_url, submitted_by_user_id
         )
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
       `;
 
       await client.query(insertQuery, [
@@ -187,6 +191,7 @@ export async function submitProviderAction(
         contactEmail,
         contactAddress,
         photoUrl,
+        mapUrl,
         submittedByUserId,
       ]);
 
@@ -199,10 +204,10 @@ export async function submitProviderAction(
         newProviderId: newId,
       };
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error("Database error on provider submission:", error);
     return {
-      message: "A database error occurred. Please try again later.",
+      message: `A database error occurred: ${error.message}. Please try again later.`,
       success: false,
     };
   } finally {
@@ -221,9 +226,9 @@ export async function deleteProviderAction(
   let client;
   try {
     client = await pool.connect();
-  } catch (connError) {
+  } catch (connError: any) {
     console.error("Error connecting to database:", connError);
-    return { success: false, message: "Failed to connect to the database." };
+    return { success: false, message: `Failed to connect to the database: ${connError.message}` };
   }
 
   try {
@@ -247,11 +252,11 @@ export async function deleteProviderAction(
     revalidatePath("/account");
 
     return { success: true, message: "Provider deleted successfully." };
-  } catch (error) {
+  } catch (error: any) {
     console.error(`Database error deleting provider ${providerId}:`, error);
     return {
       success: false,
-      message: "A database error occurred. Please try again.",
+      message: `A database error occurred: ${error.message}`,
     };
   } finally {
     client?.release();

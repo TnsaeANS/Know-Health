@@ -134,7 +134,7 @@ export async function submitReviewAction(
     
     const dbErrorMessage = error.message || 'An unknown database error occurred.';
     return {
-      message: `Database Error: ${dbErrorMessage} Please try again later.`,
+      message: `Database Error: ${dbErrorMessage}. Please try again later.`,
       success: false,
     };
   }
@@ -217,7 +217,7 @@ export async function updateReviewAction(
       console.error('Database error on review update:', error);
       const dbErrorMessage = error.message || 'An unknown database error occurred.';
       return {
-        message: `Database Error: ${dbErrorMessage} Please try again later.`,
+        message: `Database Error: ${dbErrorMessage}. Please try again later.`,
         success: false,
       };
     }
@@ -248,7 +248,6 @@ export async function updateReviewAction(
       return { success: true, message: 'Review deleted successfully.' };
     } catch (error: any) {
       console.error(`Database error deleting review ${reviewId}:`, error);
-      return { success: false, message: 'A database error occurred. Please try again.' };
+      return { success: false, message: `A database error occurred: ${error.message}.` };
     }
   }
-

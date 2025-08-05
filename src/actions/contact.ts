@@ -57,10 +57,10 @@ export async function submitContactForm(
       message: 'Thank you for your message! We will get back to you soon.',
       success: true,
     };
-  } catch (error) {
+  } catch (error: any) {
     console.error('Database error on contact form submission:', error);
     return {
-      message: 'A database error occurred. Please try again later.',
+      message: `A database error occurred: ${error.message}. Please try again later.`,
       success: false,
     };
   }
