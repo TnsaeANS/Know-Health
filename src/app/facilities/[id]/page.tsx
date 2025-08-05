@@ -1,3 +1,4 @@
+
 // This should be a server component to fetch initial data
 import { getFacilityById, getProviders } from '@/lib/data';
 import { PageWrapper } from '@/components/ui/PageWrapper';

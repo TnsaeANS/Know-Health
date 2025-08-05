@@ -7,13 +7,11 @@ import { Card, CardContent } from '@/components/ui/card';
 import EditProviderFormClient from '@/components/providers/EditProviderFormClient';
 
 export default async function EditProviderPage({
-  params: paramsPromise, // Destructure as Promise
+  params,
 }: {
-  params: Promise<{ id: string }>; // Type as Promise
+  params: { id: string };
 }) {
-  // Await the params promise
-  const { id } = await paramsPromise;
-
+  const { id } = params;
   const provider = await getProviderById(id);
 
   if (!provider) {
