@@ -1,5 +1,4 @@
-
-import type { LucideIcon } from 'lucide-react';
+import type { LucideIcon } from "lucide-react";
 
 export interface NavItem {
   label: string;
@@ -17,25 +16,25 @@ export interface User {
 export interface Review {
   id: string;
   userId: string;
-  userName:string;
+  userName: string;
   comment: string;
   date: string; // ISO date string
-  status: 'published' | 'under_review' | 'hidden';
-  
+  status: "published" | "under_review" | "hidden";
+
   // Entity IDs
   providerId?: string;
   facilityId?: string;
-  
+
   // Provider-specific ratings
-  bedsideManner?: number; // 1-5
-  medicalAdherence?: number; // 1-5
-  specialtyCare?: number; // 1-5
-  
+  bedsideManner?: number;
+  medicalAdherence?: number;
+  specialtyCare?: number;
+
   // Facility-specific ratings
-  facilityQuality?: number; // 1-5
+  facilityQuality?: number;
 
   // Common ratings
-  waitTime?: number; // 1-5
+  waitTime?: number;
 }
 
 export interface ReportedReview extends Review {
@@ -48,7 +47,8 @@ export interface Provider {
   id: string;
   name: string;
   specialty: string;
-  photoUrl: string;
+  photoUrl: string; 
+  imageUrl: string;
   bio: string;
   contact: {
     phone?: string;
@@ -64,10 +64,11 @@ export interface Provider {
 }
 
 export interface Facility {
-  id:string;
+  id: string;
   name: string;
-  type: string; // e.g., Hospital, Clinic, Pharmacy
+  type: string;
   photoUrl: string;
+  imageUrl: string; 
   description: string;
   contact: {
     phone?: string;
@@ -94,6 +95,6 @@ export interface ContactMessage {
   email: string;
   subject: string;
   message: string;
-  created_at: string; // ISO date string
+  created_at: string;
   is_read: boolean;
 }

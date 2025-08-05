@@ -32,7 +32,7 @@ export function FacilityCard({ facility }: FacilityCardProps) {
       <CardHeader className="p-0">
         <div className="relative w-full h-48">
           <Image
-            src={facility.photoUrl}
+            src={facility.imageUrl || '/placeholder-facility.jpg'}
             alt={facility.name}
             fill
             className="object-cover"
