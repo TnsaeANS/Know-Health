@@ -1,3 +1,4 @@
+
 import { getProviders, getFacilities } from '@/lib/data';
 import { ProviderCard } from '@/components/providers/ProviderCard';
 import { FacilityCard } from '@/components/facilities/FacilityCard';
@@ -18,7 +19,7 @@ const calculateProviderAverage = (reviews: Review[]): number => {
       review.medicalAdherence, 
       review.specialtyCare,
       review.waitTime
-    ].filter((rating): rating is number => typeof rating === 'number');
+    ].filter((rating): rating is number => typeof rating === 'number' && rating > 0);
     
     if (ratings.length > 0) {
       totalScore += ratings.reduce((sum, rating) => sum + rating, 0);
@@ -26,7 +27,7 @@ const calculateProviderAverage = (reviews: Review[]): number => {
     }
   });
   
-  return ratingCount > 0 ? Math.round((totalScore / ratingCount) * 10) / 10 : 0;
+  return ratingCount > 0 ? totalScore / ratingCount : 0;
 };
 
 // Helper function to calculate average rating for a facility
@@ -40,7 +41,7 @@ const calculateFacilityAverage = (reviews: Review[]): number => {
     const ratings = [
       review.facilityQuality,
       review.waitTime
-    ].filter((rating): rating is number => typeof rating === 'number');
+    ].filter((rating): rating is number => typeof rating === 'number' && rating > 0);
     
     if (ratings.length > 0) {
       totalScore += ratings.reduce((sum, rating) => sum + rating, 0);
@@ -48,7 +49,7 @@ const calculateFacilityAverage = (reviews: Review[]): number => {
     }
   });
   
-  return ratingCount > 0 ? Math.round((totalScore / ratingCount) * 10) / 10 : 0;
+  return ratingCount > 0 ? totalScore / ratingCount : 0;
 };
 
 export async function FeaturedSection() {

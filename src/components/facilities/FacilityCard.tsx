@@ -15,7 +15,8 @@ interface FacilityCardProps {
 export function FacilityCard({ facility }: FacilityCardProps) {
   const IconComponent = FACILITY_TYPE_ICONS[facility.type.toLowerCase()] || Building;
 
-  const calculateAverageRating = (reviews: Facility['reviews'], criterion: keyof Review) => {
+  const calculateAverageRating = (reviews: Review[] | undefined, criterion: keyof Review): number => {
+    if (!reviews) return 0; // Guard against undefined reviews
     const validReviews = reviews.filter(review => typeof review[criterion] === 'number' && (review[criterion] as number) > 0);
     if (validReviews.length === 0) return 0;
     const totalRating = validReviews.reduce((sum, review) => sum + (review[criterion] as number), 0);
@@ -32,7 +33,7 @@ export function FacilityCard({ facility }: FacilityCardProps) {
       <CardHeader className="p-0">
         <div className="relative w-full h-48">
           <Image
-            src={facility.imageUrl || '/placeholder-facility.jpg'}
+            src={facility.imageUrl}
             alt={facility.name}
             fill
             className="object-cover"
