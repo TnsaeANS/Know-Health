@@ -81,11 +81,10 @@ export async function submitProviderAction(
       const updateQuery = `
         UPDATE providers SET
           name = $1, specialty = $2, location = $3, bio = $4, languages_spoken = $5,
-          qualifications = $6, contact_phone = $7, contact_email = $8, contact_address = $9,
-          map_url = $10
-        WHERE id = $11 AND submitted_by_user_id = $12
+          qualifications = $6, contact_phone = $7, contact_email = $8, contact_address = $9
+        WHERE id = $10 AND submitted_by_user_id = $11
       `;
-      await client.query(updateQuery, [name, specialty, location, bio, languages, qualificationsArray, contactPhone, contactEmail, contactAddress, mapUrl, id, submittedByUserId]);
+      await client.query(updateQuery, [name, specialty, location, bio, languages, qualificationsArray, contactPhone, contactEmail, contactAddress, id, submittedByUserId]);
 
       revalidatePath('/providers');
       revalidatePath(`/providers/${id}`);
@@ -104,13 +103,13 @@ export async function submitProviderAction(
 
       const insertQuery = `
         INSERT INTO providers (
-          id, name, specialty, location, bio, languages_spoken, qualifications, contact_phone, contact_email, contact_address, photo_url, submitted_by_user_id, map_url
+          id, name, specialty, location, bio, languages_spoken, qualifications, contact_phone, contact_email, contact_address, photo_url, submitted_by_user_id
         )
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
       `;
 
       await client.query(insertQuery, [
-          newId, name, specialty, location, bio, languages, qualificationsArray, contactPhone, contactEmail, contactAddress, photoUrl, submittedByUserId, mapUrl
+          newId, name, specialty, location, bio, languages, qualificationsArray, contactPhone, contactEmail, contactAddress, photoUrl, submittedByUserId
       ]);
 
       revalidatePath('/providers');
