@@ -22,6 +22,12 @@ const nextConfig: NextConfig = {
         hostname: 'media.istockphoto.com',
         port: '',
         pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+        port: '',
+        pathname: '/**',
       }
     ],
   },
