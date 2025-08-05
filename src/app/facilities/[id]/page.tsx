@@ -145,9 +145,23 @@ export default async function FacilityProfilePage({
                     <h3 className="font-semibold text-md text-foreground mb-2 flex items-center">
                        <MapPin className="h-5 w-5 mr-2 text-primary" /> Location Map
                     </h3>
+                    {facility.mapUrl ? (
+                      <div className="aspect-video bg-muted rounded-md overflow-hidden">
+                        <iframe
+                          src={facility.mapUrl}
+                          width="100%"
+                          height="100%"
+                          style={{ border: 0 }}
+                          allowFullScreen={false}
+                          loading="lazy"
+                          referrerPolicy="no-referrer-when-downgrade"
+                        ></iframe>
+                      </div>
+                    ) : (
                      <div className="aspect-video bg-muted rounded-md flex items-center justify-center">
-                        <p className="text-muted-foreground">Map placeholder for {facility.contact.address || facility.location}</p>
+                        <p className="text-muted-foreground">Map not available for this facility.</p>
                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>

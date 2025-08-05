@@ -17,6 +17,7 @@ const providerFormSchema = z.object({
   contactPhone: z.string().optional(),
   contactEmail: z.string().email({ message: 'Invalid email address' }).optional().or(z.literal('')),
   contactAddress: z.string().optional(),
+  mapUrl: z.string().url({ message: 'Please enter a valid URL' }).optional().or(z.literal('')),
   submittedByUserId: z.string().min(1, { message: 'User ID is required' }),
 });
 
@@ -49,6 +50,7 @@ export async function submitProviderAction(
       contactPhone: data.get('contactPhone'),
       contactEmail: data.get('contactEmail'),
       contactAddress: data.get('contactAddress'),
+      mapUrl: data.get('mapUrl'),
       submittedByUserId: data.get('submittedByUserId'),
   };
 
@@ -63,7 +65,7 @@ export async function submitProviderAction(
     };
   }
   
-  const { id, name, specialty, location, bio, languages, qualifications, contactPhone, contactEmail, contactAddress, submittedByUserId } = parsed.data;
+  const { id, name, specialty, location, bio, languages, qualifications, contactPhone, contactEmail, contactAddress, mapUrl, submittedByUserId } = parsed.data;
 
   const qualificationsArray = qualifications?.split(',').map(q => q.trim()).filter(Boolean) || [];
   const client = await pool.connect();
@@ -79,10 +81,11 @@ export async function submitProviderAction(
       const updateQuery = `
         UPDATE providers SET
           name = $1, specialty = $2, location = $3, bio = $4, languages_spoken = $5,
-          qualifications = $6, contact_phone = $7, contact_email = $8, contact_address = $9
-        WHERE id = $10 AND submitted_by_user_id = $11
+          qualifications = $6, contact_phone = $7, contact_email = $8, contact_address = $9,
+          map_url = $10
+        WHERE id = $11 AND submitted_by_user_id = $12
       `;
-      await client.query(updateQuery, [name, specialty, location, bio, languages, qualificationsArray, contactPhone, contactEmail, contactAddress, id, submittedByUserId]);
+      await client.query(updateQuery, [name, specialty, location, bio, languages, qualificationsArray, contactPhone, contactEmail, contactAddress, mapUrl, id, submittedByUserId]);
 
       revalidatePath('/providers');
       revalidatePath(`/providers/${id}`);
@@ -101,13 +104,13 @@ export async function submitProviderAction(
 
       const insertQuery = `
         INSERT INTO providers (
-          id, name, specialty, location, bio, languages_spoken, qualifications, contact_phone, contact_email, contact_address, photo_url, submitted_by_user_id
+          id, name, specialty, location, bio, languages_spoken, qualifications, contact_phone, contact_email, contact_address, photo_url, submitted_by_user_id, map_url
         )
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
       `;
 
       await client.query(insertQuery, [
-          newId, name, specialty, location, bio, languages, qualificationsArray, contactPhone, contactEmail, contactAddress, photoUrl, submittedByUserId
+          newId, name, specialty, location, bio, languages, qualificationsArray, contactPhone, contactEmail, contactAddress, photoUrl, submittedByUserId, mapUrl
       ]);
 
       revalidatePath('/providers');

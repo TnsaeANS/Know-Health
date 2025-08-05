@@ -130,6 +130,12 @@ export function NewFacilityForm({ existingFacility }: NewFacilityFormProps) {
           {getErrorForField('contactEmail') && <p className="text-sm text-destructive">{getErrorForField('contactEmail')}</p>}
         </div>
       </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="mapUrl">Location Map URL (Optional)</Label>
+        <Input id="mapUrl" name="mapUrl" placeholder="https://www.google.com/maps/embed?..." defaultValue={existingFacility?.mapUrl} />
+        {getErrorForField('mapUrl') && <p className="text-sm text-destructive">{getErrorForField('mapUrl')}</p>}
+      </div>
       
       <div className="space-y-2">
         <Label htmlFor="description">Description (Optional)</Label>
