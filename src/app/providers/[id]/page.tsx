@@ -13,17 +13,19 @@ import { SPECIALTY_ICONS } from '@/lib/constants';
 export const dynamic = 'force-dynamic';
 
 export default async function ProviderProfilePage({
-  params,
+  params: paramsPromise, // Destructure as Promise
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>; // Type as Promise
 }) {
-  const { id } = params;
+  // Await the params promise
+  const { id } = await paramsPromise;
   
   const provider = await getProviderById(id);
 
   if (!provider) {
     notFound();
   }
+
 
   const SpecialtyIcon = SPECIALTY_ICONS[provider.specialty.toLowerCase()] || Stethoscope;
   const defaultMapUrl = "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3940.743953258832!2d38.76178331526685!3d8.99473599354146!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x164b85cef5ab402d%3A0x84f747402c89283b!2sAddis%20Ababa!5e0!3m2!1sen!2set!4v1628527233372!5m2!1sen!2set";

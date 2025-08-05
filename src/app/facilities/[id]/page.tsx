@@ -15,17 +15,17 @@ import { FACILITY_TYPE_ICONS } from '@/lib/constants';
 export const dynamic = 'force-dynamic';
 
 export default async function FacilityProfilePage({
-  params,
+  params: paramsPromise, // Destructure as Promise
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>; // Type as Promise
 }) {
-  const { id } = params;
+  // Await the params promise
+  const { id } = await paramsPromise;
   
   const facility = await getFacilityById(id);
   if (!facility) {
     notFound();
   }
-
   const TypeIcon = FACILITY_TYPE_ICONS[facility.type.toLowerCase()] || Building;
   
   const allProviders = await getProviders();

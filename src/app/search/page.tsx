@@ -1,4 +1,3 @@
-
 import { getProviders, getFacilities } from '@/lib/data';
 import { PageWrapper } from '@/components/ui/PageWrapper';
 import { PageHeader } from '@/components/shared/PageHeader';
@@ -11,24 +10,26 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 
 export default async function SearchPage({
-  searchParams,
+  searchParams: searchParamsPromise,
 }: {
-  searchParams: { [key: string]: string | string[] | undefined };
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
+  // Await the searchParams promise
+  const searchParams = await searchParamsPromise;
   const query = typeof searchParams.q === 'string' ? searchParams.q.trim() : '';
 
   if (!query) {
     return (
       <PageWrapper>
         <div className="text-center py-12">
-            <SearchX className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
-            <h1 className="text-2xl font-semibold mb-2">Please Enter a Search Term</h1>
-            <p className="text-muted-foreground mb-4">
-              Go back to the homepage to start a new search.
-            </p>
-            <Button asChild>
-                <Link href="/">Back to Home</Link>
-            </Button>
+          <SearchX className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
+          <h1 className="text-2xl font-semibold mb-2">Please Enter a Search Term</h1>
+          <p className="text-muted-foreground mb-4">
+            Go back to the homepage to start a new search.
+          </p>
+          <Button asChild>
+            <Link href="/">Back to Home</Link>
+          </Button>
         </div>
       </PageWrapper>
     );
@@ -67,52 +68,52 @@ export default async function SearchPage({
       
       {hasResults ? (
         <Tabs defaultValue={defaultTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="doctors" disabled={filteredProviders.length === 0}>
-                    <Stethoscope className="mr-2 h-4 w-4" />
-                    Doctors ({filteredProviders.length})
-                </TabsTrigger>
-                <TabsTrigger value="facilities" disabled={filteredFacilities.length === 0}>
-                    <Hospital className="mr-2 h-4 w-4" />
-                    Facilities ({filteredFacilities.length})
-                </TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="doctors" className="mt-6">
-                {filteredProviders.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-                        {filteredProviders.map(provider => (
-                            <ProviderCard key={provider.id} provider={provider} />
-                        ))}
-                    </div>
-                ) : (
-                    <div className="text-center text-muted-foreground py-10">
-                        <p>No doctors found matching your search.</p>
-                    </div>
-                )}
-            </TabsContent>
-            
-            <TabsContent value="facilities" className="mt-6">
-                {filteredFacilities.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-                        {filteredFacilities.map(facility => (
-                            <FacilityCard key={facility.id} facility={facility} />
-                        ))}
-                    </div>
-                ) : (
-                     <div className="text-center text-muted-foreground py-10">
-                        <p>No facilities found matching your search.</p>
-                    </div>
-                )}
-            </TabsContent>
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="doctors" disabled={filteredProviders.length === 0}>
+              <Stethoscope className="mr-2 h-4 w-4" />
+              Doctors ({filteredProviders.length})
+            </TabsTrigger>
+            <TabsTrigger value="facilities" disabled={filteredFacilities.length === 0}>
+              <Hospital className="mr-2 h-4 w-4" />
+              Facilities ({filteredFacilities.length})
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="doctors" className="mt-6">
+            {filteredProviders.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+                {filteredProviders.map(provider => (
+                  <ProviderCard key={provider.id} provider={provider} />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center text-muted-foreground py-10">
+                <p>No doctors found matching your search.</p>
+              </div>
+            )}
+          </TabsContent>
+          
+          <TabsContent value="facilities" className="mt-6">
+            {filteredFacilities.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+                {filteredFacilities.map(facility => (
+                  <FacilityCard key={facility.id} facility={facility} />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center text-muted-foreground py-10">
+                <p>No facilities found matching your search.</p>
+              </div>
+            )}
+          </TabsContent>
         </Tabs>
       ) : (
         <div className="text-center py-12">
-            <SearchX className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
-            <h1 className="text-2xl font-semibold mb-2">No Results Found</h1>
-            <p className="text-muted-foreground">
-                We couldn't find any doctors or facilities matching your search for "{query}".
-            </p>
+          <SearchX className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
+          <h1 className="text-2xl font-semibold mb-2">No Results Found</h1>
+          <p className="text-muted-foreground">
+            We couldn't find any doctors or facilities matching your search for "{query}".
+          </p>
         </div>
       )}
     </PageWrapper>
