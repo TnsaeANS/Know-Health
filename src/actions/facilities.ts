@@ -19,7 +19,7 @@ const facilityFormSchema = z.object({
   contactAddress: z.string().min(5, { message: 'Address must be at least 5 characters' }),
   mapUrl: z.string().url({ message: 'Please enter a valid URL' }).optional().or(z.literal('')),
   submittedByUserId: z.string().min(1, { message: 'User ID is required' }),
-  imageUrl: z.string().url().optional(),
+  imageUrl: z.string().url().optional().or(z.literal('')),
 });
 
 export type FacilityFormState = {
@@ -40,6 +40,7 @@ export async function submitFacilityAction(
     return { message: 'Database is not configured. Could not process facility.', success: false };
   }
 
+  // Correctly parse form data, especially arrays from checkboxes
   const formData = {
     id: data.get('id') || undefined,
     name: data.get('name'),
